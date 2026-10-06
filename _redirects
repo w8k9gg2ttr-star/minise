@@ -1,11 +1,8 @@
-# Netlify: the admin has its own address, separate from the store.
-#   Store: https://minisearte.netlify.app
-#   Admin: https://minisearte-admin.netlify.app
+# Netlify: the admin has its own address.
+#   Store: https://minisearte.com
+#   Admin: https://admin.minisearte.com
+# (the admin page also still works at /admin.html on the store address)
 
-# the admin address opens the admin page
-https://minisearte-admin.netlify.app/          /admin.html                             200!
-http://minisearte-admin.netlify.app/           /admin.html                             200!
-
-# the store address never shows the admin page
-https://minisearte.netlify.app/admin.html      https://minisearte-admin.netlify.app/   301!
-http://minisearte.netlify.app/admin.html       https://minisearte-admin.netlify.app/   301!
+https://admin.minisearte.com/            /admin.html   200!
+http://admin.minisearte.com/             /admin.html   200!
+https://minisearte-admin.netlify.app/    /admin.html   200!

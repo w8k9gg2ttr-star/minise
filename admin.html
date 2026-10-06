@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Minise Admin</title>
+<link rel="icon" href="images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Lao:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="locked">
+
+<!-- sign in -->
+<section class="login" id="login" aria-labelledby="loginTitle">
+  <button type="button" class="login-lang" id="lgLang">ພາສາລາວ</button>
+  <div class="login-card">
+    <span class="mark big"><img src="images/logo.png" alt="Minise Arte" width="64" height="38"></span>
+    <p class="login-kicker">Minise Arte · <span id="lgKicker">Admin console</span></p>
+    <h1 id="loginTitle">Welcome back</h1>
+    <p class="login-sub" id="loginSub">Sign in to manage Minise Arte</p>
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="lgPass" id="lgPassLabel">Password</label>
+        <div class="pw"><input type="password" id="lgPass" autocomplete="current-password"><button type="button" id="lgShow" class="pw-btn">Show</button></div>
+      </div>
+      <div class="field" id="lgConfirmWrap" hidden>
+        <label for="lgConfirm" id="lgConfirmLabel">Type it again</label>
+        <input type="password" id="lgConfirm" autocomplete="new-password">
+      </div>
+      <label class="check"><input type="checkbox" id="lgRemember"> <span id="lgRememberLabel">Keep me signed in on this computer for 30 days</span></label>
+      <p class="alert warn" id="lgErr" role="alert" hidden></p>
+      <button class="btn wide" type="submit" id="lgBtn">Sign in</button>
+      <button class="linkbtn" type="button" id="lgForgot">Forgot password?</button>
+      <div class="reset-box" id="lgReset" hidden>
+        <p id="lgResetText"></p>
+        <input type="text" id="lgResetInput" autocomplete="off" aria-labelledby="lgResetText">
+        <button class="btn ghost wide" type="button" id="lgResetBtn">Reset password</button>
+      </div>
+    </form>
+    <p class="login-note" id="loginNote"></p>
+  </div>
+</section>
+
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="admin.html#dashboard">
+      <span class="mark"><img src="images/logo.png" alt="" width="34" height="20"></span>
+      <span class="brand-txt"><b>Minise Arte</b><small data-a="brand_sub">Admin console</small></span>
+    </a>
+    <nav class="side-nav" id="sideNav" aria-label="Admin"></nav>
+    <div class="side-foot">
+      <p class="side-status" id="folderStatus"></p>
+      <button type="button" class="side-item" id="connectBtn"><span class="ic" data-icon="folder"></span><span id="connectLabel">Connect folder</span></button>
+      <a class="side-item" href="index.html" target="_blank" rel="noopener"><span class="ic" data-icon="external"></span><span data-a="view_shop">View shop</span></a>
+      <button type="button" class="side-item" id="adLang"><span class="ic" data-icon="globe"></span><span id="adLangLabel">ພາສາລາວ</span></button>
+      <button type="button" class="side-item" id="logoutBtn"><span class="ic" data-icon="logout"></span><span data-a="logout">Log out</span></button>
+    </div>
+  </aside>
+
+  <div class="content">
+    <header class="top">
+      <div class="top-l">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p class="top-sub" id="pageSub"></p>
+      </div>
+      <div class="top-r">
+        <div class="gsearch" role="search">
+          <span class="ic" data-icon="search"></span>
+          <input type="search" id="gq" autocomplete="off" aria-label="Search">
+          <kbd>/</kbd>
+          <div class="gres" id="gres" hidden></div>
+        </div>
+        <button class="btn" type="button" id="saveBtn">Save</button>
+      </div>
+    </header>
+    <main class="main" id="adMain"></main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Order" hidden></aside>
+<dialog class="ad-dialog" id="dlg"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div id="printArea" aria-hidden="true"></div>
+
+<script src="js/i18n.js"></script>
+<script src="js/products.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

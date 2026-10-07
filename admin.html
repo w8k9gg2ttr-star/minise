@@ -8,8 +8,9 @@
 <link rel="icon" href="images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Lao:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Noto+Sans+Lao+Looped:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="css/admin.css">
+<link rel="stylesheet" href="css/cats.css">
 </head>
 <body class="locked">
 
@@ -17,12 +18,17 @@
 <section class="login" id="login" aria-labelledby="loginTitle">
   <button type="button" class="login-lang" id="lgLang">ພາສາລາວ</button>
   <div class="login-card">
-    <span class="mark big"><img src="images/logo.png" alt="Minise Arte" width="64" height="38"></span>
-    <p class="login-kicker">Minise Arte · <span id="lgKicker">Admin console</span></p>
+    <span class="login-kitty" id="lgKitty"></span>
+    <span class="login-word">Minise Arte</span>
+    <p class="login-kicker"><span id="lgKicker">Admin console</span></p>
     <h1 id="loginTitle">Welcome back</h1>
     <p class="login-sub" id="loginSub">Sign in to manage Minise Arte</p>
     <form id="loginForm" novalidate>
-      <div class="field">
+      <div class="field" id="lgEmailWrap" hidden>
+        <label for="lgEmail" id="lgEmailLabel">Email</label>
+        <input type="email" id="lgEmail" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="field" id="lgPassWrap">
         <label for="lgPass" id="lgPassLabel">Password</label>
         <div class="pw"><input type="password" id="lgPass" autocomplete="current-password"><button type="button" id="lgShow" class="pw-btn">Show</button></div>
       </div>
@@ -30,10 +36,15 @@
         <label for="lgConfirm" id="lgConfirmLabel">Type it again</label>
         <input type="password" id="lgConfirm" autocomplete="new-password">
       </div>
-      <label class="check"><input type="checkbox" id="lgRemember"> <span id="lgRememberLabel">Keep me signed in on this computer for 30 days</span></label>
+      <div class="field" id="lgCodeWrap" hidden>
+        <label for="lgCode" id="lgCodeLabel">6-digit code</label>
+        <input type="text" id="lgCode" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*">
+      </div>
+      <label class="check" id="lgRememberWrap"><input type="checkbox" id="lgRemember"> <span id="lgRememberLabel">Keep me signed in on this computer for 30 days</span></label>
       <p class="alert warn" id="lgErr" role="alert" hidden></p>
       <button class="btn wide" type="submit" id="lgBtn">Sign in</button>
       <button class="linkbtn" type="button" id="lgForgot">Forgot password?</button>
+      <button class="linkbtn" type="button" id="lgBack" hidden>Use another account</button>
       <div class="reset-box" id="lgReset" hidden>
         <p id="lgResetText"></p>
         <input type="text" id="lgResetInput" autocomplete="off" aria-labelledby="lgResetText">
@@ -47,8 +58,7 @@
 <div class="shell">
   <aside class="side">
     <a class="brand" href="admin.html#dashboard">
-      <span class="mark"><img src="images/logo.png" alt="" width="34" height="20"></span>
-      <span class="brand-txt"><b>Minise Arte</b><small data-a="brand_sub">Admin console</small></span>
+      <span class="brand-stripes"><span class="brand-tag"><span class="brand-kitty" id="brandKitty"></span><b>Minise Arte</b><small data-a="brand_sub">Admin console</small></span></span>
     </a>
     <nav class="side-nav" id="sideNav" aria-label="Admin"></nav>
     <div class="side-foot">
@@ -89,6 +99,8 @@
 <script src="js/i18n.js"></script>
 <script src="js/products.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/cats.js"></script>
+<script src="js/vendor/supabase.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>

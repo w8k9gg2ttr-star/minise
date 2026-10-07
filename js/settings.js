@@ -1,4 +1,6 @@
-/* Minise Arte shop settings. Edit these in admin.html rather than by hand. "api" is the Google Sheet web app link (Online orders). */
+/* Minise Arte shop settings. Edit these in admin.html rather than by hand.
+   "supabase" is the database the store and admin use. The key is the public (publishable) one:
+   it is meant to be in the website, and the database rules decide what it can do. */
 window.MINISE_SETTINGS = {
   "ann": [
     ["Free gift box with every order", "ແຖມກ່ອງຂອງຂວັນທຸກອໍເດີ"],
@@ -13,5 +15,8 @@ window.MINISE_SETTINGS = {
   "addr": ["Morning Market Shopping Mall (Talat Sao new building), 2nd floor, Vientiane", "ຕະຫຼາດເຊົ້າ ຕຶກໃໝ່ ຊັ້ນ 2, ນະຄອນຫຼວງວຽງຈັນ"],
   "account": "SOULINDA PHONEPHITHACK MS",
   "qr": "images/laoqr.png",
-  "api": "https://script.google.com/macros/s/AKfycby_R0jcb2pgUmxzgiSK99UeyPHrpUmBZQs4pO97-q82KyJ920KLD0MG1CRLNAqBhrau/exec"
+  "supabase": {
+    "url": "https://glajjmhkygeaxxkqajik.supabase.co",
+    "key": "sb_publishable_e9Jd75KR_BY0xx6aLudwmQ_CbR3_PyU"
+  }
 };

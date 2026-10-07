@@ -388,8 +388,8 @@
     lg_reset_bad: ["Type RESET in capital letters to confirm.", "ພິມ RESET ເປັນຕົວພິມໃຫຍ່ເພື່ອຢືນຢັນ"],
     lg_note: ["The password keeps this admin private on this computer. Don't put admin.html on the public website.", "ລະຫັດຜ່ານນີ້ປ້ອງກັນໜ້າຜູ້ດູແລໃນຄອມນີ້. ຢ່າອັບໂຫຼດ admin.html ຂຶ້ນເວັບໄຊສາທາລະນະ"],
 
-    nav_online: ["Online orders", "ອໍເດີອອນລາຍ"],
-    sub_online: ["Website orders, the admin and your Google Sheet, connected", "ເຊື່ອມເວັບໄຊ ໜ້າຜູ້ດູແລ ແລະ Google Sheet"],
+    nav_online: ["Database", "ຖານຂໍ້ມູນ"],
+    sub_online: ["Where your orders and products are stored, and how they are protected", "ບ່ອນເກັບອໍເດີ ແລະ ສິນຄ້າ ແລະ ການປ້ອງກັນ"],
     publish: ["Publish changes", "ເຜີຍແຜ່ການປ່ຽນແປງ"],
     publish_n: ["Publish {n} change(s)", "ເຜີຍແຜ່ {n} ການປ່ຽນແປງ"],
     published_all: ["Shop is up to date", "ໜ້າຮ້ານເປັນປັດຈຸບັນ"],
@@ -397,6 +397,7 @@
     first_publish: ["Your catalogue is now online.", "ລາຍການສິນຄ້າອອນລາຍແລ້ວ"],
     publish_fail: ["Couldn't publish: {e}. Your changes are still here; try again.", "ເຜີຍແຜ່ບໍ່ສຳເລັດ: {e}. ການປ່ຽນແປງຍັງຢູ່; ລອງໃໝ່"],
     on_status_ok: ["Online · synced {t}", "ອອນລາຍ · ອັບເດດ {t}"],
+    db_status_live: ["Live · synced {t}", "ອອນລາຍສົດ · ອັບເດດ {t}"],
     on_status_wait: ["Online · connecting…", "ອອນລາຍ · ກຳລັງເຊື່ອມຕໍ່…"],
     on_status_err: ["Offline · changes sync when the connection is back", "ອອບລາຍ · ຈະອັບເດດເມື່ອເຊື່ອມຕໍ່ໄດ້"],
     new_web_orders: ["{n} new order(s) from the website", "ອໍເດີໃໝ່ຈາກເວັບໄຊ {n} ອໍເດີ"],
@@ -408,7 +409,19 @@
     slip_loading: ["Loading slip…", "ກຳລັງໂຫຼດສະລິບ…"],
     slip_fail: ["Couldn't load the slip. Check the connection and try again.", "ໂຫຼດສະລິບບໍ່ໄດ້. ກວດການເຊື່ອມຕໍ່ ແລ້ວລອງໃໝ່"],
     f_ref: ["Transfer", "ການໂອນ"],
-    lg_net: ["Can't reach Google right now. Check the internet connection and try again.", "ເຊື່ອມຕໍ່ Google ບໍ່ໄດ້. ກວດອິນເຕີເນັດ ແລ້ວລອງໃໝ່"],
+    f_contact: ["Contact by", "ຕິດຕໍ່ທາງ"],
+    via_whatsapp: ["WhatsApp", "WhatsApp"],
+    via_phone: ["Phone call or SMS", "ໂທ ຫຼື SMS"],
+    via_facebook: ["Facebook Messenger", "Facebook Messenger"],
+    via_line: ["LINE", "LINE"],
+    via_instagram: ["Instagram", "Instagram"],
+    sec_photos: ["Customer photos ({n})", "ຮູບຂອງລູກຄ້າ ({n})"],
+    photos_view: ["Show photos", "ເບິ່ງຮູບ"],
+    photos_loading: ["Loading photos…", "ກຳລັງໂຫຼດຮູບ…"],
+    photos_fail: ["Couldn't load the photos. Check the connection and try again.", "ໂຫຼດຮູບບໍ່ໄດ້. ກວດການເຊື່ອມຕໍ່ ແລ້ວລອງໃໝ່"],
+    photos_hint: ["Tap a photo to open it full size. Links work for 1 hour.", "ກົດຮູບເພື່ອເປີດຂະໜາດເຕັມ. ລິ້ງໃຊ້ໄດ້ 1 ຊົ່ວໂມງ"],
+    log_photos: ["Customer uploaded their photos", "ລູກຄ້າອັບໂຫຼດຮູບແລ້ວ"],
+    lg_net: ["Can't reach the database right now. Check the internet connection and try again.", "ເຊື່ອມຕໍ່ຖານຂໍ້ມູນບໍ່ໄດ້. ກວດອິນເຕີເນັດ ແລ້ວລອງໃໝ່"],
     lg_too_many: ["Too many wrong tries. Wait 15 minutes, then try again.", "ລອງຜິດຫຼາຍເກີນໄປ. ລໍຖ້າ 15 ນາທີ ແລ້ວລອງໃໝ່"],
     lg_exists: ["A password was already created. Sign in with it.", "ມີລະຫັດຜ່ານແລ້ວ. ເຂົ້າສູ່ລະບົບດ້ວຍລະຫັດນັ້ນ"],
     lg_session_end: ["You were signed out. Please sign in again.", "ອອກຈາກລະບົບແລ້ວ. ກະລຸນາເຂົ້າສູ່ລະບົບອີກຄັ້ງ"],
@@ -446,6 +459,54 @@
     bk_files_text: ["products.js and settings.js with everything as it is now. Put them in the js folder before you upload the website again, so first-time visitors see the latest catalogue straight away.", "products.js ແລະ settings.js ຕາມຂໍ້ມູນປັດຈຸບັນ. ໃສ່ໃນໂຟນເດີ js ກ່ອນອັບໂຫຼດເວັບໄຊອີກຄັ້ງ"],
     bk_files_btn: ["Download website files", "ດາວໂຫຼດໄຟລ໌ເວັບໄຊ"],
     dz_text_online: ["Removes every order here and in your Google Sheet. Download a backup first.", "ລຶບທຸກອໍເດີບ່ອນນີ້ ແລະ ໃນ Google Sheet. ດາວໂຫຼດໄຟລ໌ສຳຮອງກ່ອນ"],
+    lg_email: ["Email", "ອີເມວ"],
+    lg_sub_email: ["Sign in with your admin email and password", "ເຂົ້າສູ່ລະບົບດ້ວຍອີເມວ ແລະ ລະຫັດຜ່ານຜູ້ດູແລ"],
+    lg_need: ["Enter your email and password.", "ກະລຸນາໃສ່ອີເມວ ແລະ ລະຫັດຜ່ານ"],
+    lg_need_email: ["Enter the email you sign in with.", "ກະລຸນາໃສ່ອີເມວທີ່ໃຊ້ເຂົ້າລະບົບ"],
+    lg_wrong_email: ["That email and password don't match. Try again.", "ອີເມວ ແລະ ລະຫັດຜ່ານບໍ່ກົງກັນ. ລອງໃໝ່"],
+    lg_not_admin: ["This account isn't an admin of Minise Arte.", "ບັນຊີນີ້ບໍ່ແມ່ນຜູ້ດູແລຂອງ Minise Arte"],
+    lg_code_h: ["Enter your 6-digit code", "ໃສ່ລະຫັດ 6 ຕົວເລກ"],
+    lg_code_sub: ["Open your authenticator app and type the code for Minise.", "ເປີດແອັບຢືນຢັນຕົວຕົນ ແລ້ວພິມລະຫັດຂອງ Minise"],
+    lg_code_label: ["6-digit code", "ລະຫັດ 6 ຕົວເລກ"],
+    lg_code_bad: ["The code has 6 digits.", "ລະຫັດມີ 6 ຕົວເລກ"],
+    lg_code_wrong: ["That code didn't work. Codes change every 30 seconds: try the new one.", "ລະຫັດບໍ່ຖືກ. ລະຫັດປ່ຽນທຸກ 30 ວິນາທີ: ລອງລະຫັດໃໝ່"],
+    lg_verify: ["Verify", "ຢືນຢັນ"],
+    lg_back: ["Use another account", "ໃຊ້ບັນຊີອື່ນ"],
+    lg_newpass_h: ["Choose a new password", "ຕັ້ງລະຫັດຜ່ານໃໝ່"],
+    lg_newpass_sub: ["You opened the reset link. Choose a new admin password.", "ທ່ານເປີດລິ້ງຕັ້ງລະຫັດໃໝ່ແລ້ວ. ກະລຸນາຕັ້ງລະຫັດຜ່ານໃໝ່"],
+    lg_set_pass: ["Save new password", "ບັນທຶກລະຫັດຜ່ານໃໝ່"],
+    lg_new_pass10: ["New password (at least 10 characters)", "ລະຫັດຜ່ານໃໝ່ (ຢ່າງໜ້ອຍ 10 ຕົວ)"],
+    lg_short10: ["Use at least 10 characters.", "ກະລຸນາໃຊ້ຢ່າງໜ້ອຍ 10 ຕົວອັກສອນ"],
+    lg_reset_email: ["Type your admin email and we'll send a link to choose a new password.", "ພິມອີເມວຜູ້ດູແລ ແລ້ວເຮົາຈະສົ່ງລິ້ງເພື່ອຕັ້ງລະຫັດຜ່ານໃໝ່"],
+    lg_reset_send: ["Send reset link", "ສົ່ງລິ້ງຕັ້ງລະຫັດໃໝ່"],
+    lg_reset_sent: ["If that email belongs to the admin, a reset link is on its way. Check your inbox and spam folder.", "ຖ້າອີເມວນີ້ເປັນຂອງຜູ້ດູແລ ລິ້ງຕັ້ງລະຫັດໃໝ່ກຳລັງສົ່ງໄປ. ກວດກ່ອງຈົດໝາຍ ແລະ ສະແປມ"],
+    lg_note_db: ["Sign-in is checked by the Minise Arte database. Customer details stay in the database, not on this device.", "ການເຂົ້າລະບົບຖືກກວດໂດຍຖານຂໍ້ມູນ Minise Arte. ຂໍ້ມູນລູກຄ້າຢູ່ໃນຖານຂໍ້ມູນ ບໍ່ໄດ້ເກັບໄວ້ໃນເຄື່ອງນີ້"],
+    save_fail_db: ["Couldn't save to the database: {e}. Your change is still here and will be sent again.", "ບັນທຶກລົງຖານຂໍ້ມູນບໍ່ສຳເລັດ: {e}. ການປ່ຽນແປງຍັງຢູ່ ແລະ ຈະສົ່ງອີກຄັ້ງ"],
+    db_h: ["Connected to the database", "ເຊື່ອມຖານຂໍ້ມູນແລ້ວ"],
+    db_p: ["Orders, products and settings are stored in your Supabase database. New website orders appear here instantly.", "ອໍເດີ ສິນຄ້າ ແລະ ການຕັ້ງຄ່າ ຖືກເກັບໃນຖານຂໍ້ມູນ Supabase. ອໍເດີໃໝ່ຈາກເວັບໄຊຈະສະແດງທັນທີ"],
+    db_live: ["Live", "ອອນລາຍ"],
+    db_project: ["Project", "ໂປຣເຈັກ"],
+    db_signed_in: ["Signed in as", "ເຂົ້າລະບົບເປັນ"],
+    db_open: ["Open in Supabase", "ເປີດໃນ Supabase"],
+    db_h_off: ["Database not connected", "ຍັງບໍ່ໄດ້ເຊື່ອມຖານຂໍ້ມູນ"],
+    db_off_p: ["The Supabase details are missing from js/settings.js, so this admin only works on this computer.", "ບໍ່ມີຂໍ້ມູນ Supabase ໃນ js/settings.js ໜ້າຜູ້ດູແລນີ້ຈຶ່ງໃຊ້ໄດ້ສະເພາະຄອມນີ້"],
+    db_safe_h: ["How your data is protected", "ຂໍ້ມູນຂອງທ່ານຖືກປ້ອງກັນແນວໃດ"],
+    db_safe_1: ["Only signed-in admins can read or change orders, customer details and payment slips.", "ສະເພາະຜູ້ດູແລທີ່ເຂົ້າລະບົບເທົ່ານັ້ນ ທີ່ອ່ານ ຫຼື ແກ້ໄຂອໍເດີ ຂໍ້ມູນລູກຄ້າ ແລະ ສະລິບໄດ້"],
+    db_safe_2: ["Website orders are priced by the database from your product list, so prices can't be changed by customers.", "ລາຄາອໍເດີຈາກເວັບໄຊຄິດໂດຍຖານຂໍ້ມູນຈາກລາຍການສິນຄ້າ ລູກຄ້າປ່ຽນລາຄາບໍ່ໄດ້"],
+    db_safe_3: ["Repeated orders from the same device or phone number are slowed down to stop spam.", "ອໍເດີທີ່ສົ່ງຊ້ຳໆຈາກເຄື່ອງ ຫຼື ເບີໂທດຽວກັນ ຈະຖືກຈຳກັດເພື່ອກັນສະແປມ"],
+    db_safe_4: ["Turn on 2-step verification in Account & security for the strongest protection.", "ເປີດການຢືນຢັນ 2 ຂັ້ນຕອນ ໃນ ບັນຊີ ແລະ ຄວາມປອດໄພ ເພື່ອຄວາມປອດໄພສູງສຸດ"],
+    mfa_title: ["2-step verification", "ການຢືນຢັນ 2 ຂັ້ນຕອນ"],
+    mfa_on: ["On", "ເປີດ"],
+    mfa_off: ["Off", "ປິດ"],
+    mfa_text: ["After your password, the admin also asks for a 6-digit code from an authenticator app on your phone (Google Authenticator, Microsoft Authenticator or similar). Even someone who learns your password can't get in.", "ຫຼັງໃສ່ລະຫັດຜ່ານ ຈະຖາມລະຫັດ 6 ຕົວເລກຈາກແອັບຢືນຢັນໃນໂທລະສັບ (Google Authenticator, Microsoft Authenticator ຫຼື ອື່ນໆ). ເຖິງຄົນອື່ນຮູ້ລະຫັດຜ່ານ ກໍເຂົ້າບໍ່ໄດ້"],
+    mfa_turn_on: ["Turn on 2-step verification", "ເປີດການຢືນຢັນ 2 ຂັ້ນຕອນ"],
+    mfa_turn_off: ["Turn off 2-step verification", "ປິດການຢືນຢັນ 2 ຂັ້ນຕອນ"],
+    mfa_scan: ["Scan this code with your authenticator app, then type the 6-digit code it shows.", "ສະແກນລະຫັດນີ້ດ້ວຍແອັບຢືນຢັນ ແລ້ວພິມລະຫັດ 6 ຕົວເລກທີ່ສະແດງ"],
+    mfa_secret: ["Can't scan? Type this key into the app instead:", "ສະແກນບໍ່ໄດ້? ພິມລະຫັດນີ້ໃສ່ແອັບແທນ:"],
+    mfa_done: ["2-step verification is on. You'll be asked for a code each time you sign in.", "ເປີດການຢືນຢັນ 2 ຂັ້ນຕອນແລ້ວ. ຈະຖາມລະຫັດທຸກຄັ້ງທີ່ເຂົ້າລະບົບ"],
+    mfa_is_on: ["Your admin asks for a 6-digit code from your authenticator app at every sign-in.", "ໜ້າຜູ້ດູແລຈະຖາມລະຫັດ 6 ຕົວເລກຈາກແອັບຢືນຢັນທຸກຄັ້ງທີ່ເຂົ້າລະບົບ"],
+    mfa_off_confirm: ["Turn off 2-step verification? Your admin will be protected by the password only.", "ປິດການຢືນຢັນ 2 ຂັ້ນຕອນ? ຈະປ້ອງກັນດ້ວຍລະຫັດຜ່ານຢ່າງດຽວ"],
+    mfa_removed: ["2-step verification is off.", "ປິດການຢືນຢັນ 2 ຂັ້ນຕອນແລ້ວ"],
     inv_title: ["Invoice", "ໃບແຈ້ງໜີ້"],
     slip_title: ["Packing slip", "ໃບແພັກເຄື່ອງ"],
     inv_bill_to: ["Customer", "ລູກຄ້າ"],
@@ -509,6 +570,8 @@
     ["id", "name", "phone", "delivery", "address", "note", "due", "tracking", "ref", "slip"].forEach(function (k) { o[k] = o[k] || ""; });
     o.lang = o.lang === "lo" ? "lo" : "en";
     o.web = !!o.web;
+    o.via = o.via || ""; o.handle = o.handle || "";
+    o.photos = Array.isArray(o.photos) ? o.photos.filter(function (x) { return typeof x === "string"; }) : [];
     return o;
   }
   var lang = load("minise_admin_lang") === "lo" ? "lo" : "en";
@@ -519,15 +582,19 @@
   }, clone(window.MINISE_SETTINGS || {}));
   while (settings.ann.length < 3) settings.ann.push(["", ""]);
   if (!settings.templates) settings.templates = {};
-  var orders = (load("minise_orders", true) || []).map(normalizeOrder);
+  // database mode: orders, products and sign-in live in Supabase (settings.supabase in js/settings.js)
+  var SBC = settings.supabase && settings.supabase.url && settings.supabase.key ? settings.supabase : null;
+  var ONLINE = !!(SBC && window.supabase && window.supabase.createClient);
+  delete settings.api;
+  if (ONLINE) {
+    // customer details are never kept on this computer: clear anything an older version saved
+    ["minise_orders", "minise_api", "minise_api_token"].forEach(function (k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) { /* ignore */ } });
+  }
+  var orders = ONLINE ? [] : (load("minise_orders", true) || []).map(normalizeOrder);
   var dirty = 0, dir = null, savedDir = null, typedSettings = false;
-  // online mode: orders, products and the password live in the Google Sheet backend (google-backend/Code.gs)
-  var API = String(load("minise_api") || settings.api || "").trim();
-  var ONLINE = !!API;
-  var TOKEN = "";
-  try { TOKEN = sessionStorage.getItem("minise_api_token") || localStorage.getItem("minise_api_token") || ""; } catch (e) { TOKEN = ""; }
-  var SYNC = { snap: {}, at: 0, state: "wait", busy: false, pull: false, push: false, sheet: "", version: "", ready: false };
-  var NEWCOUNT = 0, SLIPS = {}, pendingRender = false;
+  var USER = null;
+  var SYNC = { snap: {}, at: 0, state: "wait", busy: false, pull: false, push: false, live: false, version: "", ready: false };
+  var NEWCOUNT = 0, SLIPS = {}, PHOTOS = {}, pendingRender = false;
   var tab = (location.hash || "").slice(1);
   if (TABS.indexOf(tab) < 0) tab = "dashboard";
   var PF = { q: "", type: "all", status: "all", sort: "name" };
@@ -554,8 +621,73 @@
   function slugify(s) { return String(s).toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "product"; }
   function uniqueSlug(base, except) { var s = base, i = 2; while (products.some(function (p) { return p.s === s && p !== except; })) s = base + "-" + i++; return s; }
   function typeName(ty) { return a("type_" + ty); }
-  function intlPhone(raw) { var d = String(raw || "").replace(/\D/g, ""); if (!d) return ""; if (d.indexOf("856") === 0) return d; return "856" + d.replace(/^0/, ""); }
+  function intlPhone(raw) { var d = String(raw || "").replace(/\D/g, ""); if (!d) return ""; if (/^\s*\+/.test(raw) || d.indexOf("856") === 0) return d; return "856" + d.replace(/^0/, ""); }
   function findProduct(name) { var n = String(name || "").trim().toLowerCase(); for (var i = 0; i < products.length; i++) if (products[i].n.toLowerCase() === n) return products[i]; return null; }
+  function productOf(it) {
+    if (it && it.s) for (var i = 0; i < products.length; i++) if (products[i].s === it.s) return products[i];
+    return findProduct(it && it.name);
+  }
+
+  /* Lao line under English order details, for staff who read Lao.
+     Options, colours, delivery and address labels are looked up from the shop's own wording;
+     anything typed by the customer (names, notes, street details) stays as written. */
+  var LAO_RE = /[຀-໿]/;
+  var LAO_PROV = [
+    ["Vientiane Capital", "ນະຄອນຫຼວງວຽງຈັນ"], ["Vientiane Province", "ແຂວງວຽງຈັນ"], ["Luang Prabang", "ຫຼວງພະບາງ"],
+    ["Savannakhet", "ສະຫວັນນະເຂດ"], ["Champasak", "ຈຳປາສັກ"], ["Khammouane", "ຄຳມ່ວນ"], ["Bolikhamxay", "ບໍລິຄຳໄຊ"],
+    ["Xayaboury", "ໄຊຍະບູລີ"], ["Xiengkhouang", "ຊຽງຂວາງ"], ["Oudomxay", "ອຸດົມໄຊ"], ["Luang Namtha", "ຫຼວງນ້ຳທາ"],
+    ["Bokeo", "ບໍ່ແກ້ວ"], ["Phongsaly", "ຜົ້ງສາລີ"], ["Houaphanh", "ຫົວພັນ"], ["Saravane", "ສາລະວັນ"],
+    ["Sekong", "ເຊກອງ"], ["Attapeu", "ອັດຕະປື"], ["Xaisomboun", "ໄຊສົມບູນ"]
+  ];
+  var LAO_KEYS = ["colour", "silver", "gold", "initials", "d_pick", "d_anou", "d_mix", "d_houng", "d_abroad", "prov", "dist", "vill_short", "branch_short", "country",
+    "via_whatsapp", "via_phone", "via_facebook", "via_line", "via_instagram"];
+  var laoBase = null;
+  function laoWords(p) {
+    if (!laoBase) {
+      laoBase = {};
+      var T = window.MINISE_T || {};
+      LAO_KEYS.forEach(function (k) { if (T[k] && T[k][0] && T[k][1]) laoBase[T[k][0].toLowerCase()] = T[k][1]; });
+      LAO_PROV.forEach(function (x) { laoBase[x[0].toLowerCase()] = x[1]; });
+      laoBase["district"] = "ເມືອງ";
+      products.forEach(function (q) {
+        (q.o || []).forEach(function (o) { var k = String(o.en || "").toLowerCase(); if (k && o.lo && !laoBase[k]) laoBase[k] = o.lo; });
+        if (q.add && q.add.en && q.add.lo && !laoBase[q.add.en.toLowerCase()]) laoBase[q.add.en.toLowerCase()] = q.add.lo;
+      });
+    }
+    if (!p) return laoBase;
+    // the product's own wording wins ("Set of 2" is ຊຸດ 2 ອັນ for lockets, ຊຸດ 2 ເສັ້ນ for bracelets)
+    var m = Object.assign({}, laoBase);
+    (p.o || []).forEach(function (o) { if (o.en && o.lo) m[o.en.toLowerCase()] = o.lo; });
+    if (p.add && p.add.en && p.add.lo) m[p.add.en.toLowerCase()] = p.add.lo;
+    return m;
+  }
+  function laoOf(text, p) {
+    text = String(text || "").trim();
+    if (!text || (LAO_RE.test(text) && !/[A-Za-z]{4}/.test(text))) return "";
+    var m = laoWords(p), changed = false, notes = [];
+    var word = function (w) {
+      var k = w.trim(), hit = m[k.toLowerCase()];
+      if (hit) { changed = true; return hit; }
+      var x = /^(.*?)\s*×\s*(\d+)$/.exec(k);
+      if (x && m[x[1].toLowerCase()]) { changed = true; return m[x[1].toLowerCase()] + " × " + x[2]; }
+      return k;
+    };
+    var out = text.replace(/“[^”]*”|"[^"]*"/g, function (q) { notes.push(q); return "\u0000" + (notes.length - 1) + "\u0000"; })
+      .split(/(\s*[,·—]\s+|\s+[·—]\s*)/).map(function (seg, i) {
+        if (i % 2) return seg;
+        var kv = /^([^:]{2,30}):\s*(.+)$/.exec(seg);
+        return kv ? word(kv[1]) + ": " + word(kv[2]) : word(seg);
+      }).join("").replace(/\u0000(\d+)\u0000/g, function (_, n) { return notes[+n]; });
+    return changed ? out : "";
+  }
+  // Lao line for one order item: the kind of piece plus its options
+  function laoItem(it) {
+    var p = productOf(it), T = window.MINISE_T || {};
+    var kind = p && p.t && T["one_" + p.t[0]] ? T["one_" + p.t[0]][1] : "";
+    var det = laoOf(it.details, p);
+    return [kind, det].filter(Boolean).join(" · ");
+  }
+  function loLine(txt, tag) { return txt ? "<" + (tag || "small") + ' class="lo" lang="lo">' + esc(txt) + "</" + (tag || "small") + ">" : ""; }
   function orderSub(o) { return o.items.reduce(function (s, it) { return s + (it.price || 0); }, 0); }
   function orderTotal(o) { return Math.max(0, orderSub(o) - (o.discount || 0) + (o.fee || 0)); }
   function hasUnknown(o) { return o.items.some(function (it) { return !it.price; }); }
@@ -610,6 +742,7 @@
 
   /* ---------- icons ---------- */
   var IC = {
+    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/>',
     dashboard: '<rect x="3.5" y="3.5" width="7" height="8" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.5"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.5"/><rect x="3.5" y="14.5" width="7" height="6" rx="1.5"/>',
     orders: '<path d="M6 3.5h12v17l-2.5-1.6L13 20.5l-2.5-1.6L8 20.5l-2-1.3V3.5Z"/><path d="M9 8h6M9 11.5h6M9 15h4"/>',
     customers: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M15.8 14.2c2.3.2 4 1.8 4.6 4.3"/>',
@@ -731,32 +864,62 @@
     });
   }
   function saveOrders() {
-    store("minise_orders", orders);
+    if (!ONLINE) store("minise_orders", orders);
     clearTimeout(saveOrders._t);
     saveOrders._t = setTimeout(ONLINE ? pushOrders : saveOrdersToFolder, ONLINE ? 300 : 800);
   }
 
-  /* ---------- online backend (Google Sheet) ---------- */
-  function setToken(t, remember) {
-    TOKEN = t || "";
-    try { sessionStorage.removeItem("minise_api_token"); localStorage.removeItem("minise_api_token"); } catch (e) { /* storage blocked */ }
-    if (TOKEN) { try { (remember ? localStorage : sessionStorage).setItem("minise_api_token", TOKEN); } catch (e) { /* stays in memory */ } }
-  }
-  function api(action, data) {
-    var body = JSON.stringify(Object.assign({ action: action, token: TOKEN }, data || {}));
-    return fetch(API, { method: "POST", body: body }).then(function (r) { return r.text(); }).then(function (txt) {
-      var res;
-      try { res = JSON.parse(txt); } catch (e) { throw new Error(a("lg_net")); }
-      if (res && res.error === "auth" && action !== "login" && action !== "setup") authLost();
-      return res;
-    });
-  }
+  /* ---------- database (Supabase) ---------- */
+  // the sign-in stays in this browser tab only, unless "Keep me signed in" was ticked
+  var authStore = {
+    getItem: function (k) { try { return sessionStorage.getItem(k) || localStorage.getItem(k); } catch (e) { return null; } },
+    setItem: function (k, v) {
+      try {
+        if (load("minise_remember") === "1") { localStorage.setItem(k, v); sessionStorage.removeItem(k); }
+        else { sessionStorage.setItem(k, v); localStorage.removeItem(k); }
+      } catch (e) { /* storage blocked: stays signed in until the page closes */ }
+    },
+    removeItem: function (k) { try { sessionStorage.removeItem(k); localStorage.removeItem(k); } catch (e) { /* ignore */ } }
+  };
+  var sb = ONLINE ? window.supabase.createClient(SBC.url, SBC.key, {
+    auth: { storage: authStore, storageKey: "minise-admin-auth", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "implicit" }
+  }) : null;
+  function dbErr(e) { return (e && (e.message || e.error_description || e.msg)) || String(e || "error"); }
+  // supabase-js answers { data, error }: hand back the data or throw the error
+  function check(res) { if (res && res.error) throw res.error; return res ? res.data : null; }
   function authLost() {
     if (document.body.classList.contains("locked")) return;
-    setToken("");
     logout(a("lg_session_end"));
   }
-  var OKEYS = ["id", "date", "created", "updated", "stage", "pay", "method", "name", "phone", "delivery", "address", "note", "ref", "lang", "items", "discount", "fee", "due", "tracking", "web", "slip", "log"];
+  function isoOf(t) { var d = new Date(t); return isNaN(d.getTime()) ? "" : d.toISOString(); }
+  function fromRow(r) {
+    return normalizeOrder({
+      id: r.id, date: r.order_date, created: isoOf(r.created_at), updated: isoOf(r.updated_at),
+      stage: r.stage, pay: r.pay, method: r.method, name: r.name, phone: r.phone, delivery: r.delivery,
+      address: r.address, note: r.note, ref: r.ref, lang: r.lang, items: Array.isArray(r.items) ? r.items : [],
+      discount: r.discount, fee: r.fee, due: r.due || "", tracking: r.tracking, web: r.web,
+      slip: r.has_slip ? "1" : "", log: Array.isArray(r.log) ? r.log : [],
+      via: r.contact_via || "", handle: r.contact_handle || "", photos: Array.isArray(r.photos) ? r.photos : []
+    });
+  }
+  function toRow(o) {
+    var cut = function (v, n) { return String(v == null ? "" : v).slice(0, n); };
+    var whole = function (v) { return Math.max(0, Math.round(+v || 0)); };
+    return {
+      id: o.id, created_at: o.created || new Date().toISOString(), order_date: o.date || todayISO(),
+      stage: o.stage, pay: o.pay, method: o.method, name: cut(o.name, 120), phone: cut(o.phone, 40),
+      delivery: cut(o.delivery, 200), address: cut(o.address, 300), note: cut(o.note, 2000), ref: cut(o.ref, 120),
+      lang: o.lang === "lo" ? "lo" : "en",
+      items: (o.items || []).map(function (it) {
+        var x = { name: cut(it.name, 200), qty: Math.max(1, whole(it.qty)), details: cut(it.details, 600), price: whole(it.price) };
+        if (it.s) { x.s = it.s; x.opt = whole(it.opt); x.addN = whole(it.addN); }
+        return x;
+      }),
+      discount: whole(o.discount), fee: whole(o.fee), due: o.due || null, tracking: cut(o.tracking, 120),
+      web: !!o.web, log: (o.log || []).slice(-100)
+    };
+  }
+  var OKEYS = ["id", "date", "created", "updated", "stage", "pay", "method", "name", "phone", "delivery", "address", "note", "ref", "lang", "items", "discount", "fee", "due", "tracking", "web", "slip", "log", "via", "handle", "photos"];
   function orderSig(o) { return JSON.stringify(OKEYS.map(function (k) { return o[k] == null ? "" : o[k]; })); }
   function syncDone(ok) {
     SYNC.busy = false;
@@ -773,13 +936,11 @@
     render();
   }
   function pullOrders() {
-    if (!ONLINE || !TOKEN) return;
+    if (!ONLINE || !USER) return;
     if (SYNC.busy) { SYNC.pull = true; return; }
     SYNC.busy = true;
-    api("orders").then(function (res) {
-      if (!res || !res.ok) throw new Error((res && res.error) || "error");
-      SYNC.sheet = res.sheet || SYNC.sheet;
-      var server = res.orders.map(normalizeOrder), onServer = {}, mine = {}, changed = false, fresh = 0;
+    sb.from("orders").select("*").order("created_at", { ascending: false }).limit(5000).then(function (res) {
+      var server = check(res).map(fromRow), onServer = {}, mine = {}, changed = false, fresh = 0;
       server.forEach(function (o) { onServer[o.id] = o; });
       orders.forEach(function (o) { mine[o.id] = o; });
       var next = [];
@@ -797,7 +958,6 @@
       orders = next;
       SYNC.snap = {};
       server.forEach(function (o) { SYNC.snap[o.id] = orderSig(o); });
-      store("minise_orders", orders);
       SYNC.ready = true;
       if (fresh) notifyNew(fresh);
       if (changed) softRender();
@@ -806,7 +966,7 @@
     }).catch(function () { syncDone(false); });
   }
   function pushOrders() {
-    if (!ONLINE || !TOKEN) return;
+    if (!ONLINE || !USER) return;
     if (SYNC.busy) { SYNC.push = true; return; }
     var sent = {};
     var changedList = orders.filter(function (o) { return SYNC.snap[o.id] !== orderSig(o); });
@@ -815,24 +975,52 @@
     SYNC.busy = true;
     changedList.forEach(function (o) { sent[o.id] = orderSig(o); });
     var jobs = [];
-    if (changedList.length) jobs.push(api("saveOrders", { orders: changedList }).then(function (res) {
-      if (!res || !res.ok) throw new Error((res && res.error) || "error");
-      res.orders.forEach(function (r) {
-        var n = normalizeOrder(r), cur = orderById(n.id);
+    if (changedList.length) jobs.push(sb.from("orders").upsert(changedList.map(toRow), { onConflict: "id" }).select().then(function (res) {
+      check(res).forEach(function (r) {
+        var n = fromRow(r), cur = orderById(n.id);
         SYNC.snap[n.id] = orderSig(n);
         // take the saved copy unless the order was edited again while it was being sent
         if (cur && orderSig(cur) === sent[n.id]) orders[orders.indexOf(cur)] = n;
       });
     }));
-    if (gone.length) jobs.push(api("deleteOrders", { ids: gone }).then(function (res) {
-      if (!res || !res.ok) throw new Error((res && res.error) || "error");
+    if (gone.length) jobs.push(sb.from("orders").delete().in("id", gone).then(function (res) {
+      check(res);
       gone.forEach(function (id) { delete SYNC.snap[id]; });
     }));
     Promise.all(jobs).then(function () {
-      store("minise_orders", orders);
       if (DR) renderDrawer();
       syncDone(true);
-    }).catch(function () { syncDone(false); });
+    }).catch(function (e) {
+      toast(a("save_fail_db", { e: dbErr(e) }), 8000);
+      syncDone(false);
+    });
+  }
+  // instant updates: new website orders and changes made on another device
+  var live = null;
+  function startLive() {
+    if (!ONLINE || live) return;
+    live = sb.channel("orders-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, function (p) {
+        if (p.eventType === "DELETE") {
+          var gid = p.old && p.old.id, g = gid && orderById(gid);
+          if (gid) delete SYNC.snap[gid];
+          if (g) { orders.splice(orders.indexOf(g), 1); softRender(); }
+          return;
+        }
+        if (!p.new || !p.new.id) return;
+        var n = fromRow(p.new), cur = orderById(n.id), sig = orderSig(n);
+        if (cur && orderSig(cur) === sig) { SYNC.snap[n.id] = sig; return; }
+        // keep an edit made here that hasn't been saved yet
+        var editingHere = cur && SYNC.snap[n.id] && orderSig(cur) !== SYNC.snap[n.id];
+        SYNC.snap[n.id] = sig;
+        if (!cur) { orders.push(n); if (p.eventType === "INSERT" && n.web && SYNC.ready) notifyNew(1); softRender(); }
+        else if (!editingHere) { orders[orders.indexOf(cur)] = n; softRender(); }
+      })
+      .subscribe(function (status) { SYNC.live = status === "SUBSCRIBED"; renderHead(); });
+  }
+  function stopLive() {
+    if (live) { try { sb.removeChannel(live); } catch (e) { /* ignore */ } live = null; }
+    SYNC.live = false;
   }
   function notifyNew(n) {
     NEWCOUNT += n;
@@ -857,59 +1045,89 @@
     settings = Object.assign(settings, data.settings || {});
     while (settings.ann.length < 3) settings.ann.push(["", ""]);
     if (!settings.templates) settings.templates = {};
-    settings.api = API;
+    if (SBC) settings.supabase = SBC;
   }
   function loadCatalogOnline() {
-    return api("catalog").then(function (res) {
-      if (!res || !res.ok) throw new Error((res && res.error) || "error");
-      if (res.empty) return publishOnline(true);
-      if (res.data && !dirty) { applyCatalog(res.data); SYNC.version = res.version; render(); }
+    return sb.rpc("get_catalog", { have: "" }).then(function (res) {
+      var r = check(res) || {};
+      if (r.empty) return publishOnline(true);
+      if (r.data && !dirty) { applyCatalog(r.data); SYNC.version = r.version; render(); }
     }).catch(function () { SYNC.state = "err"; renderHead(); });
+  }
+  // a new photo goes to the public "product-photos" storage and is replaced by its web address
+  function uploadPhoto(dataUrl, name) {
+    var blob = dataURLtoBlob(dataUrl);
+    var ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+    var path = String(name).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6) + "." + ext;
+    var bucket = sb.storage.from("product-photos");
+    return bucket.upload(path, blob, { contentType: blob.type, cacheControl: "31536000", upsert: false }).then(function (res) {
+      check(res);
+      return bucket.getPublicUrl(path).data.publicUrl;
+    });
   }
   function publishOnline(first) {
     var btn = document.getElementById("saveBtn");
     btn.disabled = true;
-    settings.api = API;
-    return api("publish", { products: products, settings: settings }).then(function (res) {
+    var jobs = [];
+    products.forEach(function (p) {
+      p.img.forEach(function (src, i) {
+        if (String(src).indexOf("data:") === 0) jobs.push(uploadPhoto(src, p.s + "-" + (i + 1)).then(function (url) { p.img[i] = url; }));
+      });
+    });
+    if (String(settings.qr || "").indexOf("data:") === 0) jobs.push(uploadPhoto(settings.qr, "laoqr").then(function (url) { settings.qr = url; }));
+    return Promise.all(jobs).then(function () {
+      var shared = Object.assign({}, settings);
+      delete shared.api; delete shared.supabase;
+      return sb.rpc("publish_catalog", { p_products: products, p_settings: shared });
+    }).then(function (res) {
+      var r = check(res) || {};
+      SYNC.version = r.version;
       btn.disabled = false;
-      if (!res || !res.ok) throw new Error((res && res.error) || "error");
-      applyCatalog(res);
-      SYNC.version = res.version;
       afterSaved(); render();
       toast(first ? a("first_publish") : a("published"), 5000);
     }).catch(function (e) {
       btn.disabled = false;
       renderHead();
-      toast(a("publish_fail", { e: e && e.message ? e.message : e }), 8000);
+      toast(a("publish_fail", { e: dbErr(e) }), 8000);
     });
-  }
-  function connectOnline(url) {
-    var msg = document.getElementById("onMsg");
-    var say = function (txt, ok) { msg.textContent = txt; msg.className = "alert " + (ok ? "ok" : "warn"); msg.hidden = false; };
-    url = String(url || "").trim();
-    if (!/^https:\/\/script\.google(usercontent)?\.com\/\S+$/.test(url) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/\S*$/.test(url)) { say(a("on_bad_url")); return; }
-    say(a("on_checking"), true);
-    fetch(url).then(function (r) { return r.json(); }).then(function (res) {
-      if (!res || res.app !== "minise") throw new Error("no");
-      store("minise_api", url);
-      say(a("on_connected_toast"), true);
-      dirty = 0;
-      setTimeout(function () { location.reload(); }, 900);
-    }).catch(function () { say(a("on_no_answer")); });
   }
   function showSlip(id) {
     var box = document.getElementById("slipBox");
     if (!box) return;
     if (SLIPS[id]) { box.innerHTML = '<img class="slip-img" src="' + SLIPS[id] + '" alt="' + esc(a("sec_slip")) + '">'; return; }
     box.innerHTML = '<p class="hint">' + esc(a("slip_loading")) + "</p>";
-    api("slip", { id: id }).then(function (res) {
-      if (!res || !res.ok) throw new Error("no");
-      SLIPS[id] = res.data;
+    sb.rpc("get_slip", { p_order_id: id }).then(function (res) {
+      var data = check(res);
+      if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(String(data || ""))) throw new Error("no slip");
+      SLIPS[id] = data;
       var b = document.getElementById("slipBox");
-      if (b) b.innerHTML = '<img class="slip-img" src="' + res.data + '" alt="' + esc(a("sec_slip")) + '">';
+      if (b) b.innerHTML = '<img class="slip-img" src="' + data + '" alt="' + esc(a("sec_slip")) + '">';
     }).catch(function () {
       var b = document.getElementById("slipBox");
       if (b) b.innerHTML = '<p class="alert warn">' + esc(a("slip_fail")) + "</p>";
+    });
+  }
+  // customer photos live in a private folder: ask for links that work for one hour
+  function photoGrid(urls) {
+    return '<div class="photo-grid">' + urls.map(function (u, i) {
+      return '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + esc(a("sec_photos", { n: i + 1 })) + '" loading="lazy"></a>';
+    }).join("") + '</div><p class="hint">' + esc(a("photos_hint")) + "</p>";
+  }
+  function showPhotos(id) {
+    var o = orderById(id), box = document.getElementById("photoBox");
+    if (!o || !box || !ONLINE) return;
+    box.innerHTML = '<p class="hint">' + esc(a("photos_loading")) + "</p>";
+    sb.storage.from("order-photos").createSignedUrls(o.photos, 3600).then(function (res) {
+      if (res.error) throw res.error;
+      var urls = (res.data || []).map(function (x) { return x && x.signedUrl; }).filter(function (u) { return /^https:\/\//.test(String(u || "")); });
+      if (!urls.length) throw new Error("no photos");
+      PHOTOS[id] = urls;
+      setTimeout(function () { delete PHOTOS[id]; }, 55 * 60 * 1000);
+      var b = document.getElementById("photoBox");
+      if (b) b.innerHTML = photoGrid(urls);
+    }).catch(function () {
+      var b = document.getElementById("photoBox");
+      if (b) b.innerHTML = '<p class="alert warn">' + esc(a("photos_fail")) + "</p>";
     });
   }
   function saveOrdersToFolder() {
@@ -959,7 +1177,7 @@
     var sb = document.getElementById("saveBtn");
     if (ONLINE) {
       st.className = "side-status" + (SYNC.state === "ok" ? " ok" : SYNC.state === "err" ? " err" : "");
-      st.textContent = SYNC.state === "ok" ? a("on_status_ok", { t: fmtTime(SYNC.at) }) : SYNC.state === "err" ? a("on_status_err") : a("on_status_wait");
+      st.textContent = SYNC.state === "ok" ? a(SYNC.live ? "db_status_live" : "on_status_ok", { t: fmtTime(SYNC.at) }) : SYNC.state === "err" ? a("on_status_err") : a("on_status_wait");
       document.getElementById("connectBtn").hidden = true;
       sb.textContent = dirty ? a("publish_n", { n: dirty }) : a("published_all");
       sb.disabled = !dirty;
@@ -1130,7 +1348,7 @@
       ["avg", a("k_avg"), money(avg), a("k_avg_c")],
       ["clock", a("k_open"), money(openSum), open.length ? a("k_open_n", { n: open.length }) : a("k_open_c")]
     ];
-    return '<div class="dash-bar">' + seg + dates + "</div>" +
+    return '<div class="dash-bar">' + seg + dates + (window.MINISE_CAT ? '<span class="dash-kitty">' + window.MINISE_CAT("drink") + "</span>" : "") + "</div>" +
       '<div class="kpis">' + kpis.map(function (k) { return '<div class="kpi"><span class="l">' + icon(k[0]) + esc(k[1]) + "</span><b>" + esc(k[2]) + '</b><span class="c">' + esc(k[3]) + "</span></div>"; }).join("") + "</div>" +
       '<div class="cards two">' + salesCard(paid) + bestCard(paid) + "</div>" +
       '<div class="cards even">' + recentCard() + dueCard() + "</div>" +
@@ -1176,7 +1394,7 @@
     var box = document.getElementById("otable");
     if (!box) return;
     if (!list.length) {
-      box.innerHTML = '<div class="empty-state">' + icon("orders") + "<p>" + esc(orders.length ? a("o_none") : a("o_none_all")) + "</p></div>";
+      box.innerHTML = '<div class="empty-state">' + (window.MINISE_CAT ? '<span class="empty-kitty">' + window.MINISE_CAT(orders.length ? "search" : "sleep") + "</span>" : icon("orders")) + "<p>" + esc(orders.length ? a("o_none") : a("o_none_all")) + "</p></div>";
     } else {
       box.innerHTML = '<table class="tbl"><thead><tr><th class="cb"><input type="checkbox" id="selAll"' + (allSel ? " checked" : "") + ' aria-label="' + esc(a("select_all")) + '"></th><th>' + esc(a("col_order")) + "</th><th>" + esc(a("col_customer")) + "</th><th>" + esc(a("col_items")) + '</th><th class="num">' + esc(a("col_total")) + "</th><th>" + esc(a("col_payment")) + "</th><th>" + esc(a("col_status")) + "</th><th>" + esc(a("col_due")) + "</th></tr></thead><tbody>" +
         list.map(function (o) {
@@ -1185,7 +1403,7 @@
           return '<tr class="click' + (SEL[o.id] ? " sel" : "") + '" data-open="' + esc(o.id) + '"><td class="cb"><input type="checkbox" data-sel="' + esc(o.id) + '"' + (SEL[o.id] ? " checked" : "") + ' aria-label="' + esc(o.id) + '"></td>' +
             '<td><span class="oid">' + esc(o.id) + "</span><small>" + esc(fmtDate(o.date)) + " · " + esc(a("m_" + o.method)) + (o.web ? " · " + esc(a("web_badge")) : "") + "</small></td>" +
             "<td><b>" + esc(o.name || "—") + "</b><small>" + esc(o.phone) + "</small></td>" +
-            "<td>" + esc(first) + "<small>" + esc(sub) + "</small></td>" +
+            "<td>" + esc(first) + "<small>" + esc(sub) + "</small>" + (o.items.length === 1 ? loLine(laoItem(o.items[0])) : "") + "</td>" +
             '<td class="num"><b>' + esc(money(orderTotal(o))) + "</b>" + (hasUnknown(o) ? "<small>" + esc(a("to_price")) + "</small>" : "") + "</td>" +
             "<td>" + payPill(o.pay) + "</td><td>" + stPill(o.stage) + "</td><td>" + duePill(o) + "</td></tr>";
         }).join("") + "</tbody></table>";
@@ -1245,11 +1463,11 @@
     var items = o.items.map(function (it) {
       var p = findProduct(it.name);
       return '<div class="oitem">' + (p && p.img[0] ? '<img src="' + esc(p.img[0]) + '" alt="">' : '<span class="noimg"></span>') +
-        '<div class="nm"><b>' + esc(it.name) + "</b>" + (it.details ? "<small>" + esc(it.details) + "</small>" : "") + '</div><span class="q">× ' + (it.qty || 1) + '</span><span class="pz">' + (it.price ? esc(money(it.price)) : '<span class="ask">' + esc(a("to_price")) + "</span>") + "</span></div>";
+        '<div class="nm"><b>' + esc(it.name) + "</b>" + (it.details ? "<small>" + esc(it.details) + "</small>" : "") + loLine(laoItem(it)) + '</div><span class="q">× ' + (it.qty || 1) + '</span><span class="pz">' + (it.price ? esc(money(it.price)) : '<span class="ask">' + esc(a("to_price")) + "</span>") + "</span></div>";
     }).join("");
     var hist = o.log.slice().reverse().map(function (l) { return "<li><time>" + esc(fmtWhen(l.at)) + "</time>" + esc(l.k ? a("log_" + l.k) : l.what) + "</li>"; }).join("");
     document.getElementById("drawer").innerHTML =
-      '<div class="dr-head"><div class="dr-top"><div><h2>' + esc(o.id) + "</h2><p>" + esc(fmtWhen(o.created)) + " · " + esc(a("m_" + o.method)) + (o.web ? " · " + esc(a("web_badge")) : "") + '</p></div><button class="icon-btn" type="button" data-closedr aria-label="' + esc(a("close")) + '">' + icon("x") + "</button></div>" +
+      '<div class="dr-head"><div class="dr-top">' + (window.MINISE_CAT ? '<span class="dr-kitty">' + window.MINISE_CAT({ "new": "wave", making: "paint", ready: "gift", sent: "walk", done: "yay" }[o.stage] || "wave") + "</span>" : "") + '<div class="dr-who"><h2>' + esc(o.id) + "</h2><p>" + esc(fmtWhen(o.created)) + " · " + esc(a("m_" + o.method)) + (o.web ? " · " + esc(a("web_badge")) : "") + '</p></div><button class="icon-btn" type="button" data-closedr aria-label="' + esc(a("close")) + '">' + icon("x") + "</button></div>" +
       '<div class="dr-pills">' + payPill(o.pay) + stPill(o.stage) + duePill(o) + "</div>" +
       '<ol class="stepper">' + steps + "</ol>" +
       '<div class="dr-actions">' + acts.join("") + "</div>" +
@@ -1259,7 +1477,8 @@
       '<section class="dr-sec"><h3>' + esc(a("sec_customer")) + '</h3><div class="cust-line"><b>' + esc(o.name || "—") + "</b>" + (o.phone ? '<span class="num">' + esc(o.phone) + "</span>" : "") +
       (wa ? '<a class="btn ghost sm" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + icon("chat") + "WhatsApp</a>" : "") +
       (o.phone ? '<a class="btn ghost sm" href="tel:' + esc(String(o.phone).replace(/[^\d+]/g, "")) + '">' + icon("phone") + esc(a("act_call")) + "</a>" : "") + "</div>" +
-      '<dl class="kv"><dt>' + esc(a("f_delivery")) + "</dt><dd>" + esc(o.delivery || "—") + "</dd>" + (o.address ? "<dt>" + esc(a("f_address")) + "</dt><dd>" + esc(o.address) + "</dd>" : "") + "</dl></section>" +
+      '<dl class="kv">' + (o.via ? "<dt>" + esc(a("f_contact")) + "</dt><dd>" + esc(a("via_" + o.via)) + (o.handle ? " · " + (o.via === "instagram" && /^@?[A-Za-z0-9._]{1,30}$/.test(o.handle) ? '<a class="link" href="https://www.instagram.com/' + esc(o.handle.replace(/^@/, "")) + '/" target="_blank" rel="noopener">' + esc(o.handle) + "</a>" : "<b>" + esc(o.handle) + "</b>") : "") + "</dd>" : "") +
+      "<dt>" + esc(a("f_delivery")) + "</dt><dd>" + esc(o.delivery || "—") + loLine(laoOf(o.delivery)) + "</dd>" + (o.address ? "<dt>" + esc(a("f_address")) + "</dt><dd>" + esc(o.address) + loLine(laoOf(o.address)) + "</dd>" : "") + "</dl></section>" +
       '<section class="dr-sec"><h3>' + esc(a("sec_items")) + '</h3><div class="oitems">' + (items || '<p class="empty">—</p>') + "</div>" +
       '<div class="sum"><div><span>' + esc(a("subtotal")) + "</span><span>" + esc(money(orderSub(o))) + "</span></div>" +
       (o.discount ? "<div><span>" + esc(a("discount")) + "</span><span>− " + esc(money(o.discount)) + "</span></div>" : "") +
@@ -1268,6 +1487,7 @@
       (hasUnknown(o) ? '<p class="hint">' + esc(a("plus_unknown")) + "</p>" : "") + "</div></section>" +
       '<section class="dr-sec"><h3>' + esc(a("sec_details")) + '</h3><dl class="kv"><dt>' + esc(a("f_channel")) + "</dt><dd>" + esc(a("m_" + o.method)) + "</dd><dt>" + esc(a("f_due")) + "</dt><dd>" + esc(o.due ? fmtDate(o.due) : "—") + "</dd><dt>" + esc(a("f_tracking")) + "</dt><dd>" + esc(o.tracking || "—") + "</dd>" + (o.ref ? "<dt>" + esc(a("f_ref")) + "</dt><dd>" + esc(o.ref) + "</dd>" : "") + "<dt>" + esc(a("f_created")) + "</dt><dd>" + esc(fmtWhen(o.created)) + "</dd></dl></section>" +
       (o.slip ? '<section class="dr-sec"><h3>' + esc(a("sec_slip")) + '</h3><div id="slipBox">' + (SLIPS[o.id] ? '<img class="slip-img" src="' + SLIPS[o.id] + '" alt="' + esc(a("sec_slip")) + '">' : '<button class="btn ghost sm" type="button" data-viewslip="' + esc(o.id) + '">' + icon("money") + esc(a("slip_view")) + "</button>") + "</div></section>" : "") +
+      (o.photos.length ? '<section class="dr-sec"><h3>' + esc(a("sec_photos", { n: o.photos.length })) + '</h3><div id="photoBox">' + (PHOTOS[o.id] ? photoGrid(PHOTOS[o.id]) : '<button class="btn ghost sm" type="button" data-viewphotos="' + esc(o.id) + '">' + icon("image") + esc(a("photos_view")) + "</button>") + "</div></section>" : "") +
       (o.note ? '<section class="dr-sec"><h3>' + esc(a("sec_note")) + '</h3><p class="note-box">' + esc(o.note) + "</p></section>" : "") +
       (hist ? '<section class="dr-sec"><h3>' + esc(a("sec_history")) + '</h3><ul class="hist">' + hist + "</ul></section>" : "") +
       "</div>";
@@ -1297,7 +1517,8 @@
       orders.push(copy); saveOrders(); DR.id = copy.id; render(); toast(a("o_saved")); return;
     } else if (act === "delete") {
       if (!confirm(a("o_del_confirm", { n: o.id }))) { renderDrawer(); return; }
-      orders.splice(orders.indexOf(o), 1); delete SEL[o.id]; saveOrders(); closeDrawer(); render(); toast(a("o_deleted")); return;
+      if (ONLINE && o.photos.length) sb.storage.from("order-photos").remove(o.photos).catch(function () { /* the files can be removed in Supabase */ });
+      orders.splice(orders.indexOf(o), 1); delete SEL[o.id]; delete PHOTOS[o.id]; saveOrders(); closeDrawer(); render(); toast(a("o_deleted")); return;
     }
     saveOrders(); render();
     toast(act === "paid" || act === "checked" ? o.id + " · " + a("pay_" + o.pay) : a("toast_stage", { id: o.id, s: a("st_" + o.stage) }));
@@ -1347,6 +1568,7 @@
       '<div class="field"><label for="o_note">' + esc(a("o_note")) + '</label><textarea id="o_note" rows="3">' + esc(x.note) + "</textarea></div></div>" +
       '<div class="dlg-foot"><span></span><div class="grp"><button class="btn ghost" type="button" data-closedlg>' + esc(a("e_cancel")) + '</button><button class="btn" type="submit">' + esc(a("o_save")) + "</button></div></div></form>";
     dlg.showModal();
+    if (!isNew) document.getElementById("o_id").readOnly = true;
   }
   function readOrderEditor() {
     var x = editingOrder.o, form = document.getElementById("oform");
@@ -1409,11 +1631,11 @@
     var addr = settings.addr[lang === "lo" ? 1 : 0] || settings.addr[0] || "";
     var shop = "<b>Minise Arte</b><br>" + esc(addr) + "<br>WhatsApp " + esc(settings.wa.mainShow) + (settings.wa.altShow ? " · " + esc(settings.wa.altShow) : "") + "<br>@minise.arte";
     var rows = o.items.map(function (it) {
-      return "<tr>" + (slip ? '<td><span class="tick"></span></td>' : "") + "<td><b>" + esc(it.name) + "</b>" + (it.details ? "<br><small>" + esc(it.details) + "</small>" : "") + '</td><td class="r">' + (it.qty || 1) + "</td>" + (slip ? "" : '<td class="r">' + (it.price ? esc(money(it.price)) : "—") + "</td>") + "</tr>";
+      return "<tr>" + (slip ? '<td><span class="tick"></span></td>' : "") + "<td><b>" + esc(it.name) + "</b>" + (it.details ? "<br><small>" + esc(it.details) + "</small>" : "") + loLine(laoItem(it)) + '</td><td class="r">' + (it.qty || 1) + "</td>" + (slip ? "" : '<td class="r">' + (it.price ? esc(money(it.price)) : "—") + "</td>") + "</tr>";
     }).join("");
     var html = '<div class="doc"><div class="doc-head"><div><img src="images/logo.png" alt="Minise Arte"><h1>' + esc(slip ? a("slip_title") : a("inv_title")) + '</h1></div><div class="shop">' + shop + "</div></div>" +
       '<div class="meta"><div><h4>' + esc(a("inv_order")) + "</h4><b>" + esc(o.id) + "</b><br>" + esc(a("inv_date")) + ": " + esc(fmtDate(o.date)) + (o.tracking ? "<br>" + esc(a("f_tracking")) + ": " + esc(o.tracking) : "") + "</div>" +
-      "<div><h4>" + esc(a("inv_bill_to")) + "</h4><b>" + esc(o.name) + "</b><br>" + esc(o.phone) + "<br>" + esc(o.delivery) + (o.address ? "<br>" + esc(o.address) : "") + "</div></div>" +
+      "<div><h4>" + esc(a("inv_bill_to")) + "</h4><b>" + esc(o.name) + "</b><br>" + esc(o.phone) + "<br>" + esc(o.delivery) + loLine(laoOf(o.delivery)) + (o.address ? "<br>" + esc(o.address) + loLine(laoOf(o.address)) : "") + "</div></div>" +
       "<table><thead><tr>" + (slip ? '<th style="width:60px">' + esc(a("slip_packed")) + "</th>" : "") + "<th>" + esc(a("inv_item")) + '</th><th class="r">' + esc(a("inv_qty")) + "</th>" + (slip ? "" : '<th class="r">' + esc(a("inv_amount")) + "</th>") + "</tr></thead><tbody>" + rows + "</tbody></table>" +
       (slip ? "" : '<div class="totals"><div><span>' + esc(a("subtotal")) + "</span><span>" + esc(money(orderSub(o))) + "</span></div>" + (o.discount ? "<div><span>" + esc(a("discount")) + "</span><span>− " + esc(money(o.discount)) + "</span></div>" : "") + (o.fee ? "<div><span>" + esc(a("fee")) + "</span><span>" + esc(money(o.fee)) + "</span></div>" : "") + '<div class="grand"><span>' + esc(a("total")) + "</span><span>" + esc(money(orderTotal(o))) + "</span></div></div>" +
         (isPaid(o) ? '<p class="pay"><b>' + esc(a("inv_paid")) + "</b></p>" : '<div class="pay"><img src="' + esc(settings.qr) + '" alt="LAO QR"><div><b>' + esc(a("inv_pay")) + "</b><br>" + esc(settings.account) + "<br>" + esc(a("total")) + ": <b>" + esc(money(orderTotal(o))) + "</b></div></div>")) +
@@ -1670,30 +1892,44 @@
   }
   function onlinePage() {
     if (!ONLINE) {
-      return '<div class="set-grid"><section class="card"><div class="card-head"><h2>' + esc(a("on_h_setup")) + '</h2></div><p class="page-intro">' + esc(a("on_setup_p")) + "</p>" +
-        '<ol class="steps-list">' + [1, 2, 3, 4, 5].map(function (i) { return "<li>" + esc(a("on_s" + i)) + "</li>"; }).join("") + "</ol>" +
-        '<form id="onForm" class="on-form" novalidate><label for="onUrl"><b>' + esc(a("on_url")) + '</b></label><div class="row"><input type="text" id="onUrl" inputmode="url" autocomplete="off" spellcheck="false" placeholder="' + esc(a("on_url_ph")) + '">' +
-        '<button class="btn" type="submit">' + icon("cloud") + esc(a("on_connect")) + '</button></div><p class="alert warn" id="onMsg" role="status" hidden></p></form></section></div>';
+      return '<div class="set-grid"><section class="card"><div class="card-head"><h2>' + esc(a("db_h_off")) + '</h2></div><p class="page-intro">' + esc(a("db_off_p")) + "</p></section></div>";
     }
-    var fileApi = String((window.MINISE_SETTINGS || {}).api || "").trim();
-    var pill = SYNC.state === "ok" ? '<span class="pill st-ready">' + esc(a("on_status_ok", { t: fmtTime(SYNC.at) })) + "</span>" :
+    var ref = (String(SBC.url).match(/^https:\/\/([a-z0-9]+)\.supabase\.co/) || [])[1];
+    var pill = SYNC.live ? '<span class="pill st-ready">' + esc(a("db_live")) + "</span>" :
       SYNC.state === "err" ? '<span class="pill due-over">' + esc(a("on_status_err")) + "</span>" : '<span class="pill muted">' + esc(a("on_status_wait")) + "</span>";
     return '<div class="set-grid">' +
-      '<section class="card"><div class="card-head"><h2>' + esc(a("on_h_connected")) + "</h2>" + pill + '</div><p class="page-intro">' + esc(a("on_connected_p")) + "</p>" +
-      '<dl class="kv"><dt>' + esc(a("on_url")) + '</dt><dd><code class="code url">' + esc(API) + "</code></dd><dt>" + esc(a("on_last")) + "</dt><dd>" + esc(SYNC.at ? fmtWhen(new Date(SYNC.at).toISOString()) : a("on_never")) + "</dd><dt>" + esc(a("k_orders")) + "</dt><dd>" + orders.length + "</dd></dl>" +
-      '<div class="chiprow">' + (SYNC.sheet ? '<a class="btn ghost" href="' + esc(SYNC.sheet) + '" target="_blank" rel="noopener">' + icon("external") + esc(a("on_sheet")) + "</a>" : "") +
+      '<section class="card"><div class="card-head"><h2>' + esc(a("db_h")) + "</h2>" + pill + '</div><p class="page-intro">' + esc(a("db_p")) + "</p>" +
+      '<dl class="kv"><dt>' + esc(a("db_project")) + '</dt><dd><code class="code url">' + esc(SBC.url) + "</code></dd>" +
+      "<dt>" + esc(a("db_signed_in")) + "</dt><dd>" + esc(USER ? USER.email : "—") + "</dd>" +
+      "<dt>" + esc(a("on_last")) + "</dt><dd>" + esc(SYNC.at ? fmtWhen(new Date(SYNC.at).toISOString()) : a("on_never")) + "</dd>" +
+      "<dt>" + esc(a("k_orders")) + "</dt><dd>" + orders.length + "</dd></dl>" +
+      '<div class="chiprow">' + (ref ? '<a class="btn ghost" href="https://supabase.com/dashboard/project/' + esc(ref) + '/editor" target="_blank" rel="noopener">' + icon("external") + esc(a("db_open")) + "</a>" : "") +
       '<button class="btn ghost" type="button" id="onSync">' + icon("refresh") + esc(a("on_sync")) + "</button></div></section>" +
-      (fileApi === API ? '<section class="card"><p class="alert ok">' + esc(a("on_web_ok")) + "</p></section>" :
-        '<section class="card"><div class="card-head"><h2>' + esc(a("on_web_h")) + '</h2></div><p class="page-intro">' + esc(a("on_web_p")) + '</p><div><button class="btn" type="button" id="onWebFile">' + icon("download") + esc(a("on_web_btn")) + "</button></div></section>") +
-      '<section class="card"><div class="card-head"><h2>' + esc(a("on_disconnect")) + '</h2></div><p class="page-intro">' + esc(a("on_disc_p")) + "</p>" + (fileApi ? '<p class="hint">' + esc(a("on_disc_file")) + "</p>" : "") +
-      '<div><button class="btn ghost" type="button" id="onDisconnect">' + esc(a("on_disconnect")) + "</button></div></section></div>";
+      '<section class="card"><div class="card-head"><h2>' + esc(a("db_safe_h")) + '</h2></div><ul class="steps-list">' +
+      [1, 2, 3, 4].map(function (i) { return "<li>" + esc(a("db_safe_" + i)) + "</li>"; }).join("") + "</ul></section></div>";
+  }
+  function mfaCard() {
+    if (!ONLINE) return "";
+    var body;
+    if (MFA.enroll) {
+      body = '<p class="page-intro">' + esc(a("mfa_scan")) + '</p><div class="mfa-setup"><img class="mfa-qr" src="' + esc(MFA.enroll.qr) + '" alt="QR code" width="180" height="180">' +
+        '<div class="mfa-side"><p class="hint">' + esc(a("mfa_secret")) + '</p><code class="code url">' + esc(MFA.enroll.secret) + "</code>" +
+        '<form id="mfaForm" class="on-form" novalidate><label for="mfaCode"><b>' + esc(a("lg_code_label")) + '</b></label><div class="row"><input type="text" id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*">' +
+        '<button class="btn" type="submit">' + esc(a("lg_verify")) + '</button></div><p class="alert warn" id="mfaMsg" hidden></p></form></div></div>';
+    } else if (MFA.state === "on") {
+      body = '<p class="alert ok">' + esc(a("mfa_is_on")) + '</p><div><button class="btn ghost" type="button" id="mfaOff">' + esc(a("mfa_turn_off")) + "</button></div>";
+    } else if (MFA.state === "off") {
+      body = '<p class="page-intro">' + esc(a("mfa_text")) + '</p><div><button class="btn" type="button" id="mfaOn">' + icon("account") + esc(a("mfa_turn_on")) + "</button></div>";
+    } else body = '<p class="hint">' + esc(a("slip_loading").replace(/slip|ສະລິບ/i, "")) + "</p>";
+    return '<section class="card"><div class="card-head"><h2>' + esc(a("mfa_title")) + "</h2>" + (MFA.state === "on" ? '<span class="pill st-ready">' + esc(a("mfa_on")) + "</span>" : MFA.state === "off" ? '<span class="pill muted">' + esc(a("mfa_off")) + "</span>" : "") + "</div>" + body + "</section>";
   }
   function accountPage() {
     var mins = +(load("minise_admin_autolock") || 30);
-    return '<div class="set-grid">' +
+    if (ONLINE && MFA.state === "loading") loadMfa();
+    return '<div class="set-grid">' + mfaCard() +
       '<form id="pwForm" class="card" novalidate><div class="card-head"><h2>' + esc(a("pw_title")) + "</h2></div>" +
       '<div class="field"><label for="pwCur">' + esc(a("pw_current")) + '</label><input type="password" id="pwCur" autocomplete="current-password"></div>' +
-      '<div class="grid2"><div class="field"><label for="pwNew">' + esc(a("lg_new_pass")) + '</label><input type="password" id="pwNew" autocomplete="new-password"></div>' +
+      '<div class="grid2"><div class="field"><label for="pwNew">' + esc(ONLINE ? a("lg_new_pass10") : a("lg_new_pass")) + '</label><input type="password" id="pwNew" autocomplete="new-password"></div>' +
       '<div class="field"><label for="pwNew2">' + esc(a("lg_confirm")) + '</label><input type="password" id="pwNew2" autocomplete="new-password"></div></div>' +
       '<p class="alert warn" id="pwMsg" hidden></p><div><button class="btn" type="submit">' + esc(a("pw_change")) + "</button></div></form>" +
       '<section class="card"><div class="card-head"><h2>' + esc(a("al_title")) + '</h2></div><p class="page-intro">' + esc(a("al_text")) + '</p><div class="field" style="max-width:260px"><select id="alSel" aria-label="' + esc(a("al_title")) + '">' +
@@ -1798,35 +2034,52 @@
     try { crypto.getRandomValues(arr); } catch (e) { for (var i = 0; i < 16; i++) arr[i] = Math.floor(Math.random() * 256); }
     return Array.prototype.map.call(arr, function (x) { return (x < 16 ? "0" : "") + x.toString(16); }).join("");
   }
-  // no built-in password: with the Google Sheet backend (settings.api) the password is checked by Google
+  // no built-in password: with the database (settings.supabase) sign-in is checked by Supabase
   var DEFAULT_AUTH = null;
   function getAuth() { return load(AUTH_KEY, true) || DEFAULT_AUTH; }
   function remembered() {
-    if (ONLINE) return !!load("minise_api_token");
+    if (ONLINE) return load("minise_remember") === "1";
     return (+load("minise_admin_until") || 0) > Date.now();
   }
   function signedIn() {
-    if (ONLINE) return !!TOKEN;
+    if (ONLINE) return !!USER;
     try { if (sessionStorage.getItem("minise_admin_session") === "1") return true; } catch (e) { /* ignore */ }
     return remembered();
   }
-  var loginMode = "signin", booted = false, lastActive = Date.now();
+  // login screens: signin (email + password), code (2-step), newpass (after a reset email), create (single-computer mode)
+  var loginMode = "signin", booted = false, lastActive = Date.now(), recovering = false;
+  // the shop cat waves on the sign-in card and peeks over the name in the sidebar
+  if (window.MINISE_CAT) {
+    document.getElementById("lgKitty").innerHTML = window.MINISE_CAT("wave");
+    document.getElementById("brandKitty").innerHTML = window.MINISE_CAT("peek");
+  }
   function renderLogin() {
     document.documentElement.lang = lang;
-    var create = loginMode === "create";
+    var m = loginMode, create = m === "create", code = m === "code", newpass = m === "newpass";
     var set = function (id, txt) { document.getElementById(id).textContent = txt; };
+    var show = function (id, on) { document.getElementById(id).hidden = !on; };
     set("lgLang", a("lang_switch")); set("lgKicker", a("lg_kicker"));
-    set("loginTitle", create ? a("lg_create") : a("lg_welcome"));
-    set("loginSub", create ? a("lg_create_sub") : a("lg_sub"));
-    set("lgPassLabel", create ? a("lg_new_pass") : a("lg_pass"));
-    document.getElementById("lgPass").autocomplete = create ? "new-password" : "current-password";
-    document.getElementById("lgConfirmWrap").hidden = !create;
+    set("loginTitle", code ? a("lg_code_h") : newpass ? a("lg_newpass_h") : create ? a("lg_create") : a("lg_welcome"));
+    set("loginSub", code ? a("lg_code_sub") : newpass ? a("lg_newpass_sub") : create ? a("lg_create_sub") : ONLINE ? a("lg_sub_email") : a("lg_sub"));
+    show("lgEmailWrap", ONLINE && m === "signin");
+    set("lgEmailLabel", a("lg_email"));
+    show("lgPassWrap", !code);
+    set("lgPassLabel", create || newpass ? (ONLINE ? a("lg_new_pass10") : a("lg_new_pass")) : a("lg_pass"));
+    document.getElementById("lgPass").autocomplete = create || newpass ? "new-password" : "current-password";
+    show("lgConfirmWrap", create || newpass);
+    show("lgCodeWrap", code);
+    set("lgCodeLabel", a("lg_code_label"));
+    show("lgRememberWrap", m === "signin" || create);
     set("lgConfirmLabel", a("lg_confirm")); set("lgRememberLabel", a("lg_remember"));
-    set("lgBtn", create ? a("lg_save") : a("lg_signin"));
-    set("lgForgot", a("lg_forgot")); document.getElementById("lgForgot").hidden = create;
-    set("lgResetText", ONLINE ? a("lg_reset_online") : a("lg_reset_text")); set("lgResetBtn", a("lg_reset_btn")); set("loginNote", ONLINE ? a("lg_note_online") : a("lg_note"));
-    document.getElementById("lgResetInput").hidden = ONLINE;
-    document.getElementById("lgResetBtn").hidden = ONLINE;
+    set("lgBtn", code ? a("lg_verify") : newpass ? a("lg_set_pass") : create ? a("lg_save") : a("lg_signin"));
+    set("lgForgot", a("lg_forgot")); show("lgForgot", m === "signin");
+    set("lgBack", a("lg_back")); show("lgBack", ONLINE && (code || newpass));
+    set("lgResetText", ONLINE ? a("lg_reset_email") : a("lg_reset_text"));
+    set("lgResetBtn", ONLINE ? a("lg_reset_send") : a("lg_reset_btn"));
+    var ri = document.getElementById("lgResetInput");
+    ri.type = ONLINE ? "email" : "text";
+    ri.autocomplete = ONLINE ? "email" : "off";
+    set("loginNote", ONLINE ? a("lg_note_db") : a("lg_note"));
     set("lgShow", document.getElementById("lgPass").type === "password" ? a("lg_show") : a("lg_hide"));
   }
   function showLogin(mode, msg) {
@@ -1837,8 +2090,12 @@
     document.getElementById("lgReset").hidden = true;
     document.getElementById("lgPass").value = "";
     document.getElementById("lgConfirm").value = "";
+    document.getElementById("lgCode").value = "";
     renderLogin();
-    setTimeout(function () { document.getElementById("lgPass").focus(); }, 50);
+    setTimeout(function () {
+      var f = mode === "code" ? "lgCode" : ONLINE && mode === "signin" && !document.getElementById("lgEmail").value ? "lgEmail" : "lgPass";
+      document.getElementById(f).focus();
+    }, 50);
   }
   function loginError(msg) { var el = document.getElementById("lgErr"); el.textContent = msg; el.hidden = false; }
   function startSession(remember) {
@@ -1857,25 +2114,59 @@
     try { sessionStorage.removeItem("minise_admin_session"); } catch (e) { /* ignore */ }
     try { localStorage.removeItem("minise_admin_until"); } catch (e) { /* ignore */ }
     closeDialog(); closeDrawer();
-    if (ONLINE) { setToken(""); showLogin("signin", msg); return; }
+    if (ONLINE) {
+      // forget everything this browser was holding: orders, slips, the sign-in
+      stopLive();
+      USER = null; orders = []; SYNC.snap = {}; SYNC.ready = false; SLIPS = {}; PHOTOS = {};
+      showLogin("signin", msg);
+      sb.auth.signOut().catch(function () { /* already signed out */ });
+      return;
+    }
     showLogin(getAuth() ? "signin" : "create", msg);
   }
-  // online: find out whether the Google Sheet already has a password before showing the form
-  function onlineLogin(msg) {
-    showLogin("signin", msg);
-    api("status").then(function (res) {
-      if (res && res.ok && !res.hasPassword) showLogin("create", msg);
-    }, function () { loginError(a("lg_net")); });
+  // after the password: ask for the 2-step code if it is turned on, then check this account is an admin
+  function afterSignIn(user) {
+    return sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function (res) {
+      var lv = res.data || {};
+      if (lv.nextLevel === "aal2" && lv.currentLevel !== "aal2") { showLogin("code"); return; }
+      return sb.from("admins").select("user_id").eq("user_id", user.id).maybeSingle().then(function (r) {
+        if (r.error || !r.data) {
+          sb.auth.signOut().catch(function () { /* ignore */ });
+          showLogin("signin", a("lg_not_admin"));
+          return;
+        }
+        USER = user;
+        startSession();
+      });
+    }).catch(function () { showLogin("signin", a("lg_net")); });
+  }
+  function onlineStart() {
+    document.body.classList.add("locked");
+    renderLogin();
+    sb.auth.onAuthStateChange(function (event, session) {
+      // keep this callback quick: Supabase asks not to call it back from inside here
+      if (event === "PASSWORD_RECOVERY") { recovering = true; setTimeout(function () { showLogin("newpass"); }, 0); return; }
+      if (event === "SIGNED_OUT" && !document.body.classList.contains("locked")) setTimeout(function () { authLost(); }, 0);
+      if (event === "TOKEN_REFRESHED" && session && USER) USER = session.user;
+    });
+    sb.auth.getSession().then(function (res) {
+      if (recovering) return;
+      var s = res.data && res.data.session;
+      if (!s) { showLogin("signin"); return; }
+      afterSignIn(s.user);
+    }, function () { showLogin("signin", a("lg_net")); });
   }
   function boot() {
     if (ONLINE) {
       render();
+      startLive();
       loadCatalogOnline().then(pullOrders);
       if (!booted) {
         booted = true;
-        setInterval(function () { if (!document.body.classList.contains("locked") && document.visibilityState !== "hidden") pullOrders(); }, 30000);
-        document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && TOKEN) pullOrders(); });
-        window.addEventListener("online", function () { if (TOKEN) pullOrders(); });
+        // a safety net in case the live connection drops
+        setInterval(function () { if (!document.body.classList.contains("locked") && document.visibilityState !== "hidden") pullOrders(); }, 60000);
+        document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && USER) pullOrders(); });
+        window.addEventListener("online", function () { if (USER) pullOrders(); });
       }
       return;
     }
@@ -1890,29 +2181,55 @@
     var mins = +(load("minise_admin_autolock") || 30);
     if (mins && Date.now() - lastActive > mins * 60000) logout(a("al_locked"));
   }, 30000);
+  function onlineSubmit(pw, remember) {
+    var lb = document.getElementById("lgBtn");
+    var done = function () { lb.disabled = false; };
+    lb.disabled = true;
+    if (loginMode === "signin") {
+      var email = document.getElementById("lgEmail").value.trim();
+      if (!email || !pw) { done(); return loginError(a("lg_need")); }
+      store("minise_remember", remember ? "1" : "0");
+      sb.auth.signInWithPassword({ email: email, password: pw }).then(function (res) {
+        done();
+        if (res.error) {
+          var st = res.error.status;
+          loginError(st === 429 ? a("lg_too_many") : st && st < 500 ? a("lg_wrong_email") : a("lg_net"));
+          document.getElementById("lgPass").select();
+          return;
+        }
+        document.getElementById("lgPass").value = "";
+        afterSignIn(res.data.user);
+      }, function () { done(); loginError(a("lg_net")); });
+    } else if (loginMode === "code") {
+      var code = document.getElementById("lgCode").value.replace(/\D/g, "");
+      if (code.length !== 6) { done(); return loginError(a("lg_code_bad")); }
+      sb.auth.mfa.listFactors().then(function (r) {
+        var f = r.data && r.data.totp && r.data.totp[0];
+        if (!f) throw new Error("no factor");
+        return sb.auth.mfa.challengeAndVerify({ factorId: f.id, code: code });
+      }).then(function (r) {
+        done();
+        if (r.error) { loginError(r.error.status === 429 ? a("lg_too_many") : a("lg_code_wrong")); document.getElementById("lgCode").select(); return; }
+        return sb.auth.getUser().then(function (u) { afterSignIn(u.data.user); });
+      }).catch(function () { done(); loginError(a("lg_code_wrong")); });
+    } else if (loginMode === "newpass") {
+      if (pw.length < 10) { done(); return loginError(a("lg_short10")); }
+      if (pw !== document.getElementById("lgConfirm").value) { done(); return loginError(a("lg_mismatch")); }
+      sb.auth.updateUser({ password: pw }).then(function (res) {
+        done();
+        if (res.error) { loginError(dbErr(res.error)); return; }
+        recovering = false;
+        history.replaceState(null, "", location.pathname + "#dashboard");
+        toast(a("pw_done"));
+        return sb.auth.getUser().then(function (u) { afterSignIn(u.data.user); });
+      }, function () { done(); loginError(a("lg_net")); });
+    } else done();
+  }
   document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var pw = document.getElementById("lgPass").value;
     var remember = document.getElementById("lgRemember").checked;
-    if (ONLINE) {
-      if (loginMode === "create") {
-        if (pw.length < 6) return loginError(a("lg_short"));
-        if (pw !== document.getElementById("lgConfirm").value) return loginError(a("lg_mismatch"));
-      }
-      var lb = document.getElementById("lgBtn");
-      lb.disabled = true;
-      api(loginMode === "create" ? "setup" : "login", { password: pw, remember: remember }).then(function (res) {
-        lb.disabled = false;
-        if (res && res.ok) { setToken(res.token, remember); startSession(remember); return; }
-        var err = res && res.error;
-        if (err === "exists") showLogin("signin", a("lg_exists"));
-        else if (err === "no_password") showLogin("create");
-        else if (err === "too_many") loginError(a("lg_too_many"));
-        else if (err === "short") loginError(a("lg_short"));
-        else { loginError(a("lg_wrong")); document.getElementById("lgPass").select(); }
-      }, function () { lb.disabled = false; loginError(a("lg_net")); });
-      return;
-    }
+    if (ONLINE) { onlineSubmit(pw, remember); return; }
     if (loginMode === "create") {
       if (pw.length < 6) return loginError(a("lg_short"));
       if (pw !== document.getElementById("lgConfirm").value) return loginError(a("lg_mismatch"));
@@ -1932,11 +2249,36 @@
     inp.type = conf.type = inp.type === "password" ? "text" : "password";
     renderLogin();
   });
-  document.getElementById("lgForgot").addEventListener("click", function () { document.getElementById("lgReset").hidden = false; document.getElementById("lgResetInput").focus(); });
+  document.getElementById("lgForgot").addEventListener("click", function () {
+    document.getElementById("lgReset").hidden = false;
+    var ri = document.getElementById("lgResetInput");
+    if (ONLINE && !ri.value) ri.value = document.getElementById("lgEmail").value.trim();
+    ri.focus();
+  });
+  document.getElementById("lgBack").addEventListener("click", function () {
+    recovering = false;
+    logout();
+  });
   document.getElementById("lgResetBtn").addEventListener("click", function () {
-    if (document.getElementById("lgResetInput").value.trim() !== "RESET") { loginError(a("lg_reset_bad")); return; }
+    var ri = document.getElementById("lgResetInput");
+    if (ONLINE) {
+      var email = ri.value.trim();
+      if (!/^\S+@\S+\.\S+$/.test(email)) { loginError(a("lg_need_email")); return; }
+      var rb = document.getElementById("lgResetBtn");
+      rb.disabled = true;
+      sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }).then(function (res) {
+        rb.disabled = false;
+        if (res.error && res.error.status === 429) { loginError(a("lg_too_many")); return; }
+        // the same answer whether or not the email exists, so it can't be used to guess accounts
+        var el = document.getElementById("lgErr");
+        el.textContent = a("lg_reset_sent"); el.className = "alert ok"; el.hidden = false;
+        setTimeout(function () { el.className = "alert warn"; }, 8000);
+      }, function () { rb.disabled = false; loginError(a("lg_net")); });
+      return;
+    }
+    if (ri.value.trim() !== "RESET") { loginError(a("lg_reset_bad")); return; }
     try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem("minise_admin_until"); } catch (e) { /* ignore */ }
-    document.getElementById("lgResetInput").value = "";
+    ri.value = "";
     showLogin(getAuth() ? "signin" : "create");
   });
   document.getElementById("lgLang").addEventListener("click", function () { lang = lang === "en" ? "lo" : "en"; store("minise_admin_lang", lang); renderLogin(); });
@@ -1945,13 +2287,22 @@
     var show = function (txt, ok) { msg.textContent = txt; msg.className = "alert " + (ok ? "ok" : "warn"); msg.hidden = false; };
     var cur = document.getElementById("pwCur").value, n1 = document.getElementById("pwNew").value, n2 = document.getElementById("pwNew2").value;
     var auth = getAuth();
-    if (n1.length < 6) return show(a("lg_short"));
+    if (n1.length < (ONLINE ? 10 : 6)) return show(ONLINE ? a("lg_short10") : a("lg_short"));
     if (n1 !== n2) return show(a("lg_mismatch"));
     if (ONLINE) {
-      var keep = remembered();
-      api("password", { current: cur, next: n1, remember: keep }).then(function (res) {
-        if (res && res.ok) { setToken(res.token, keep); document.getElementById("pwForm").reset(); show(a("pw_done"), true); }
-        else show(res && res.error === "short" ? a("lg_short") : a("lg_wrong"));
+      // check the current password first, then set the new one
+      var email = USER && USER.email;
+      sb.auth.signInWithPassword({ email: email, password: cur }).then(function (res) {
+        if (res.error) { show(res.error.status === 429 ? a("lg_too_many") : a("lg_wrong")); return; }
+        return sb.auth.updateUser({ password: n1 }).then(function (r) {
+          if (r.error) { show(dbErr(r.error)); return; }
+          document.getElementById("pwForm").reset();
+          show(a("pw_done"), true);
+          // signing in again may need the 2-step code
+          return sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function (lv) {
+            if (lv.data && lv.data.nextLevel === "aal2" && lv.data.currentLevel !== "aal2") { stopLive(); USER = null; showLogin("code", a("pw_done")); }
+          });
+        });
       }, function () { show(a("lg_net")); });
       return;
     }
@@ -1965,7 +2316,45 @@
       });
     });
   }
-
+  /* 2-step verification with an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…) */
+  var MFA = { state: "loading", factor: null, enroll: null };
+  function loadMfa() {
+    if (!ONLINE) return;
+    sb.auth.mfa.listFactors().then(function (r) {
+      var f = r.data && r.data.totp && r.data.totp[0];
+      MFA.state = f ? "on" : "off"; MFA.factor = f || null;
+      if (tab === "account") softRender();
+    }, function () { MFA.state = "off"; });
+  }
+  function mfaStart() {
+    // remove a half-finished setup first, then make a fresh one
+    sb.auth.mfa.listFactors().then(function (r) {
+      var stale = ((r.data && r.data.all) || []).filter(function (f) { return f.status !== "verified"; });
+      return Promise.all(stale.map(function (f) { return sb.auth.mfa.unenroll({ factorId: f.id }); }));
+    }).then(function () {
+      return sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "Minise admin " + new Date().toISOString().slice(0, 10) });
+    }).then(function (res) {
+      var d = check(res);
+      var qr = d.totp.qr_code || "";
+      if (qr.indexOf("<svg") === 0) qr = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(qr);
+      MFA.enroll = { id: d.id, qr: qr, secret: d.totp.secret };
+      softRender();
+    }).catch(function (e) { toast(dbErr(e), 6000); });
+  }
+  function mfaVerify(code) {
+    if (!MFA.enroll) return;
+    sb.auth.mfa.challengeAndVerify({ factorId: MFA.enroll.id, code: code }).then(function (res) {
+      if (res.error) { var m = document.getElementById("mfaMsg"); if (m) { m.textContent = a("lg_code_wrong"); m.hidden = false; } return; }
+      MFA.enroll = null; toast(a("mfa_done"), 5000); loadMfa();
+    });
+  }
+  function mfaOff() {
+    if (!MFA.factor || !confirm(a("mfa_off_confirm"))) return;
+    sb.auth.mfa.unenroll({ factorId: MFA.factor.id }).then(function (res) {
+      if (res.error) { toast(dbErr(res.error), 6000); return; }
+      toast(a("mfa_removed"), 5000); loadMfa();
+    });
+  }
   /* ---------- events ---------- */
   document.addEventListener("click", function (e) {
     var el;
@@ -1976,20 +2365,16 @@
     if (e.target.closest("#connectBtn")) { if (savedDir && !dir) reconnect(); else connect(); return; }
     if (e.target.closest("#saveBtn")) { saveAll(); return; }
     if (e.target.closest("#logoutBtn")) { logout(); return; }
-    if (e.target.closest("#onSync")) { SYNC.state = "wait"; render(); pullOrders(); return; }
-    if (e.target.closest("#onWebFile")) { settings.api = API; download("settings.js", settingsFile(), "text/javascript;charset=utf-8"); return; }
+    if (e.target.closest("#onSync")) { SYNC.state = "wait"; render(); pullOrders(); if (ONLINE) loadCatalogOnline(); return; }
     if (e.target.closest("#bkFiles")) {
-      if (ONLINE) settings.api = API;
       download("products.js", productsFile(), "text/javascript;charset=utf-8");
       setTimeout(function () { download("settings.js", settingsFile(), "text/javascript;charset=utf-8"); }, 400);
       return;
     }
-    if (e.target.closest("#onDisconnect")) {
-      if (!confirm(a("on_disc_confirm"))) return;
-      setToken(""); try { localStorage.removeItem("minise_api"); } catch (err) { /* ignore */ }
-      dirty = 0; location.reload(); return;
-    }
+    if (e.target.closest("#mfaOn")) { mfaStart(); return; }
+    if (e.target.closest("#mfaOff")) { mfaOff(); return; }
     if ((el = e.target.closest("[data-viewslip]"))) { showSlip(el.getAttribute("data-viewslip")); return; }
+    if ((el = e.target.closest("[data-viewphotos]"))) { showPhotos(el.getAttribute("data-viewphotos")); return; }
     if (e.target.closest("[data-closedlg]")) { closeDialog(); return; }
     if (e.target.closest("[data-closedr]") || e.target.id === "scrim") { closeDrawer(); return; }
     if ((el = e.target.closest("[data-period]"))) { setPreset(el.getAttribute("data-period")); render(); return; }
@@ -2071,7 +2456,7 @@
       else { logEvent(x, a("log_edited")); orders[orders.indexOf(ref)] = x; if (DR && DR.id === ref.id) DR.id = x.id; }
       var pm = document.getElementById("pasteMsg"); if (pm && wasNew) pm.value = "";
       saveOrders(); closeDialog(); render(); toast(a("o_saved"));
-    } else if (id === "onForm") connectOnline(document.getElementById("onUrl").value);
+    } else if (id === "mfaForm") mfaVerify(document.getElementById("mfaCode").value.replace(/\D/g, ""));
     else if (id === "pwForm") changePassword();
   });
 
@@ -2159,9 +2544,7 @@
   window.addEventListener("afterprint", function () { document.getElementById("printArea").innerHTML = ""; });
 
   /* start: the admin opens only after signing in */
-  if (ONLINE) {
-    if (TOKEN) { document.body.classList.remove("locked"); boot(); }
-    else onlineLogin();
-  } else if (signedIn() && getAuth()) { document.body.classList.remove("locked"); boot(); }
+  if (ONLINE) onlineStart();
+  else if (signedIn() && getAuth()) { document.body.classList.remove("locked"); boot(); }
   else showLogin(getAuth() ? "signin" : "create");
 })();

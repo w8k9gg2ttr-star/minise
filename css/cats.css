@@ -1,0 +1,104 @@
+/* Minise Arte · the shop cat: how the drawings move (drawings in js/cats.js).
+   Each part moves around its own box (fill-box), so the same rules work at any size.
+   Cats only move while on screen (.play is set by js/cats.js) and stay still for people who turn motion off. */
+.kitty { display: block; width: 100%; height: auto; overflow: visible; }
+.kitty-swim, .kitty-paw { overflow: hidden; }
+.kitty [class^="k-"], .kitty [class*=" k-"] { transform-box: fill-box; }
+.kitty:not(.play) * { animation-play-state: paused !important; }
+
+/* used by the pages around the cats */
+@keyframes kittyPop { 0% { opacity: 0; transform: translateY(35%) scale(0.55); } 60% { opacity: 1; transform: translateY(-6%) scale(1.05); } 100% { opacity: 1; transform: none; } }
+@keyframes kittyBob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4px) rotate(-2deg); } }
+@keyframes kittyWiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 75% { transform: rotate(7deg); } }
+@keyframes kittyJump { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-18%) scale(1.04, 0.96); } 55% { transform: translateY(0) scale(1.06, 0.92); } 75% { transform: translateY(-5%) scale(1); } }
+
+/* every cat: blinks, sways its head, swishes its tail */
+.k-eyes { transform-origin: center; animation: kBlink 5.2s var(--kd, 0s) infinite; }
+.k-look { transform-origin: center; animation: kGlance 6.5s var(--kd, 0s) ease-in-out infinite; }
+.k-head { transform-origin: 50% 100%; animation: kSway 4.6s var(--kd, 0s) ease-in-out infinite; }
+.k-tail { transform-origin: 0% 92%; animation: kTail 2.8s var(--kd, 0s) ease-in-out infinite; }
+.k-tail-side { transform-origin: 100% 100%; }
+.k-motion { animation: kMotion 1.1s ease-in-out infinite; }
+@keyframes kBlink { 0%, 90%, 96%, 100% { transform: scaleY(1); } 93% { transform: scaleY(0.08); } }
+@keyframes kGlance { 0%, 38%, 100% { transform: translateX(0); } 46%, 78% { transform: translateX(-9px); } }
+@keyframes kSway { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-3deg); } 70% { transform: rotate(2.5deg); } }
+@keyframes kTail { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-13deg); } }
+@keyframes kMotion { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+
+/* wave: the raised paw waves from the shoulder */
+.kitty-wave .k-wave { transform-box: view-box; transform-origin: 136px 150px; animation: kWave 1.1s ease-in-out infinite; }
+@keyframes kWave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-16deg); } }
+/* yay: arms pump, confetti floats */
+.kitty-yay .k-cheer-l { transform-box: view-box; transform-origin: 66px 150px; animation: kCheerL 0.9s ease-in-out infinite; }
+.kitty-yay .k-cheer-r { transform-box: view-box; transform-origin: 134px 150px; animation: kCheerR 0.9s ease-in-out infinite; }
+@keyframes kCheerL { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(14deg); } }
+@keyframes kCheerR { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-14deg); } }
+.k-bit { transform-origin: center; animation: kConfetti 2.2s ease-in-out infinite; }
+.k-bit:nth-child(2n) { animation-delay: -0.7s; }
+.k-bit:nth-child(3n) { animation-delay: -1.3s; }
+.k-bit:nth-child(4n+1) { animation-duration: 2.8s; }
+@keyframes kConfetti { 0%, 100% { transform: translateY(-5px) rotate(0); opacity: 1; } 50% { transform: translateY(7px) rotate(50deg); opacity: 0.55; } }
+/* sleep: breathing, z z z floating up */
+.k-breathe { transform-origin: 50% 100%; animation: kBreathe 3.4s ease-in-out infinite; }
+.k-breathe-head { transform-origin: 50% 100%; animation: kBreatheHead 3.4s ease-in-out infinite; }
+.k-zzz text { animation: kZ 2.7s ease-in-out infinite; }
+.k-zzz text:nth-child(2) { animation-delay: 0.45s; }
+.k-zzz text:nth-child(3) { animation-delay: 0.9s; }
+@keyframes kBreathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.015, 1.05); } }
+@keyframes kBreatheHead { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(2px) rotate(-1.5deg); } }
+@keyframes kZ { 0% { opacity: 0; transform: translate(-4px, 8px); } 30%, 60% { opacity: 1; } 100% { opacity: 0; transform: translate(7px, -14px); } }
+/* heart: the locket beats */
+.k-beat { transform-origin: center; animation: kBeat 1.6s ease-in-out infinite; }
+@keyframes kBeat { 0%, 45%, 100% { transform: scale(1); } 15% { transform: scale(1.13); } 30% { transform: scale(1.04); } }
+/* gift: the box hops, the bow wiggles */
+.k-hop { transform-origin: 50% 100%; animation: kHop 2.4s ease-in-out infinite; }
+.k-bow { transform-origin: 50% 100%; animation: kTilt 2.4s ease-in-out infinite; }
+@keyframes kHop { 0%, 58%, 100% { transform: translateY(0); } 68% { transform: translateY(-8px); } 78% { transform: translateY(0); } 86% { transform: translateY(-3px); } }
+@keyframes kTilt { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-9deg); } 75% { transform: rotate(9deg); } }
+/* phone: buzzes now and then, the QR flickers */
+.k-buzz { transform-origin: 50% 100%; animation: kBuzz 3s ease-in-out infinite; }
+.k-screen { animation: kScreen 1.6s steps(2) infinite; }
+@keyframes kBuzz { 0%, 78%, 100% { transform: rotate(0); } 81% { transform: rotate(-4deg); } 84% { transform: rotate(4deg); } 87% { transform: rotate(-3deg); } 90% { transform: rotate(2deg); } }
+@keyframes kScreen { 0% { opacity: 1; } 100% { opacity: 0.55; } }
+/* search: the magnifier looks around */
+.k-scan { transform-origin: 80% 90%; animation: kScan 3.4s ease-in-out infinite; }
+@keyframes kScan { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(-7px, -4px) rotate(-6deg); } 50% { transform: translate(-2px, 5px) rotate(2deg); } 75% { transform: translate(5px, -2px) rotate(4deg); } }
+/* drink: sips, ice clinks */
+.k-sip { transform-origin: 50% 100%; animation: kSip 3s ease-in-out infinite; }
+.k-ice { transform-origin: center; animation: kIce 1.8s ease-in-out infinite; }
+.k-ice2 { animation-delay: -0.9s; }
+@keyframes kSip { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes kIce { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(2px) rotate(12deg); } }
+/* sparkle: stars twinkle in turn */
+.k-star { transform-origin: center; animation: kTwinkle 1.9s ease-in-out infinite; }
+.k-star:nth-child(2) { animation-delay: -0.4s; }
+.k-star:nth-child(3) { animation-delay: -0.8s; }
+.k-star:nth-child(4) { animation-delay: -1.2s; }
+.k-star:nth-child(5) { animation-delay: -1.6s; }
+@keyframes kTwinkle { 0%, 100% { transform: scale(0.4) rotate(0); opacity: 0.35; } 50% { transform: scale(1.1) rotate(45deg); opacity: 1; } }
+/* paint: brush strokes, the painted heart pulses */
+.k-brush { transform-origin: 0% 100%; animation: kBrush 1.3s ease-in-out infinite; }
+.k-twinkle { transform-origin: center; animation: kBeat 2s ease-in-out infinite; }
+@keyframes kBrush { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-11deg); } }
+/* box: the box jiggles */
+.k-boxjig { transform-origin: 50% 100%; animation: kBuzz 3.6s ease-in-out infinite; }
+/* shark: fin wiggles, tail fin wags, the waving fin waves */
+.k-fintop { transform-origin: 35% 100%; animation: kFin 2.4s ease-in-out infinite; }
+.k-finwave { transform-origin: 2% 82%; animation: kWave 1.1s ease-in-out infinite; }
+.k-sharktail { transform-origin: 0% 55%; animation: kTail 1.5s ease-in-out infinite; }
+@keyframes kFin { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
+/* swim: bobbing in the waves */
+.k-bob { transform-origin: 50% 100%; animation: kBob 2.6s ease-in-out infinite; }
+.k-waves { animation: kWaves 2.4s linear infinite; }
+@keyframes kBob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(7px) rotate(2deg); } }
+@keyframes kWaves { from { transform: translateX(0); } to { transform: translateX(-50px); } }
+/* walk: legs step, body bobs */
+.k-leg { transform-origin: 50% 0%; animation: kLeg 0.55s ease-in-out infinite alternate; }
+.k-leg-b { animation-delay: -0.55s; }
+.k-walkbob { animation: kWalkBob 0.275s ease-in-out infinite alternate; }
+@keyframes kLeg { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+@keyframes kWalkBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .kitty *, [class$="-kitty"], .walker, .peeker { animation: none !important; transition: none !important; }
+}

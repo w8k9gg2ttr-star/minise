@@ -8,6 +8,7 @@ window.MINISE_T = {
   nav_necklace: ["Necklaces", "ສາຍຄໍ", "项链"],
   nav_set: ["Couple sets", "ຊຸດຄູ່", "情侣套装"],
   nav_pet: ["Pet lover", "ຄົນຮັກສັດລ້ຽງ", "宠物系列"],
+  nav_home: ["Home", "ໜ້າຫຼັກ", "首页"],
   nav_story: ["Our story", "ເລື່ອງລາວຂອງເຮົາ", "我们的故事"],
   nav_order: ["How to order", "ວິທີສັ່ງຊື້", "如何下单"],
   nav_visit: ["Visit us", "ໜ້າຮ້ານ", "门店"],

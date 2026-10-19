@@ -1514,15 +1514,19 @@
     if (!GM.won) return "";
     return '<div class="gm-win" role="status">' + kitty("yay", "gm-win-kitty") + '<div><p>' + esc(t("gm_win", { n: GM.moves })) + '</p><div class="gm-win-btns"><button class="btn solid" type="button" data-gm-use>' + esc(t("gm_use")) + '</button><button class="btn" type="button" data-gm-again>' + esc(t("gm_again")) + "</button></div></div>" + kitty("peniWave", "gm-win-kitty") + "</div>";
   }
+  function gameHTML() {
+    if (!GM.cards.length) gmNew();
+    return '<div class="gm" id="gm"><div class="gm-top"><div><h3>' + esc(t("gm_h")) + "</h3><p>" + esc(t("gm_p")) + '</p></div><div class="gm-stats" id="gmStats">' + gmStats() + "</div></div>" +
+      '<div class="gm-board" id="gmBoard">' + GM.cards.map(function (c, i) { return gmCard(i); }).join("") + "</div>" +
+      '<div class="gm-foot"><div class="gm-peni">' + kitty("peni", "gm-peni-kitty") + '<p class="gm-say" id="gmSay" role="status">' + esc(GM.say) + '</p></div><button class="link gm-reset" type="button" data-gm-again>' + esc(t("gm_again")) + "</button></div>" +
+      '<div id="gmWin">' + gmWin() + "</div></div>";
+  }
   function duoHTML() {
     if (!GM.cards.length) gmNew();
     return '<section class="duo"><div class="wrap">' +
       '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><span class="duo-links"><a class="link" href="#mumi">' + esc(t("mumi_link")) + ' →</a><a class="link" href="#peni">' + esc(t("peni_link")) + " →</a></span>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
       storyHTML() + fortuneHTML() +
-      '<div class="gm" id="gm"><div class="gm-top"><div><h3>' + esc(t("gm_h")) + "</h3><p>" + esc(t("gm_p")) + '</p></div><div class="gm-stats" id="gmStats">' + gmStats() + "</div></div>" +
-      '<div class="gm-board" id="gmBoard">' + GM.cards.map(function (c, i) { return gmCard(i); }).join("") + "</div>" +
-      '<div class="gm-foot"><div class="gm-peni">' + kitty("peni", "gm-peni-kitty") + '<p class="gm-say" id="gmSay" role="status">' + esc(GM.say) + '</p></div><button class="link gm-reset" type="button" data-gm-again>' + esc(t("gm_again")) + "</button></div>" +
-      '<div id="gmWin">' + gmWin() + "</div></div></div></section>";
+      gameHTML() + "</div></section>";
   }
   function gmSay(text) {
     GM.say = text;
@@ -1588,13 +1592,193 @@
       location.hash = "#make";
     }
   });
+  /* Mumi & Peni's world (#cats): an animated stage, a choose-your-path story game, a quiz,
+     the comics, the charm game and Peni's charm of the day. Found endings stay on this device. */
+  var WL = { m: "drink", p: "peniMilk", mode: "shop", lm: 0, lp: 0 };
+  var WL_M = ["drink", "wave", "heart", "gift", "yay", "paint", "sparkle", "search", "phone", "shark"];
+  var WL_P = ["peniMilk", "peniWave", "peniHeart", "peniGift", "peniYay", "peniPaint", "peniSparkle", "peniYarn", "peniBunny", "peniPhone"];
+  var WL_MODES = { shop: ["drink", "peniMilk", "wl_sm", "wl_sp"], costume: ["shark", "peniBunny", "wl_cm", "wl_cp"], party: ["yay", "peniYay", "wl_pm", "wl_pp"], nap: ["sleep", "peniSleep", "wl_nz", "wl_nz"] };
+  var WL_FLOAT = [["A1", 6, 0], ["C17", 18, 1.2], ["A9", 30, 2.6], ["C13", 70, 0.6], ["A7", 82, 2], ["C25", 92, 3.1], ["B20", 50, 4]];
+  function wlStage() {
+    var C = window.MINISE_CAT || function () { return ""; };
+    var floats = WL_FLOAT.map(function (f) { return CH_BY[f[0]] ? '<span class="wl-bit" style="left:' + f[1] + "%;animation-delay:-" + f[2] + 's">' + charmImg(f[0]) + "</span>" : ""; }).join("");
+    var stars = [[8, 14], [22, 30], [40, 10], [58, 26], [74, 12], [90, 30], [32, 44], [66, 46]].map(function (s, i) { return '<i style="left:' + s[0] + "%;top:" + s[1] + "%;animation-delay:-" + (i * 0.4) + 's"></i>'; }).join("");
+    return '<div class="wl-stage" id="wlStage" data-mode="' + WL.mode + '"><div class="wl-sky" aria-hidden="true"><span class="wl-moon"></span>' + stars + "</div>" +
+      '<div class="wl-awning" aria-hidden="true"></div><p class="wl-sign" aria-hidden="true">Minise Arte</p>' +
+      '<div class="wl-floats" aria-hidden="true">' + floats + "</div>" +
+      '<div class="wl-cats">' +
+      '<button class="wl-cat" type="button" data-wl="m" aria-label="' + esc(t("wl_pet_m")) + '"><span class="wl-say" id="wlSayM">' + esc(t("wl_m4")) + '</span><span class="wl-fig" id="wlFigM">' + C(WL.m) + "</span></button>" +
+      '<button class="wl-cat" type="button" data-wl="p" aria-label="' + esc(t("wl_pet_p")) + '"><span class="wl-say" id="wlSayP">' + esc(t("wl_p6")) + '</span><span class="wl-fig" id="wlFigP">' + C(WL.p) + "</span></button>" +
+      '</div><div class="wl-floor" aria-hidden="true"></div><div class="wl-burst" id="wlBurst" aria-hidden="true"></div></div>' +
+      '<div class="wl-modes" role="group" aria-label="' + esc(t("wl_h")) + '">' + ["shop", "costume", "party", "nap"].map(function (m) {
+        return '<button type="button" class="wl-mode" data-wl-mode="' + m + '" aria-pressed="' + (WL.mode === m) + '">' + esc(t("wl_" + m)) + "</button>";
+      }).join("") + "</div>";
+  }
+  function wlSet(which, pose, line) {
+    var fig = document.getElementById(which === "m" ? "wlFigM" : "wlFigP"), say = document.getElementById(which === "m" ? "wlSayM" : "wlSayP");
+    if (!fig || !window.MINISE_CAT) return;
+    WL[which] = pose;
+    fig.innerHTML = window.MINISE_CAT(pose);
+    if (line) { say.textContent = line; say.classList.remove("pop"); void say.offsetWidth; say.classList.add("pop"); }
+    if (!calm) { fig.classList.remove("jump"); void fig.offsetWidth; fig.classList.add("jump"); }
+  }
+  function wlBurst(n) {
+    var box = document.getElementById("wlBurst");
+    if (!box || calm) return;
+    var cols = ["#f4a9ba", "#a9bfdb", "#24396a", "#f3d873", "#a3dcc9", "#fff"];
+    for (var i = 0; i < (n || 26); i++) {
+      var b = document.createElement("i");
+      b.style.setProperty("--x", Math.round(Math.random() * 360 - 180) + "px");
+      b.style.setProperty("--y", Math.round(-80 - Math.random() * 200) + "px");
+      b.style.setProperty("--r", Math.round(Math.random() * 720 - 360) + "deg");
+      b.style.background = cols[i % cols.length];
+      b.style.animationDelay = Math.round(Math.random() * 150) + "ms";
+      b.addEventListener("animationend", function () { this.remove(); });
+      box.appendChild(b);
+    }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-wl]");
+    if (b) {
+      var w = b.getAttribute("data-wl"), list = w === "m" ? WL_M : WL_P, cur = WL[w], next = cur;
+      while (next === cur) next = list[Math.floor(Math.random() * list.length)];
+      var n = w === "m" ? (WL.lm++ % 6) + 1 : (WL.lp++ % 6) + 1;
+      wlSet(w, next, t("wl_" + w + n));
+      return;
+    }
+    b = e.target.closest("[data-wl-mode]");
+    if (b) {
+      var m = b.getAttribute("data-wl-mode"), set = WL_MODES[m];
+      WL.mode = m;
+      document.getElementById("wlStage").setAttribute("data-mode", m);
+      document.querySelectorAll("[data-wl-mode]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      wlSet("m", set[0], t(set[2]));
+      setTimeout(function () { wlSet("p", set[1], t(set[3])); }, calm ? 0 : 180);
+      if (m === "party" || m === "costume") wlBurst(m === "party" ? 34 : 20);
+    }
+  });
+
+  // the story game: each scene has who is in it, its text and the choices; endings have a badge charm
+  var SG_SCENES = {
+    s1: { cats: ["phone", "peniPeek"], ch: [["sg_c1a", "s2a"], ["sg_c1b", "s2b"]] },
+    s2a: { cats: ["search"], ch: [["sg_c2a1", "s3a"], ["sg_c2a2", "s3b"]] },
+    s2b: { cats: ["peniBox"], ch: [["sg_c2b1", "s3c"], ["sg_c2b2", "s3d"]] },
+    s3a: { cats: ["peniYarn"], ch: [["sg_c3a1", "eA"], ["sg_c3a2", "s4"]] },
+    s3b: { cats: ["gift", "peniBunnySleep"], ch: [["sg_c3b1", "s3d"], ["sg_c3b2", "eB"]] },
+    s3c: { cats: ["peniSparkle"], charms: ["A17", "A1", "C17"], ch: [["sg_c3c1", "eA"], ["sg_c3c2", "eC"]] },
+    s3d: { cats: ["heart", "peniHeart"], ch: [["sg_c3d1", "eA"], ["sg_c3d2", "eD"]] },
+    s4: { cats: ["shark", "peniYarn"], ch: [["sg_c4", "eA"]] },
+    eA: { cats: ["gift", "peniYay"], end: "A", badge: "C12", cta: ["#c-photo", "sg_cta_photo"] },
+    eB: { cats: ["drink", "peniBunnySleep"], end: "B", badge: "C17", cta: ["#c-photo", "sg_cta_photo"] },
+    eC: { cats: ["paint", "peniBracelet"], end: "C", badge: "A1", cta: ["#make", "nav_make"] },
+    eD: { cats: ["heart", "peniGift"], end: "D", badge: "A18", cta: ["#c-photo", "sg_cta_photo"] }
+  };
+  var SG = { at: "s1", steps: 0, found: [], fresh: false };
+  try { SG.found = (JSON.parse(localStorage.getItem("minise_sg_endings") || "[]") || []).filter(function (x) { return /^[ABCD]$/.test(x); }); } catch (e) { /* ignore */ }
+  function sgBadges() {
+    return '<div class="sg-badges">' + ["A", "B", "C", "D"].map(function (k) {
+      var sc = SG_SCENES["e" + k], got = SG.found.indexOf(k) > -1;
+      return '<span class="sg-badge' + (got ? " got" : "") + '" title="' + esc(got ? t("sg_e" + k + "_t") : "?") + '">' + (got ? charmImg(sc.badge) : "<b>?</b>") + "</span>";
+    }).join("") + '<span class="sg-count tn">' + esc(t("sg_found", { n: SG.found.length })) + "</span></div>";
+  }
+  function sgScene() {
+    var sc = SG_SCENES[SG.at];
+    var pics = sc.cats.map(function (p) { return kitty(p, "sg-k" + (sc.cats.length === 1 ? " sg-solo" : "")); }).join("") +
+      (sc.charms ? '<span class="sg-charms">' + sc.charms.map(function (c) { return charmImg(c); }).join("") + "</span>" : "");
+    var body;
+    if (sc.end) {
+      var all = SG.found.length === 4;
+      body = '<p class="sg-tag">' + esc(t(SG.fresh ? "sg_new" : "sg_seen")) + "</p><h4>" + esc(t("sg_e" + sc.end + "_t")) + "</h4><p>" + esc(t("sg_e" + sc.end)) + "</p>" +
+        (all ? '<p class="sg-all">' + esc(t("sg_all")) + "</p>" : "") +
+        '<div class="sg-ch"><button class="btn solid" type="button" data-sg-again>' + esc(t("sg_again")) + '</button><a class="btn" href="' + sc.cta[0] + '">' + esc(t(sc.cta[1])) + "</a></div>";
+    } else {
+      body = "<p>" + esc(t("sg_" + SG.at)) + '</p><div class="sg-ch">' + sc.ch.map(function (c, i) {
+        return '<button class="btn' + (i ? "" : " solid") + '" type="button" data-sg-go="' + c[1] + '">' + esc(t(c[0])) + "</button>";
+      }).join("") + "</div>";
+    }
+    return '<div class="sg-scene' + (sc.end ? " is-end" : "") + '"><div class="sg-pic">' + pics + (sc.end ? '<span class="sg-medal">' + charmImg(sc.badge) + "</span>" : "") + '</div><div class="sg-text" role="status">' + body + "</div></div>";
+  }
+  function sgHTML() {
+    return '<div class="sg" id="sg"><div class="sg-top"><div><p class="eyebrow">' + esc(t("sg_eyebrow")) + "</p><h2>" + esc(t("sg_h")) + "</h2><p>" + esc(t("sg_p")) + '</p></div><div id="sgBadges">' + sgBadges() + "</div></div>" +
+      '<div id="sgScene">' + sgScene() + "</div></div>";
+  }
+  function sgGo(to) {
+    SG.at = to;
+    SG.steps++;
+    var sc = SG_SCENES[to];
+    SG.fresh = false;
+    if (sc.end && SG.found.indexOf(sc.end) < 0) {
+      SG.found.push(sc.end);
+      SG.fresh = true;
+      try { localStorage.setItem("minise_sg_endings", JSON.stringify(SG.found)); } catch (e) { /* ignore */ }
+    }
+    var box = document.getElementById("sgScene");
+    if (!box) return;
+    box.innerHTML = sgScene();
+    document.getElementById("sgBadges").innerHTML = sgBadges();
+    if (!calm) { box.classList.remove("turn"); void box.offsetWidth; box.classList.add("turn"); }
+    var r = box.getBoundingClientRect();
+    if (r.top < 90 || r.top > window.innerHeight - 160) box.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-sg-go]");
+    if (b) { sgGo(b.getAttribute("data-sg-go")); return; }
+    if (e.target.closest("[data-sg-again]")) { SG.steps = 0; sgGo("s1"); }
+  });
+
+  // the quiz: four questions, each answer counts for Mumi or Peni
+  var QZ_Q = [[], [], [], ["A18", "C18"]];
+  var QZ = { i: 0, m: 0, p: 0 };
+  function qzBody() {
+    if (QZ.i >= 4) {
+      var who = QZ.m > QZ.p ? "m" : QZ.p > QZ.m ? "p" : "b";
+      var pics = who === "m" ? kitty("yay", "qz-k") : who === "p" ? kitty("peniYay", "qz-k") : kitty("yay", "qz-k") + kitty("peniYay", "qz-k");
+      var cta = { m: ["#c-photo", "qz_rm_cta"], p: ["#make", "qz_rp_cta"], b: ["#shop-set", "qz_rb_cta"] }[who];
+      return '<div class="qz-result"><div class="qz-pics">' + pics + '</div><div><h3>' + esc(t("qz_r" + who + "_h")) + "</h3><p>" + esc(t("qz_r" + who)) + '</p><div class="sg-ch"><a class="btn solid" href="' + cta[0] + '">' + esc(t(cta[1])) + '</a><button class="btn" type="button" data-qz-again>' + esc(t("qz_again")) + "</button></div></div></div>";
+    }
+    var n = QZ.i + 1, imgs = QZ_Q[QZ.i];
+    var dots = [0, 1, 2, 3].map(function (d) { return '<i class="' + (d < QZ.i ? "done" : d === QZ.i ? "on" : "") + '"></i>'; }).join("");
+    return '<p class="qz-n tn"><span class="qz-dots">' + dots + "</span>" + esc(t("qz_q", { n: n })) + "</p><h3>" + esc(t("qz_" + n)) + '</h3><div class="qz-ans">' +
+      ["m", "p"].map(function (w, i) {
+        return '<button type="button" class="qz-a" data-qz="' + w + '">' + (imgs[i] ? charmImg(imgs[i]) : "") + "<span>" + esc(t("qz_" + n + w)) + "</span></button>";
+      }).join("") + "</div>";
+  }
+  function qzHTML() {
+    return '<div class="qz"><div class="qz-head">' + kitty("peek", "qz-peek") + kitty("peniPeek", "qz-peek") + '<div><p class="eyebrow">' + esc(t("qz_eyebrow")) + "</p><h2>" + esc(t("qz_h")) + "</h2><p>" + esc(t("qz_p")) + '</p></div></div><div class="qz-body" id="qzBody">' + qzBody() + "</div></div>";
+  }
+  function qzRender() {
+    var box = document.getElementById("qzBody");
+    if (!box) return;
+    box.innerHTML = qzBody();
+    if (!calm) { box.classList.remove("turn"); void box.offsetWidth; box.classList.add("turn"); }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-qz]");
+    if (b) { QZ[b.getAttribute("data-qz")]++; QZ.i++; qzRender(); return; }
+    if (e.target.closest("[data-qz-again]")) { QZ = { i: 0, m: 0, p: 0 }; qzRender(); }
+  });
+
+  function worldPage() {
+    if (!GM.cards.length) gmNew();
+    var meet = [["mumi", "wave", "wl_m_line"], ["peni", "peniWave", "wl_p_line"]].map(function (c) {
+      return '<a class="wl-meet" href="#' + c[0] + '">' + kitty(c[1], "wl-meet-k") + "<div><h3>" + esc(t(c[0] === "mumi" ? "mid_name" : "peni_name")) + "</h3><p>" + esc(t(c[2])) + '</p><span class="link">' + esc(t(c[0] + "_link")) + " →</span></div></a>";
+    }).join("");
+    return '<section class="wl-hero"><div class="wrap"><div class="wl-head"><p class="eyebrow">' + esc(t("wl_eyebrow")) + "</p><h1>" + esc(t("wl_h")) + '</h1><p class="lead">' + esc(t("wl_lead")) + "</p></div>" +
+      wlStage() + '<p class="wl-hint">' + esc(t("wl_tap")) + "</p></div></section>" +
+      '<section class="section tight"><div class="wrap wl-meets">' + meet + "</div></section>" +
+      '<section class="section band"><div class="wrap">' + sgHTML() + "</div></section>" +
+      '<section class="section"><div class="wrap">' + qzHTML() + "</div></section>" +
+      '<section class="section band"><div class="wrap">' + storyHTML() + "</div></section>" +
+      '<section class="section"><div class="wrap wl-play">' + fortuneHTML() + gameHTML() + "</div></section>";
+  }
+
   function footer() {
     return '<div class="wrap foot-wrap">' + kitty("shark", "foot-kitty") + kitty("peniBunnySleep", "foot-kitty2") + '<div class="foot-grid"><div class="foot-brand"><span class="foot-logo">Minise Arte</span><p>' + esc(t("footer_tag")) + "</p>" +
       '<p class="tn">' + WA.mainShow + " · " + WA.altShow + "</p></div>" +
       "<div><h4>" + esc(t("footer_shop")) + '</h4><ul><li><a href="#make">' + esc(t("nav_make")) + "</a></li>" + ["locket", "bracelet", "necklace", "set", "earrings", "accessory"].map(function (ty) {
         return '<li><a href="#shop-' + ty + '">' + esc(t("type_" + ty)) + "</a></li>";
       }).join("") + "</ul></div>" +
-      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
+      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#cats">' + esc(t("nav_cats")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
       "<div><h4>" + esc(t("footer_follow")) + '</h4><ul><li><a href="' + FB + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></li><li><a href="https://www.instagram.com/minise.studio/" target="_blank" rel="noopener">@minise.studio</a></li><li><a href="https://www.instagram.com/minise.au/" target="_blank" rel="noopener">@minise.au</a></li><li><a href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a></li><li><a href="https://linktr.ee/Miniseofficial" target="_blank" rel="noopener">Linktree</a></li></ul></div></div>' +
       '<div class="foot-base"><span>© 2026 Minise Arte · ມິນິເຊ່ ອາຕ໌</span><span>' + esc(t("footer_copy")) + "</span></div></div>";
   }
@@ -1622,6 +1806,7 @@
     else if (h === "privacy") html = legalPage("pv", 7, "sharkPeek");
     else if (h === "terms") html = legalPage("tm", 10, "paint");
     else if (h === "mumi" || h === "peni") html = catPage(h);
+    else if (h === "cats") html = worldPage();
     else if (h === "checkout") html = checkout();
     else { h = "home"; html = home(); }
     if (h !== "checkout") CO.done = null;
@@ -1649,13 +1834,14 @@
 
   // the browser tab title and the page description follow the page you are on
   function setMeta(h) {
-    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h") };
+    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), cats: t("wl_h") };
     var title = "Minise Arte · " + t("footer_tag").replace(/\.$/, ""), desc = t("hero_lead");
     if (S) { title = S.p.n + " · Minise Arte"; desc = (describe(S.p, lang) || describe(S.p, "en") || desc).slice(0, 155); }
     else if (h.indexOf("shop") === 0 || h.indexOf("c-") === 0) title = shopTitle() + " · Minise Arte";
     else if (names[h]) title = names[h] + " · Minise Arte";
     if (h === "mumi") desc = t("mumi_lead");
     if (h === "peni") desc = t("pni_lead");
+    if (h === "cats") desc = t("wl_lead");
     if (h === "make") desc = t("mk_lead");
     document.title = title;
     var m = document.querySelector('meta[name="description"]');

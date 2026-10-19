@@ -35,6 +35,7 @@
     return "856" + d.replace(/^0/, "");
   }
   var IG = "https://www.instagram.com/minise.arte/";
+  var FB = "https://www.facebook.com/p/MiniseArte-100092305741637/";
   var P, SET, WA, ACCOUNT, QR, OVR, bySlug;
   function applyData() {
     // products hidden in the admin page never reach the shop
@@ -63,13 +64,23 @@
     try { localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v)); } catch (e) { /* storage unavailable */ }
   }
 
-  var lang = load("minise_lang") === "lo" ? "lo" : "en";
+  var LANGS = ["en", "lo", "zh"], LI = { en: 0, lo: 1, zh: 2 };
+  var lang = (function () {
+    var saved = load("minise_lang");
+    if (LANGS.indexOf(saved) > -1) return saved;
+    var nav = String((navigator.languages && navigator.languages[0]) || navigator.language || "").toLowerCase();
+    return nav.indexOf("zh") === 0 ? "zh" : "en";
+  })();
   var bag = (load("minise_bag", true) || []).filter(function (it) { return it && bySlug[it.s]; });
 
   /* ---------- helpers ---------- */
   function t(k, vars) {
-    var src = OVR[k] || T[k];
-    var s = src ? (src[lang === "lo" ? 1 : 0] || "") : k;
+    var i = LI[lang] || 0, def = T[k], own = OVR[k], s;
+    if (own) {
+      // texts edited in the admin. Without a Chinese version, Chinese shows the built-in Chinese
+      // while the English is still the original wording, otherwise the admin's English.
+      s = own[i] || (i === 2 ? (def && def[2] && own[0] === def[0] ? def[2] : own[0]) : "") || "";
+    } else s = def ? (def[i] || def[0] || "") : k;
     if (s.indexOf("020 5524 6154") > -1) s = s.split("020 5524 6154").join(WA.mainShow);
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split("{" + v + "}").join(vars[v]); });
     return s;
@@ -79,12 +90,26 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function money(n) { return n.toLocaleString("en-US") + (lang === "lo" ? " ກີບ" : " ₭"); }
+  function money(n) { return n.toLocaleString("en-US") + (lang === "lo" ? " ກີບ" : lang === "zh" ? " 基普" : " ₭"); }
+  // "from 265,000 ₭" reads "265,000 基普 起" in Chinese
+  function fromText(m) { return lang === "zh" ? m + " " + t("from") : t("from") + " " + m; }
+  // run something in another language (orders and WhatsApp messages from Chinese pages are sent in English,
+  // so the team can read them)
+  function inLang(L, fn) { var keep = lang; lang = L; try { return fn(); } finally { lang = keep; } }
+  function shopLang() { return lang === "zh" ? "en" : lang; }
+  function tw(k) { return inLang(shopLang(), function () { return t(k); }); }
+  // product option names: English and Lao come with the catalogue, Chinese is kept here
+  var ZH_OPT = {
+    "Set of 2": "两个一套", "With photo and front name engraving": "放照片 + 正面刻名字", "Phone strap": "手机挂绳", "Keychain": "钥匙扣",
+    "Standard": "标准款", "With engraving on the back": "背面刻字", "Silver": "银色", "Gold": "金色", "Extra charm": "加购挂饰",
+    "Set": "一套", "One bracelet": "单条手链", "Pair": "一对", "No engraving on the back": "背面不刻字", "Extra photo charm": "加购照片挂饰"
+  };
+  function optName(o) { return lang === "lo" ? (o.lo || o.en) : lang === "zh" ? (ZH_OPT[o.en] || o.en) : o.en; }
   function minPrice(p) { return p.o.length ? Math.min.apply(null, p.o.map(function (o) { return o.price; })) : null; }
   function priceText(p) {
     if (!p.o.length) return null;
-    var pre = (p.o.length > 1 || p.from) ? t("from") + " " : "";
-    return pre + money(minPrice(p));
+    var m = money(minPrice(p));
+    return (p.o.length > 1 || p.from) ? fromText(m) : m;
   }
   function priceHTML(p) {
     var txt = priceText(p);
@@ -94,6 +119,7 @@
   function fmtDate(iso) {
     var d = iso.split("-");
     if (lang === "lo") return d[2] + "/" + d[1] + "/" + d[0];
+    if (lang === "zh") return d[0] + "年" + (+d[1]) + "月" + (+d[2]) + "日";
     var m = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+d[1] - 1];
     return (+d[2]) + " " + m + " " + d[0];
   }
@@ -156,6 +182,7 @@
       '<div class="store"><p class="eyebrow">' + esc(t("store_vte")) + "</p><h3>Morning Market Mall</h3><p>" + esc(t("store_vte_addr")) + "</p>" +
       "<p><b>" + esc(t("hours")) + "</b></p><p>" + esc(t("store_vte_p")) + "</p>" +
       contactLine(WA.main, WA.mainShow) + contactLine(WA.alt, WA.altShow) +
+      '<div class="contact-line"><a class="link" href="' + FB + '" target="_blank" rel="noopener">Facebook · Minise Arte</a><a class="link" href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></div>' +
       '<a class="link" href="https://www.google.com/maps/search/?api=1&query=Morning+Market+Mall+Vientiane" target="_blank" rel="noopener">Google Maps →</a></div>' +
       '<div class="store"><p class="eyebrow">' + esc(t("store_au")) + "</p><h3>Melbourne</h3><p>" + esc(t("store_au_p")) + "</p>" +
       '<div class="contact-line"><a class="link" href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a>' +
@@ -204,7 +231,7 @@
       "<h1>" + esc(t("hero_h1a")) + " <em>" + esc(t("hero_h1b")) + "</em></h1>" +
       '<p class="lead">' + esc(t("hero_lead")) + "</p>" +
       '<div class="hero-actions"><a class="btn" href="#shop">' + esc(t("hero_cta")) + '</a>' +
-      '<a class="btn ghost" href="' + waLink(t("msg_hi")) + '" target="_blank" rel="noopener">' + esc(t("hero_wa")) + "</a></div>" +
+      '<a class="btn ghost" href="' + waLink(tw("msg_hi")) + '" target="_blank" rel="noopener">' + esc(t("hero_wa")) + "</a></div>" +
       '<p class="proof"><span class="dot"></span>' + esc(t("hero_proof")) + "</p></div>" +
       '<div class="pol-stack">' + hero + kitty("sharkSleep", "pol-kitty") + "</div></div>" + kitty("walk", "walker") + "</section>" +
       promisesHTML() +
@@ -330,6 +357,20 @@
     pageIn._t = setTimeout(function () { main.classList.remove("page-in"); }, 1000);
   }
   // the highlight behind the active menu item slides from page to page
+  // put the menu on its own row when its words don't fit beside the logo (Lao and Chinese words are longer)
+  function fitNav() {
+    var head = document.querySelector(".site-head"), nav = head.querySelector(".main-nav");
+    head.classList.remove("stack");
+    var need = Array.prototype.reduce.call(nav.querySelectorAll("a"), function (s, a) { return s + a.offsetWidth; }, 0);
+    head.classList.toggle("stack", window.innerWidth <= 1040 || need > nav.clientWidth + 1);
+    navEdge();
+  }
+  // on phones the menu row can be swiped; a soft fade on the right shows there is more
+  function navEdge() {
+    var nav = document.querySelector(".main-nav");
+    nav.classList.toggle("more", nav.scrollWidth > nav.clientWidth + 2 && nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 4);
+  }
+  document.querySelector(".main-nav").addEventListener("scroll", navEdge, { passive: true });
   function movePill() {
     var nav = document.querySelector(".main-nav");
     if (!nav) return;
@@ -360,10 +401,16 @@
     return '<ul class="feats">' + f.map(function (x) { return "<li" + (x[1] ? ' class="hot"' : "") + ">" + esc(t(x[0])) + "</li>"; }).join("") + "</ul>";
   }
   function describe(p, which) {
-    var txt = which === "lo" ? p.lo : p.en;
+    var txt = which === "lo" ? p.lo : which === "zh" ? "" : p.en;
     if (txt) return txt;
     if (which === "lo") return "";
-    var bits = ["Handmade " + t("one_" + p.t[0]).toLowerCase() + " by Minise Arte" + (p.stainless ? " in stainless steel" : "") + "."];
+    var kind = T["one_" + p.t[0]] || ["piece", "", "作品"];
+    if (which === "zh") {
+      var z = "Minise Arte 手工制作的" + kind[2] + (p.stainless ? "，不锈钢材质" : "") + "。";
+      if (p.li) z += "可刻上 " + (p.li[0] === p.li[1] ? p.li[0] : p.li[0] + "–" + p.li[1]) + " 个字母（A–Z）。";
+      return z;
+    }
+    var bits = ["Handmade " + kind[0].toLowerCase() + " by Minise Arte" + (p.stainless ? " in stainless steel" : "") + "."];
     if (p.li) bits.push("Personalise it with " + (p.li[0] === p.li[1] ? p.li[0] : p.li[0] + "–" + p.li[1]) + " initial" + (p.li[1] > 1 ? "s" : "") + ".");
     return bits.join(" ");
   }
@@ -380,9 +427,9 @@
     }).join("") + "</div>" : "";
     var priceBlock = priceBlockHTML();
     var opts = p.o.length > 1 ? '<div class="field"><span class="lbl">' + esc(t("option")) + '</span><div class="opts" role="radiogroup">' + p.o.map(function (o, i) {
-      return '<label class="opt"><input type="radio" name="opt" value="' + i + '"' + (i === 0 ? " checked" : "") + "><span>" + esc(lang === "lo" ? o.lo : o.en) + "<small>" + esc(money(o.price)) + "</small></span></label>";
+      return '<label class="opt"><input type="radio" name="opt" value="' + i + '"' + (i === 0 ? " checked" : "") + "><span>" + esc(optName(o)) + "<small>" + esc(money(o.price)) + "</small></span></label>";
     }).join("") + "</div></div>" : "";
-    var addon = p.add ? '<div class="field"><span class="lbl">' + esc(lang === "lo" ? p.add.lo : p.add.en) + ' <span class="hint">(' + esc(t("addon_each", { p: money(p.add.price) })) + ')</span></span>' +
+    var addon = p.add ? '<div class="field"><span class="lbl">' + esc(optName(p.add)) + ' <span class="hint">(' + esc(t("addon_each", { p: money(p.add.price) })) + ')</span></span>' +
       '<div class="stepper"><button type="button" data-step="addN" data-d="-1" aria-label="' + esc(t("less")) + '">−</button><output id="addN">0</output><button type="button" data-step="addN" data-d="1" aria-label="' + esc(t("more")) + '">+</button></div></div>' : "";
     var ini = p.li ? '<div class="field"><label for="ini">' + esc(t("initials")) + '</label><input type="text" id="ini" maxlength="' + Math.max(p.li[1], 1) + '" autocomplete="off" autocapitalize="characters" spellcheck="false">' +
       '<span class="hint">' + esc(p.li[1] > 1 ? t("initials_hint", { n: p.li[1] }) : t("initials_hint1")) + '</span><span class="err" id="iniErr" hidden>' + esc(t("req_ini")) + "</span></div>" : "";
@@ -397,7 +444,7 @@
         var sa = a.g.some(function (g) { return p.g.indexOf(g) > -1; }) ? 1 : 0, sb = b.g.some(function (g) { return p.g.indexOf(g) > -1; }) ? 1 : 0;
         return (sb - sa) || ((b.cur - a.cur)) || byLikes(a, b);
       }).slice(0, 4);
-    var otherLang = lang === "lo" ? describe(p, "en") : p.lo;
+    var otherLang = lang === "en" ? p.lo : describe(p, "en");
     return '<section class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="#shop">' + esc(t("nav_shop")) + '</a><span>/</span><a href="#shop-' + p.t[0] + '">' + esc(t("type_" + p.t[0])) + "</a><span>/</span><span>" + esc(p.n) + "</span></nav>" +
       '<div class="pdp-grid"><div class="gallery">' + kitty(p.s.length % 2 ? "sharkPeek" : "peek", "gal-kitty") + '<div class="gmain">' + img(p.img[0], p.n, "", true).replace("<img", '<img id="gmain"') + "</div>" + thumbs + "</div>" +
       '<div class="pinfo"><div><p class="ptype">' + esc(typeLabel(p)) + "</p><h1>" + esc(p.n) + '</h1></div><div id="priceBlock">' + priceBlock + "</div>" + features(p) +
@@ -416,9 +463,8 @@
     var p = S.p;
     var u = unitPrice(p, S.opt, S.addN);
     if (u != null) {
-      var label = p.o.length === 1 && p.o[0].en ? '<p class="price-note">' + esc(lang === "lo" ? p.o[0].lo : p.o[0].en) + "</p>" : "";
-      var pre = p.from && p.o.length === 1 ? t("from") + " " : "";
-      return '<p class="price-big tn">' + esc(pre + money(u)) + "</p>" + label;
+      var label = p.o.length === 1 && p.o[0].en ? '<p class="price-note">' + esc(optName(p.o[0])) + "</p>" : "";
+      return '<p class="price-big tn">' + esc(p.from && p.o.length === 1 ? fromText(money(u)) : money(u)) + "</p>" + label;
     }
     var note = "";
     if (p.last) note = t("last_listed", { p: money(p.last), y: p.lastYear });
@@ -437,10 +483,10 @@
   }
   function lineDetails(p, it) {
     var d = [];
-    if (p.o.length > 1 || (p.o.length === 1 && p.o[0].en)) d.push(lang === "lo" ? p.o[it.opt].lo : p.o[it.opt].en);
+    if (p.o.length > 1 || (p.o.length === 1 && p.o[0].en)) d.push(optName(p.o[it.opt]));
     if (it.col) d.push(t("colour") + ": " + t(it.col));
     if (it.ini) d.push(t("initials") + ": " + it.ini);
-    if (p.add && it.addN) d.push((lang === "lo" ? p.add.lo : p.add.en) + " × " + it.addN);
+    if (p.add && it.addN) d.push(optName(p.add) + " × " + it.addN);
     if (it.note) d.push("“" + it.note + "”");
     return d;
   }
@@ -448,8 +494,8 @@
     var a = document.getElementById("askWa");
     if (!a || !S) return;
     var it = currentSelection();
-    var d = lineDetails(S.p, it);
-    a.href = waLink(t("msg_ask") + " " + S.p.n + (d.length ? " (" + d.join(", ") + ")" : "") + (S.p.ig.length ? "\n" + igPost(S.p.ig[0]) : ""));
+    var d = inLang(shopLang(), function () { return lineDetails(S.p, it); });
+    a.href = waLink(tw("msg_ask") + " " + S.p.n + (d.length ? " (" + d.join(", ") + ")" : "") + (S.p.ig.length ? "\n" + igPost(S.p.ig[0]) : ""));
   }
 
   /* bag */
@@ -538,13 +584,13 @@
     ["OT", "", /^\d{6,14}$/, ""]
   ];
   var PROVINCES = [
-    ["Vientiane Capital", "ນະຄອນຫຼວງວຽງຈັນ"], ["Vientiane Province", "ແຂວງວຽງຈັນ"], ["Luang Prabang", "ຫຼວງພະບາງ"],
-    ["Savannakhet", "ສະຫວັນນະເຂດ"], ["Champasak", "ຈຳປາສັກ"], ["Khammouane", "ຄຳມ່ວນ"], ["Bolikhamxay", "ບໍລິຄຳໄຊ"],
-    ["Xayaboury", "ໄຊຍະບູລີ"], ["Xiengkhouang", "ຊຽງຂວາງ"], ["Oudomxay", "ອຸດົມໄຊ"], ["Luang Namtha", "ຫຼວງນ້ຳທາ"],
-    ["Bokeo", "ບໍ່ແກ້ວ"], ["Phongsaly", "ຜົ້ງສາລີ"], ["Houaphanh", "ຫົວພັນ"], ["Saravane", "ສາລະວັນ"],
-    ["Sekong", "ເຊກອງ"], ["Attapeu", "ອັດຕະປື"], ["Xaisomboun", "ໄຊສົມບູນ"]
+    ["Vientiane Capital", "ນະຄອນຫຼວງວຽງຈັນ", "万象市"], ["Vientiane Province", "ແຂວງວຽງຈັນ", "万象省"], ["Luang Prabang", "ຫຼວງພະບາງ", "琅勃拉邦省"],
+    ["Savannakhet", "ສະຫວັນນະເຂດ", "沙湾拿吉省"], ["Champasak", "ຈຳປາສັກ", "占巴塞省"], ["Khammouane", "ຄຳມ່ວນ", "甘蒙省"], ["Bolikhamxay", "ບໍລິຄຳໄຊ", "波里坎赛省"],
+    ["Xayaboury", "ໄຊຍະບູລີ", "沙耶武里省"], ["Xiengkhouang", "ຊຽງຂວາງ", "川圹省"], ["Oudomxay", "ອຸດົມໄຊ", "乌多姆赛省"], ["Luang Namtha", "ຫຼວງນ້ຳທາ", "琅南塔省"],
+    ["Bokeo", "ບໍ່ແກ້ວ", "博胶省"], ["Phongsaly", "ຜົ້ງສາລີ", "丰沙里省"], ["Houaphanh", "ຫົວພັນ", "华潘省"], ["Saravane", "ສາລະວັນ", "沙拉湾省"],
+    ["Sekong", "ເຊກອງ", "色贡省"], ["Attapeu", "ອັດຕະປື", "阿速坡省"], ["Xaisomboun", "ໄຊສົມບູນ", "赛宋本省"]
   ];
-  var VIAS = ["whatsapp", "phone", "facebook", "line", "instagram"];
+  var VIAS = ["whatsapp", "phone", "facebook", "instagram"];
   var DELS = ["d_pick", "d_anou", "d_mix", "d_houng", "d_abroad"];
   var CO = { slipImg: null, slipUrl: "", photos: [], sending: false, done: null };
   var slipImg = null; // kept for the receipt drawing
@@ -588,14 +634,14 @@
     return c ? "+" + c[1] + " " + e164.slice(c[1].length + 1) : e164;
   }
   function fieldVal(id) { var el = document.getElementById(id); return el ? String(el.value || "").trim() : ""; }
-  function delText() { var del = document.getElementById("coDel"); return del ? del.options[del.selectedIndex].text : ""; }
+  function delText() { var v = fieldVal("coDel"); return v ? t(v) : ""; }
   function addressText() {
     var v = fieldVal("coDel");
     if (v === "d_pick") return "";
     if (v === "d_abroad") return [fieldVal("coCountry"), fieldVal("coAddr")].filter(Boolean).join(" · ");
     var prov = document.getElementById("coProv");
     var parts = [
-      prov && prov.value ? t("prov") + ": " + prov.options[prov.selectedIndex].text : "",
+      prov && prov.value && PROVINCES[+prov.value] ? t("prov") + ": " + (PROVINCES[+prov.value][LI[lang]] || PROVINCES[+prov.value][0]) : "",
       fieldVal("coDist") ? t("dist") + ": " + fieldVal("coDist") : "",
       fieldVal("coVill") ? t("vill_short") + ": " + fieldVal("coVill") : "",
       fieldVal("coBranch") ? t("branch_short") + ": " + fieldVal("coBranch") : "",
@@ -622,7 +668,7 @@
     var cc = COUNTRIES.map(function (c) { return '<option value="' + c[0] + '">' + esc(t("cc_" + c[0])) + "</option>"; }).join("");
     var vias = VIAS.map(function (v) { return '<option value="' + v + '">' + esc(t("via_" + v)) + "</option>"; }).join("");
     var dels = DELS.map(function (k) { return '<option value="' + k + '">' + esc(t(k)) + "</option>"; }).join("");
-    var provs = '<option value="">' + esc(t("prov_ph")) + "</option>" + PROVINCES.map(function (p, i) { return '<option value="' + i + '">' + esc(lang === "lo" ? p[1] : p[0]) + "</option>"; }).join("");
+    var provs = '<option value="">' + esc(t("prov_ph")) + "</option>" + PROVINCES.map(function (p, i) { return '<option value="' + i + '">' + esc(p[LI[lang]] || p[0]) + "</option>"; }).join("");
     var html = '<section class="wrap"><div class="page-head"><p class="eyebrow">' + esc(t("co_eyebrow")) + "</p><h1>" + esc(t("co_h")) + '</h1><p class="lead">' + esc(t("co_p")) + "</p></div>" +
       '<div class="co-grid"><form class="co-form" id="coForm" novalidate>' +
       '<fieldset class="co-step">' + kitty("wave", "step-kitty") + stepHead(n++, t("st_details")) +
@@ -688,7 +734,7 @@
       ph.textContent = okPhone ? t("phone_ok", { p: prettyPhone(okPhone) }) : c[3] ? t("phone_eg", { eg: c[3] }) : t("phone_eg_other");
       ph.classList.toggle("ok", !!okPhone);
     }
-    var via = fieldVal("coVia"), needHandle = via === "facebook" || via === "line" || via === "instagram";
+    var via = fieldVal("coVia"), needHandle = via === "facebook" || via === "instagram";
     show("coHandleF", needHandle);
     var hl = document.querySelector("#coHandleF label");
     if (hl && needHandle) hl.textContent = t("handle_" + via);
@@ -707,7 +753,7 @@
     var c = countryOf(fieldVal("coCc"));
     chk("coPhone", !!readPhone(), c[3] ? t("err_phone", { eg: c[3] }) : t("err_phone_other"));
     var via = fieldVal("coVia");
-    if (via === "facebook" || via === "line" || via === "instagram") chk("coHandle", fieldVal("coHandle").length >= 2, t("req"));
+    if (via === "facebook" || via === "instagram") chk("coHandle", fieldVal("coHandle").length >= 2, t("req"));
     else setErr("coHandle", "");
     var v = fieldVal("coDel");
     if (v === "d_anou" || v === "d_mix" || v === "d_houng") {
@@ -748,8 +794,9 @@
     })).then(function () { return rpc("order_photos_added", { p_id: id, p_key: key, p_count: list.length }); })
       .then(function (r) { if (!r || !r.ok) throw new Error("photos"); });
   }
+  // what the shop receives: English or Lao (a Chinese page sends English, so the team can read it)
   function orderPayload() {
-    return {
+    return inLang(shopLang(), function () { return {
       id: currentOrderNo(), date: todayLocal(), lang: lang, method: "rc",
       name: fieldVal("coName"), phone: readPhone(),
       contact_via: fieldVal("coVia"), contact_handle: fieldVal("coHandle"),
@@ -760,7 +807,7 @@
         // the database works out the price itself from the product, choice and quantity
         return { s: it.s, opt: it.opt || 0, addN: it.addN || 0, qty: it.qty, details: lineDetails(p, it).join(", ") };
       })
-    };
+    }; });
   }
   function sendOrder() {
     if (CO.sending) return;
@@ -777,8 +824,9 @@
     var payload = orderPayload();
     var slip = shrink(CO.slipImg, 1200, 0.8).toDataURL("image/jpeg", 0.8);
     var snap = {
-      name: payload.name, phone: prettyPhone(payload.phone), via: payload.contact_via, delivery: payload.delivery,
-      address: payload.address, note: payload.note, ref: payload.ref, bag: bag.slice(), total: bagTotals().sum
+      name: payload.name, phone: prettyPhone(payload.phone), via: payload.contact_via, delivery: delText(),
+      address: addressText(), note: payload.note, ref: payload.ref, bag: bag.slice(), total: bagTotals().sum,
+      wa: { delivery: payload.delivery, address: payload.address }
     };
     rpc("place_order", { p_order: payload, p_slip: slip }).then(function (res) {
       if (!res || !res.ok) {
@@ -817,6 +865,7 @@
       '<button class="btn wide" type="button" id="rcNew">' + esc(t("rc_new")) + "</button></div></div></div></section>";
   }
   function orderMessage(d) {
+    if (lang === "zh") return inLang("en", function () { return orderMessage(d); });
     var lines = [t("msg_hello")];
     if (!d.unpaid) lines.push(t("rc_no") + ": " + d.id);
     d.bag.forEach(function (it, i) {
@@ -825,7 +874,7 @@
       lines.push((i + 1) + ". " + p.n + " × " + it.qty + (det.length ? " (" + det.join(", ") + ")" : "") + " — " + (u == null ? t("msg_confirm") : money(u * it.qty)));
     });
     if (d.unpaid) return lines.join("\n");
-    lines.push(t("rc_paid") + ": " + money(d.total), t("msg_paid"), "", t("name") + ": " + d.name, t("phone") + ": " + d.phone, t("delivery") + ": " + d.delivery + (d.address ? " — " + d.address : ""));
+    lines.push(t("rc_paid") + ": " + money(d.total), t("msg_paid"), "", t("name") + ": " + d.name, t("phone") + ": " + d.phone, t("delivery") + ": " + (d.wa || d).delivery + ((d.wa || d).address ? " — " + (d.wa || d).address : ""));
     if (d.note) lines.push(t("co_note") + " " + d.note);
     return lines.join("\n");
   }
@@ -858,13 +907,13 @@
     return out;
   }
   function drawReceipt(d) {
-    // the receipt is lettered like the shop: Patrick Hand, Lao in Noto Sans Lao Looped
-    var serif = '"Patrick Hand", "Noto Sans Lao Looped", "Noto Sans Lao", sans-serif', sans = serif;
+    // the receipt is lettered like the shop: Patrick Hand, Lao in Noto Sans Lao, Chinese in Noto Sans SC
+    var serif = '"Patrick Hand", "Noto Sans Lao", "Noto Sans SC", "PingFang SC", sans-serif', sans = serif;
     var W = 1080, P = 80, inner = W - P * 2;
     var ink = "#24396a", soft = "#51618a", line = "rgba(36, 57, 106, 0.3)", sky = "#e1e9f2";
     var info = [
       [t("rc_no"), d.id],
-      [t("rc_date"), new Date().toLocaleString(lang === "lo" ? "lo-LA" : "en-GB", { dateStyle: "medium", timeStyle: "short" })],
+      [t("rc_date"), new Date().toLocaleString(lang === "lo" ? "lo-LA" : lang === "zh" ? "zh-CN" : "en-GB", { dateStyle: "medium", timeStyle: "short" })],
       [t("rc_customer"), d.name + " · " + d.phone],
       [t("rc_delivery"), d.delivery + (d.address ? " — " + d.address : "")],
       [t("rc_paid_to"), "LAO QR · " + ACCOUNT]
@@ -991,7 +1040,7 @@
         return '<li><a href="#shop-' + ty + '">' + esc(t("type_" + ty)) + "</a></li>";
       }).join("") + "</ul></div>" +
       "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + "</a></li></ul></div>" +
-      "<div><h4>" + esc(t("footer_follow")) + '</h4><ul><li><a href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></li><li><a href="https://www.instagram.com/minise.studio/" target="_blank" rel="noopener">@minise.studio</a></li><li><a href="https://www.instagram.com/minise.au/" target="_blank" rel="noopener">@minise.au</a></li><li><a href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a></li><li><a href="https://linktr.ee/Miniseofficial" target="_blank" rel="noopener">Linktree</a></li></ul></div></div>' +
+      "<div><h4>" + esc(t("footer_follow")) + '</h4><ul><li><a href="' + FB + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></li><li><a href="https://www.instagram.com/minise.studio/" target="_blank" rel="noopener">@minise.studio</a></li><li><a href="https://www.instagram.com/minise.au/" target="_blank" rel="noopener">@minise.au</a></li><li><a href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a></li><li><a href="https://linktr.ee/Miniseofficial" target="_blank" rel="noopener">Linktree</a></li></ul></div></div>' +
       '<div class="foot-base"><span>© 2026 Minise Arte · ມິນິເຊ່ ອາຕ໌</span><span>' + esc(t("footer_copy")) + "</span></div></div>";
   }
 
@@ -1038,11 +1087,13 @@
   }
 
   function applyLang() {
-    document.documentElement.lang = lang;
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+    document.querySelectorAll("[data-lang]").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-lang") === lang)); });
     document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t(el.getAttribute("data-t")); });
     document.querySelectorAll(".announce li").forEach(function (li) { li.hidden = !li.textContent.trim(); });
     document.querySelectorAll("[data-t-label]").forEach(function (el) { el.setAttribute("aria-label", t(el.getAttribute("data-t-label"))); });
     document.getElementById("foot").innerHTML = footer();
+    fitNav();
   }
 
   function toast(msg, pose) {
@@ -1188,8 +1239,24 @@
   });
   document.getElementById("scrim").addEventListener("click", closeBag);
   document.getElementById("bagBtn").addEventListener("click", openBag);
-  document.getElementById("langBtn").addEventListener("click", function () {
-    lang = lang === "en" ? "lo" : "en";
+  // language menu: English, ລາວ, 中文
+  function langMenu(open) {
+    var m = document.getElementById("langMenu"), b = document.getElementById("langBtn");
+    m.hidden = !open; b.setAttribute("aria-expanded", String(open));
+    if (open) { var cur = m.querySelector('[data-lang="' + lang + '"]'); if (cur) cur.focus(); }
+  }
+  document.getElementById("langBtn").addEventListener("click", function (e) {
+    e.stopPropagation();
+    langMenu(document.getElementById("langMenu").hidden);
+  });
+  document.addEventListener("click", function (e) { if (!e.target.closest("#langMenu")) langMenu(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !document.getElementById("langMenu").hidden) { langMenu(false); document.getElementById("langBtn").focus(); } });
+  document.getElementById("langMenu").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-lang]");
+    if (!b) return;
+    langMenu(false);
+    if (b.getAttribute("data-lang") === lang) return;
+    lang = b.getAttribute("data-lang");
     save("minise_lang", lang);
     applyLang();
     var keepScroll = window.scrollY;
@@ -1253,7 +1320,7 @@
     var bub = document.getElementById("peekBubble");
     if (!bub.hidden) { bub.hidden = true; return; }
     var tips = ["peek_1", "peek_2", "peek_3", "peek_4"];
-    bub.innerHTML = "<p>" + esc(t(tips[PK.msg++ % tips.length])) + '</p><div class="pb-row"><a class="btn" href="' + esc(waLink(t("msg_hi"))) + '" target="_blank" rel="noopener">' + esc(t("peek_wa")) + '</a><button class="link" type="button" id="peekOff">' + esc(t("peek_hide")) + "</button></div>";
+    bub.innerHTML = "<p>" + esc(t(tips[PK.msg++ % tips.length])) + '</p><div class="pb-row"><a class="btn" href="' + esc(waLink(tw("msg_hi"))) + '" target="_blank" rel="noopener">' + esc(t("peek_wa")) + '</a><button class="link" type="button" id="peekOff">' + esc(t("peek_hide")) + "</button></div>";
     bub.hidden = false;
   }
   document.addEventListener("click", function (e) {
@@ -1267,8 +1334,13 @@
   window.addEventListener("scroll", function () { if (!peekerUpdate._t) peekerUpdate._t = setTimeout(function () { peekerUpdate._t = 0; peekerUpdate(); }, 120); }, { passive: true });
   window.addEventListener("hashchange", function () { setTimeout(peekerUpdate, 50); });
 
-  window.addEventListener("resize", function () { clearTimeout(movePill._t); movePill._t = setTimeout(movePill, 120); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(movePill);
+  // re-measure the menu whenever the screen width changes (rotating a phone or iPad, resizing a window)
+  var lastW = 0;
+  function onWidth() { var w = document.documentElement.clientWidth; if (w === lastW) return; lastW = w; clearTimeout(movePill._t); movePill._t = setTimeout(function () { fitNav(); movePill(); }, 120); }
+  window.addEventListener("resize", onWidth);
+  window.addEventListener("orientationchange", onWidth);
+  if ("ResizeObserver" in window) new ResizeObserver(onWidth).observe(document.documentElement);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitNav(); movePill(); });
 
   applyLang();
   updateBagCount();

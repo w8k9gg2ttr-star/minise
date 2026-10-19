@@ -320,6 +320,8 @@
     s_note: ["Changes appear in the shop after you press Save.", "ການປ່ຽນແປງຈະສະແດງໃນຮ້ານຫຼັງກົດບັນທຶກ"],
     en: ["English", "ອັງກິດ"],
     lo: ["Lao", "ລາວ"],
+    zh: ["Chinese", "ຈີນ"],
+    zh_hint: ["Chinese is optional. Left empty, the shop shows its own Chinese while the English is unchanged, otherwise your English.", "ພາສາຈີນບໍ່ບັງຄັບ. ຖ້າປ່ອຍຫວ່າງ ຮ້ານຈະໃຊ້ພາສາຈີນທີ່ມີໃນລະບົບ ຫຼື ພາສາອັງກິດຂອງທ່ານ"],
 
     tpl_intro: ["These messages open in WhatsApp when you press Message customer on an order. Placeholders fill in the order details automatically. Press Save to keep your changes.", "ຂໍ້ຄວາມເຫຼົ່ານີ້ຈະເປີດໃນ WhatsApp ເມື່ອກົດສົ່ງຂໍ້ຄວາມຫາລູກຄ້າ. ຕົວແທນຂໍ້ມູນຈະໃສ່ລາຍລະອຽດອໍເດີໃຫ້ອັດຕະໂນມັດ. ກົດບັນທຶກເພື່ອເກັບການປ່ຽນແປງ"],
     tpl_placeholders: ["Placeholders", "ຕົວແທນຂໍ້ມູນ"],
@@ -413,7 +415,6 @@
     via_whatsapp: ["WhatsApp", "WhatsApp"],
     via_phone: ["Phone call or SMS", "ໂທ ຫຼື SMS"],
     via_facebook: ["Facebook Messenger", "Facebook Messenger"],
-    via_line: ["LINE", "LINE"],
     via_instagram: ["Instagram", "Instagram"],
     sec_photos: ["Customer photos ({n})", "ຮູບຂອງລູກຄ້າ ({n})"],
     photos_view: ["Show photos", "ເບິ່ງຮູບ"],
@@ -640,7 +641,7 @@
     ["Sekong", "ເຊກອງ"], ["Attapeu", "ອັດຕະປື"], ["Xaisomboun", "ໄຊສົມບູນ"]
   ];
   var LAO_KEYS = ["colour", "silver", "gold", "initials", "d_pick", "d_anou", "d_mix", "d_houng", "d_abroad", "prov", "dist", "vill_short", "branch_short", "country",
-    "via_whatsapp", "via_phone", "via_facebook", "via_line", "via_instagram"];
+    "via_whatsapp", "via_phone", "via_facebook", "via_instagram"];
   var laoBase = null;
   function laoWords(p) {
     if (!laoBase) {
@@ -1856,13 +1857,15 @@
   }
 
   /* ---------- settings pages ---------- */
+  // shop texts in English, Lao and (optional) Chinese
   function pairFields(id, val, label) {
-    return '<div class="grid2"><div class="field"><label for="' + id + '_en">' + esc(label) + " · " + esc(a("en")) + '</label><input type="text" id="' + id + '_en" data-set="' + id + '" data-l="0" value="' + esc(val[0]) + '"></div>' +
-      '<div class="field"><label for="' + id + '_lo">' + esc(label) + " · " + esc(a("lo")) + '</label><input type="text" id="' + id + '_lo" data-set="' + id + '" data-l="1" value="' + esc(val[1]) + '"></div></div>';
+    return '<div class="grid3">' + [["en", 0], ["lo", 1], ["zh", 2]].map(function (l) {
+      return '<div class="field"><label for="' + id + "_" + l[0] + '">' + esc(label) + " · " + esc(a(l[0])) + '</label><input type="text" id="' + id + "_" + l[0] + '" data-set="' + id + '" data-l="' + l[1] + '" value="' + esc(val[l[1]] || "") + '"' + (l[0] === "zh" ? ' lang="zh-CN"' : "") + "></div>";
+    }).join("") + "</div>";
   }
   function shopPage() {
     return '<form id="sform" class="set-grid" novalidate>' +
-      '<section class="card"><div class="card-head"><h2>' + esc(a("s_ann")) + '</h2></div><p class="hint">' + esc(a("s_ann_hint")) + "</p>" +
+      '<section class="card"><div class="card-head"><h2>' + esc(a("s_ann")) + '</h2></div><p class="hint">' + esc(a("s_ann_hint")) + " " + esc(a("zh_hint")) + "</p>" +
       settings.ann.slice(0, 3).map(function (v, i) { return pairFields("ann" + i, v, a("s_msg", { n: i + 1 })); }).join("") + "</section>" +
       '<section class="card"><div class="card-head"><h2>' + esc(a("s_contact")) + '</h2></div><div class="grid2"><div class="field"><label for="s_wa_main">' + esc(a("s_wa_main")) + '</label><input type="tel" id="s_wa_main" value="' + esc(settings.wa.mainShow) + '"></div>' +
       '<div class="field"><label for="s_wa_alt">' + esc(a("s_wa_alt")) + '</label><input type="tel" id="s_wa_alt" value="' + esc(settings.wa.altShow) + '"></div></div>' +

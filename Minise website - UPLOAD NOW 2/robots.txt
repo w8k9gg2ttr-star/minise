@@ -1,6 +1,0 @@
-# Minise Arte — search engines may read the shop; the admin stays out of search results.
-User-agent: *
-Allow: /
-Disallow: /admin.html
-
-Sitemap: https://minisearte.com/sitemap.xml

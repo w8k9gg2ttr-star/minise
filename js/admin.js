@@ -496,6 +496,39 @@
     db_safe_2: ["Website orders are priced by the database from your product list, so prices can't be changed by customers.", "ລາຄາອໍເດີຈາກເວັບໄຊຄິດໂດຍຖານຂໍ້ມູນຈາກລາຍການສິນຄ້າ ລູກຄ້າປ່ຽນລາຄາບໍ່ໄດ້"],
     db_safe_3: ["Repeated orders from the same device or phone number are slowed down to stop spam.", "ອໍເດີທີ່ສົ່ງຊ້ຳໆຈາກເຄື່ອງ ຫຼື ເບີໂທດຽວກັນ ຈະຖືກຈຳກັດເພື່ອກັນສະແປມ"],
     db_safe_4: ["Turn on 2-step verification in Account & security for the strongest protection.", "ເປີດການຢືນຢັນ 2 ຂັ້ນຕອນ ໃນ ບັນຊີ ແລະ ຄວາມປອດໄພ ເພື່ອຄວາມປອດໄພສູງສຸດ"],
+    ig_h: ["Instagram → shop", "Instagram → ຮ້ານ"],
+    ig_p: ["New posts on @minise.arte are checked every 30 minutes. A product post with a kip price appears in the shop by itself. A post without a price is added hidden, so you can add the price and show it.",
+           "ລະບົບຈະກວດໂພສໃໝ່ຂອງ @minise.arte ທຸກ 30 ນາທີ. ໂພສສິນຄ້າທີ່ມີລາຄາເປັນກີບ ຈະຂຶ້ນໃນຮ້ານເອງ. ໂພສທີ່ບໍ່ມີລາຄາ ຈະຖືກເພີ່ມແບບເຊື່ອງໄວ້ ໃຫ້ທ່ານໃສ່ລາຄາ ແລ້ວເປີດສະແດງ"],
+    ig_connected: ["Connected", "ເຊື່ອມຕໍ່ແລ້ວ"],
+    ig_not: ["Not connected yet", "ຍັງບໍ່ໄດ້ເຊື່ອມຕໍ່"],
+    ig_last: ["Last check", "ກວດລ່າສຸດ"],
+    ig_never: ["Not checked yet", "ຍັງບໍ່ໄດ້ກວດ"],
+    ig_result: ["{a} added · {h} hidden · {u} repeat posts · {s} not products", "ເພີ່ມ {a} · ເຊື່ອງ {h} · ໂພສຊ້ຳ {u} · ບໍ່ແມ່ນສິນຄ້າ {s}"],
+    ig_error: ["Last check failed: {e}", "ກວດຄັ້ງລ່າສຸດບໍ່ສຳເລັດ: {e}"],
+    ig_token: ["Instagram access token", "Token ຂອງ Instagram"],
+    ig_token_hint: ["Paste the long token from Meta for Developers. It is saved privately: nobody can read it back, not even here.", "ວາງ token ຍາວໆ ຈາກ Meta for Developers. ລະບົບເກັບໄວ້ເປັນຄວາມລັບ: ບໍ່ມີໃຜອ່ານຄືນໄດ້ ລວມທັງໜ້ານີ້"],
+    ig_save: ["Connect Instagram", "ເຊື່ອມຕໍ່ Instagram"],
+    ig_replace: ["Replace token", "ປ່ຽນ token"],
+    ig_saved: ["Instagram connected", "ເຊື່ອມຕໍ່ Instagram ແລ້ວ"],
+    ig_bad_token: ["That doesn't look like an Instagram token. Copy the whole token and try again.", "ນີ້ບໍ່ແມ່ນ token ຂອງ Instagram. ກະລຸນາສຳເນົາ token ທັງໝົດ ແລ້ວລອງໃໝ່"],
+    ig_check: ["Check Instagram now", "ກວດ Instagram ດຽວນີ້"],
+    ig_checking: ["Checking Instagram…", "ກຳລັງກວດ Instagram…"],
+    ig_done: ["Instagram checked: {a} new product(s), {h} hidden", "ກວດແລ້ວ: ສິນຄ້າໃໝ່ {a}, ເຊື່ອງ {h}"],
+    ig_fail: ["Couldn't check Instagram: {e}", "ກວດ Instagram ບໍ່ໄດ້: {e}"],
+    ig_need_update: ["Run update-2-instagram.sql in Supabase first, then come back here.", "ກະລຸນາແລ່ນ update-2-instagram.sql ໃນ Supabase ກ່ອນ ແລ້ວກັບມາໜ້ານີ້"],
+    ig_recent: ["Recent posts", "ໂພສລ່າສຸດ"],
+    ig_none: ["No posts checked yet.", "ຍັງບໍ່ມີໂພສທີ່ກວດ"],
+    ig_st_added: ["In the shop", "ຂຶ້ນໃນຮ້ານແລ້ວ"],
+    ig_st_hidden: ["Hidden: needs a price", "ເຊື່ອງໄວ້: ຍັງບໍ່ມີລາຄາ"],
+    ig_st_updated: ["Repeat post", "ໂພສຊ້ຳ"],
+    ig_st_skipped: ["Not a product", "ບໍ່ແມ່ນສິນຄ້າ"],
+    ig_st_known: ["Already in the shop", "ມີໃນຮ້ານແລ້ວ"],
+    ig_setup_h: ["How to connect (once)", "ວິທີເຊື່ອມຕໍ່ (ຄັ້ງດຽວ)"],
+    ig_setup_1: ["In the Instagram app, make sure @minise.arte is a Professional account (Settings → Account type and tools).", "ໃນແອັບ Instagram ໃຫ້ກວດວ່າ @minise.arte ເປັນບັນຊີ Professional (Settings → Account type and tools)"],
+    ig_setup_2: ["On developers.facebook.com, create an app and add \"Instagram API with Instagram login\".", "ໃນ developers.facebook.com ສ້າງແອັບ ແລ້ວເພີ່ມ \"Instagram API with Instagram login\""],
+    ig_setup_3: ["Under \"Generate access tokens\", add @minise.arte and press Generate token.", "ໃນ \"Generate access tokens\" ເພີ່ມ @minise.arte ແລ້ວກົດ Generate token"],
+    ig_setup_4: ["Copy the token, paste it below and press Connect Instagram. The key renews itself after that.", "ສຳເນົາ token ມາວາງຂ້າງລຸ່ມ ແລ້ວກົດ ເຊື່ອມຕໍ່ Instagram. ຫຼັງຈາກນັ້ນ ລະບົບຈະຕໍ່ອາຍຸເອງ"],
+    ig_view: ["View on Instagram", "ເບິ່ງໃນ Instagram"],
     mfa_title: ["2-step verification", "ການຢືນຢັນ 2 ຂັ້ນຕອນ"],
     mfa_on: ["On", "ເປີດ"],
     mfa_off: ["Off", "ປິດ"],
@@ -1048,11 +1081,12 @@
     if (!settings.templates) settings.templates = {};
     if (SBC) settings.supabase = SBC;
   }
+  var CAT_AT = ""; // when this admin last loaded the catalogue from the database
   function loadCatalogOnline() {
     return sb.rpc("get_catalog", { have: "" }).then(function (res) {
       var r = check(res) || {};
       if (r.empty) return publishOnline(true);
-      if (r.data && !dirty) { applyCatalog(r.data); SYNC.version = r.version; render(); }
+      if (r.data && !dirty) { applyCatalog(r.data); SYNC.version = r.version; CAT_AT = new Date().toISOString(); render(); }
     }).catch(function () { SYNC.state = "err"; renderHead(); });
   }
   // a new photo goes to the public "product-photos" storage and is replaced by its web address
@@ -1066,9 +1100,21 @@
       return bucket.getPublicUrl(path).data.publicUrl;
     });
   }
+  // products Instagram added while this admin was open are kept (publishing replaces the whole catalogue)
+  function keepInstagramProducts() {
+    return sb.rpc("get_catalog", { have: "" }).then(function (res) {
+      var r = check(res) || {}, list = (r.data && r.data.products) || [], have = {};
+      products.forEach(function (p) { have[p.s] = true; });
+      var extra = list.filter(function (p) { return p && p.src === "ig" && !have[p.s] && (!CAT_AT || String(p.igAt || "") > CAT_AT); });
+      if (extra.length) products = extra.concat(products);
+    }).catch(function () { /* publish what we have */ });
+  }
   function publishOnline(first) {
     var btn = document.getElementById("saveBtn");
     btn.disabled = true;
+    return keepInstagramProducts().then(function () { return publishNow(first, btn); });
+  }
+  function publishNow(first, btn) {
     var jobs = [];
     products.forEach(function (p) {
       p.img.forEach(function (src, i) {
@@ -1908,8 +1954,56 @@
       "<dt>" + esc(a("k_orders")) + "</dt><dd>" + orders.length + "</dd></dl>" +
       '<div class="chiprow">' + (ref ? '<a class="btn ghost" href="https://supabase.com/dashboard/project/' + esc(ref) + '/editor" target="_blank" rel="noopener">' + icon("external") + esc(a("db_open")) + "</a>" : "") +
       '<button class="btn ghost" type="button" id="onSync">' + icon("refresh") + esc(a("on_sync")) + "</button></div></section>" +
+      igCard() +
       '<section class="card"><div class="card-head"><h2>' + esc(a("db_safe_h")) + '</h2></div><ul class="steps-list">' +
       [1, 2, 3, 4].map(function (i) { return "<li>" + esc(a("db_safe_" + i)) + "</li>"; }).join("") + "</ul></section></div>";
+  }
+  /* Instagram → shop: status, connect, check now, what was imported */
+  var IG = { state: "idle", status: null, posts: [], busy: false, missing: false };
+  function loadIg() {
+    IG.state = "loading";
+    Promise.all([
+      sb.rpc("ig_status"),
+      sb.from("ig_posts").select("id, permalink, caption, status, product_slug, taken_at").order("taken_at", { ascending: false }).limit(12)
+    ]).then(function (res) {
+      if (res[0].error) { IG.missing = true; IG.state = "ready"; return; }
+      IG.missing = false; IG.status = res[0].data || {}; IG.posts = (res[1] && res[1].data) || []; IG.state = "ready";
+    }).catch(function () { IG.missing = true; IG.state = "ready"; }).then(function () { if (tab === "online") render(); });
+  }
+  function igCard() {
+    if (IG.state === "idle") loadIg();
+    var head = '<section class="card" id="igCard"><div class="card-head"><h2>' + icon("image") + " " + esc(a("ig_h")) + "</h2>";
+    if (IG.state !== "ready") return head + '</div><p class="hint">…</p></section>';
+    if (IG.missing) return head + '</div><p class="alert info">' + esc(a("ig_need_update")) + "</p></section>";
+    var st = IG.status || {}, last = st.last_result || {};
+    var lastLine = st.last_run ? esc(fmtWhen(st.last_run)) + " · " + esc(last.ok === false ? a("ig_error", { e: last.error || "?" }) : a("ig_result", { a: last.added || 0, h: last.hidden || 0, u: last.updated || 0, s: last.skipped || 0 })) : esc(a("ig_never"));
+    var posts = IG.posts.length ? '<div class="rows">' + IG.posts.map(function (p) {
+      var cls = { added: "st-ready", hidden: "pay-unpaid", updated: "st-new" }[p.status] || "muted";
+      var first = String(p.caption || "").split("\n")[0].slice(0, 60);
+      return '<div class="r"><span class="ig-cap"><a class="link" href="' + esc(/^https:\/\/www\.instagram\.com\//.test(p.permalink) ? p.permalink : "https://www.instagram.com/minise.arte/") + '" target="_blank" rel="noopener">' + esc(first || a("ig_view")) + "</a><small>" + esc(p.taken_at ? fmtWhen(p.taken_at) : "") + "</small></span>" +
+        '<span class="pill ' + cls + '">' + esc(a("ig_st_" + p.status)) + "</span></div>";
+    }).join("") + "</div>" : '<p class="hint">' + esc(a("ig_none")) + "</p>";
+    return head + '<span class="pill ' + (st.connected ? "st-ready" : "muted") + '">' + esc(a(st.connected ? "ig_connected" : "ig_not")) + "</span></div>" +
+      '<p class="page-intro">' + esc(a("ig_p")) + "</p>" +
+      '<dl class="kv"><dt>' + esc(a("ig_last")) + "</dt><dd>" + lastLine + "</dd></dl>" +
+      (st.connected ? '<div class="chiprow"><button class="btn" type="button" id="igCheck"' + (IG.busy ? " disabled" : "") + ">" + icon("refresh") + esc(a(IG.busy ? "ig_checking" : "ig_check")) + "</button></div>" : "") +
+      '<details class="ig-setup"' + (st.connected ? "" : " open") + "><summary>" + esc(st.connected ? a("ig_replace") : a("ig_setup_h")) + "</summary>" +
+      '<ol class="steps-list">' + [1, 2, 3, 4].map(function (i) { return "<li>" + esc(a("ig_setup_" + i)) + "</li>"; }).join("") + "</ol>" +
+      '<form class="on-form" id="igForm" novalidate><label for="igToken"><b>' + esc(a("ig_token")) + '</b></label><div class="row"><input type="password" id="igToken" autocomplete="off" spellcheck="false">' +
+      '<button class="btn" type="submit">' + esc(a("ig_save")) + '</button></div><p class="hint">' + esc(a("ig_token_hint")) + "</p></form></details>" +
+      "<h3 class=\"legend\">" + esc(a("ig_recent")) + "</h3>" + posts + "</section>";
+  }
+  function igCheckNow() {
+    IG.busy = true; render();
+    sb.functions.invoke("instagram-sync", { body: {} }).then(function (res) {
+      var r = res.data || {};
+      if (res.error && !r.error) throw res.error;
+      if (r.ok === false) throw new Error(r.error || "error");
+      toast(a("ig_done", { a: r.added || 0, h: r.hidden || 0 }), 6000);
+      return loadCatalogOnline();
+    }).catch(function (e) {
+      toast(a("ig_fail", { e: (e && e.message) || String(e) }), 9000);
+    }).then(function () { IG.busy = false; loadIg(); });
   }
   function mfaCard() {
     if (!ONLINE) return "";
@@ -2368,6 +2462,7 @@
     if (e.target.closest("#connectBtn")) { if (savedDir && !dir) reconnect(); else connect(); return; }
     if (e.target.closest("#saveBtn")) { saveAll(); return; }
     if (e.target.closest("#logoutBtn")) { logout(); return; }
+    if (e.target.closest("#igCheck")) { igCheckNow(); return; }
     if (e.target.closest("#onSync")) { SYNC.state = "wait"; render(); pullOrders(); if (ONLINE) loadCatalogOnline(); return; }
     if (e.target.closest("#bkFiles")) {
       download("products.js", productsFile(), "text/javascript;charset=utf-8");
@@ -2459,6 +2554,16 @@
       else { logEvent(x, a("log_edited")); orders[orders.indexOf(ref)] = x; if (DR && DR.id === ref.id) DR.id = x.id; }
       var pm = document.getElementById("pasteMsg"); if (pm && wasNew) pm.value = "";
       saveOrders(); closeDialog(); render(); toast(a("o_saved"));
+    } else if (id === "igForm") {
+      // the token goes straight to the database; it is never kept in this page
+      var tk = document.getElementById("igToken"), val = tk.value.trim();
+      tk.value = "";
+      sb.rpc("ig_save_token", { p_token: val }).then(function (res) {
+        var r = check(res) || {};
+        if (r.ok === false) { toast(a("ig_bad_token"), 7000); return; }
+        toast(a("ig_saved"));
+        loadIg();
+      }).catch(function (err) { toast(a("ig_fail", { e: dbErr(err) }), 8000); });
     } else if (id === "mfaForm") mfaVerify(document.getElementById("mfaCode").value.replace(/\D/g, ""));
     else if (id === "pwForm") changePassword();
   });

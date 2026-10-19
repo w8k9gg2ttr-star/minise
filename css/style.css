@@ -284,7 +284,7 @@ html[lang="lo"] .hero h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem); }
 .store p { color: var(--ink-2); }
 .contact-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-top: 12px; border-top: 1.5px dashed var(--line); }
 .contact-line .num { font-variant-numeric: tabular-nums; font-size: 1.1rem; user-select: all; }
-.mini-btn { border: 1.5px solid var(--ink); background: transparent; border-radius: 6px; padding: 2px 12px; font-size: 0.9rem; min-height: 34px; color: var(--ink); }
+.mini-btn { border: 1.5px solid var(--ink); background: transparent; border-radius: 6px; padding: 2px 14px; font-size: 0.95rem; min-height: 40px; min-width: 56px; color: var(--ink); }
 .mini-btn:hover { background: var(--sky); }
 @media (max-width: 760px) { .visit-grid { grid-template-columns: 1fr; } }
 
@@ -940,10 +940,11 @@ html[lang="lo"] .mumi-copy h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem); 
 .duo-head { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px 24px; padding: clamp(22px, 3vw, 32px) clamp(20px, 3vw, 34px); background: var(--card); box-shadow: 0 18px 40px -24px rgba(20, 30, 60, 0.5); }
 .duo-head h2 { font-size: var(--step-3); }
 .duo-head > div { display: grid; gap: 8px; min-width: 0; }
-.duo-head .link { justify-self: end; margin-right: clamp(80px, 9vw, 110px); white-space: nowrap; }
+.duo-links { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-self: end; margin-right: clamp(80px, 9vw, 110px); }
+.duo-links .link { white-space: nowrap; }
 .duo-kitty { position: absolute; bottom: calc(100% - 12px); width: clamp(70px, 8vw, 96px); left: clamp(18px, 3vw, 32px); transform-origin: 50% 100%; animation: kittyPop 0.7s cubic-bezier(.3, 1.5, .5, 1) 0.3s both; }
 .duo-kitty2 { left: auto; right: clamp(18px, 3vw, 32px); bottom: 10px; width: clamp(68px, 7.5vw, 92px); animation-delay: 0.5s; }
-@media (max-width: 700px) { .duo-head { grid-template-columns: 1fr; padding-right: clamp(96px, 26vw, 120px); } .duo-head .link { justify-self: start; margin-right: 0; } }
+@media (max-width: 700px) { .duo-head { grid-template-columns: 1fr; padding-right: clamp(96px, 26vw, 120px); } .duo-links { justify-self: start; margin-right: 0; } }
 /* the comic: four panels */
 .duo-story { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; counter-reset: none; }
 .duo-story li { position: relative; display: grid; grid-template-rows: auto 1fr; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; }
@@ -984,7 +985,7 @@ html[lang="lo"] .mumi-copy h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem); 
 .gm-say { position: relative; margin-bottom: 14px; padding: 7px 12px; background: var(--paper); border: 2px solid var(--ink); border-radius: 14px; font-size: 1.02rem; line-height: 1.3; max-width: 30em; }
 .gm-say::after { content: ""; position: absolute; left: -10px; bottom: 12px; width: 14px; height: 14px; background: var(--paper); border-left: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(45deg); }
 .gm-say.pop { animation: mumiSay 0.4s cubic-bezier(.3, 1.4, .5, 1) both; }
-.gm-reset { background: none; border: 0; padding: 4px 0; font-size: 1rem; cursor: pointer; }
+.gm-reset { min-height: 44px; background: none; border: 0; padding: 4px 2px; font-size: 1rem; cursor: pointer; }
 .gm-win { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px 18px; padding: 14px 16px; border: 2px dashed var(--ink); border-radius: 14px; background: var(--sky); }
 .gm-win p { font-size: 1.15rem; margin-bottom: 10px; }
 .gm-win-btns { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -996,3 +997,59 @@ html[lang="lo"] .mumi-copy h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem); 
   .gm-win-btns { justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .gm-inner { transition: none; } .gm-say.pop, .duo-kitty, .pn-clover { animation: none; } }
+
+/* ---------- every screen: small fixes from the device check ---------- */
+@media (max-width: 700px) { .pics-kitty { left: -4px; } }
+/* short screens (a phone turned sideways): the menu scrolls away instead of covering a third of the screen,
+   and the floating bits get smaller */
+@media (max-height: 500px) and (orientation: landscape) {
+  html { scroll-padding-top: 16px; }
+  .site-head { position: relative; top: 0; }
+  .mk-side { position: static; }
+  .mk-card { width: 100%; max-width: 440px; justify-self: center; }
+  .mk-sec { padding-bottom: 80px; }
+  .mk-bar { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .mk-bar small { display: none; }
+  .mk-bar b { font-size: 1.2rem; }
+  .peeker { width: 64px; }
+  .peek-bubble { bottom: calc(env(safe-area-inset-bottom, 0px) + 64px); }
+  .cookie-note { padding-block: 8px; }
+}
+/* while the bag is open, the "added" message sits under the bag's title instead of over its Checkout button */
+body:has(.drawer:not([hidden])) .toast { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 84px); }
+
+/* ---------- Peni everywhere: walking behind Mumi, on the done page, stories, charm of the day ---------- */
+.walker2 { width: clamp(62px, 7vw, 92px); animation-delay: 1.6s; animation-fill-mode: backwards; }
+.done-duo { display: flex; align-items: flex-end; gap: 6px; }
+.done-duo .done-kitty { width: 112px; }
+.done-duo .done-kitty + .done-kitty { animation-delay: 0.25s; }
+.pics-kitty2 { left: auto; right: -14px; bottom: -30px; width: clamp(76px, 9vw, 104px); }
+@media (max-width: 700px) { .pics-kitty2 { right: -2px; } }
+/* stories: pick an episode */
+.stories { display: grid; gap: 14px; }
+.ep-head { display: grid; gap: 10px; }
+.ep-head .eyebrow { justify-self: start; padding: 2px 12px; border-radius: 999px; background: var(--card); }
+.ep-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ep-tab { display: grid; gap: 0; min-height: 52px; padding: 6px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); text-align: left; font-size: 1.05rem; line-height: 1.2; transition: background 0.2s ease, color 0.2s ease; }
+.ep-tab span { font-size: 0.82rem; color: var(--ink-2); }
+.ep-tab:hover { background: var(--sky); }
+.ep-tab[aria-pressed="true"] { background: var(--ink); color: var(--on-btn); }
+.ep-tab[aria-pressed="true"] span { color: var(--sky); }
+@media (max-width: 760px) { .ep-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pn-solo { width: 56%; }
+.pn-pic .pn-clover + .pn-clover { margin-left: -4%; margin-bottom: 18%; }
+/* Peni's charm of the day */
+.fortune { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px 22px; padding: 16px clamp(16px, 3vw, 26px); background: var(--card); border: 2px solid var(--ink); border-radius: 16px; box-shadow: 0 18px 40px -26px rgba(20, 30, 60, 0.5); }
+.fortune-kitty { width: clamp(76px, 9vw, 100px); }
+.fortune-copy { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.fortune-copy h3 { font-size: var(--step-2); }
+.fortune-copy h3 small { font-size: 0.9rem; color: var(--ink-2); }
+.fortune-copy p:not(.eyebrow) { font-size: 1.15rem; color: var(--ink); }
+.fortune-charm .ch-img { display: block; width: clamp(88px, 11vw, 120px); aspect-ratio: 1; border-radius: 50%; border: 4px solid #b3b9c4; box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.7), 0 10px 18px -10px rgba(20, 30, 60, 0.6); animation: kittyBob 3s ease-in-out infinite; }
+@media (max-width: 640px) {
+  .fortune { grid-template-columns: auto minmax(0, 1fr); }
+  .fortune-kitty { grid-row: 1; }
+  .fortune-charm { grid-column: 2; grid-row: 1; justify-self: end; }
+  .fortune-copy { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { .fortune-charm .ch-img { animation: none; } }

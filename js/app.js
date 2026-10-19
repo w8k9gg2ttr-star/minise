@@ -151,13 +151,13 @@
   function card(p) {
     return '<a class="card" href="' + (p.s === MYO ? "#make" : "#p-" + p.s) + '">' +
       '<div class="pimg">' + img(p.img[0], p.n, "a") + (p.img[1] ? img(p.img[1], "", "b") : "") +
-      '<div class="badges">' + badges(p) + "</div>" + kitty("paw", "card-paw") + "</div>" +
+      '<div class="badges">' + badges(p) + "</div>" + kitty(p.s.length % 2 ? "peniPaw" : "paw", "card-paw") + "</div>" +
       '<div class="pmeta"><span class="ptype">' + esc(typeLabel(p)) + '</span><span class="pname">' + esc(p.n) + "</span>" + priceHTML(p) + "</div></a>";
   }
   // the shop cat (js/cats.js); decorative, so screen readers skip it
   function kitty(pose, cls) { return window.MINISE_CAT ? '<span class="' + (cls || "kitty-wrap") + '">' + window.MINISE_CAT(pose) + "</span>" : ""; }
   // the same cat as a link to Mumi's page
-  function mumiLink(pose, cls) { return window.MINISE_CAT ? '<a class="' + cls + '" href="#mumi" title="' + esc(t("mumi_link")) + '" aria-label="' + esc(t("mumi_link")) + '">' + window.MINISE_CAT(pose) + "</a>" : ""; }
+  function mumiLink(pose, cls, who) { who = who || "mumi"; return window.MINISE_CAT ? '<a class="' + cls + '" href="#' + who + '" title="' + esc(t(who + "_link")) + '" aria-label="' + esc(t(who + "_link")) + '">' + window.MINISE_CAT(pose) + "</a>" : ""; }
   function head(eyebrow, title, linkHref, linkText, tag, pose) {
     var h = tag || "h2";
     return '<div class="section-head"><div><p class="eyebrow">' + esc(eyebrow) + "</p><" + h + ">" + esc(title) + (pose ? " " + kitty(pose, "sec-kitty") : "") + "</" + h + "></div>" +
@@ -165,7 +165,7 @@
   }
   function stepsHTML() {
     var out = '<ol class="steps">';
-    var poses = ["heart", "wave", "phone", "paint", "gift"];
+    var poses = ["heart", "peniWave", "phone", "peniPaint", "gift"];
     for (var i = 1; i <= 5; i++) out += "<li>" + kitty(poses[i - 1], "steps-kitty") + "<b>" + esc(t("s" + i)) + "</b><p>" + esc(t("s" + i + "p")) + "</p></li>";
     return out + "</ol>";
   }
@@ -192,7 +192,7 @@
       "</div>";
   }
   function promisesHTML() {
-    var items = [["sparkle", "tr1"], ["swim", "tr2"], ["paint", "tr3"], ["gift", "tr4"]];
+    var items = [["sparkle", "tr1"], ["swim", "tr2"], ["peniPaint", "tr3"], ["peniGift", "tr4"]];
     return '<section class="promises"><div class="wrap promise-row">' + items.map(function (it) {
       return '<div class="promise">' + kitty(it[0], "promise-kitty") + "<div><b>" + esc(t(it[1])) + "</b><span>" + esc(t(it[1] + "p")) + "</span></div></div>";
     }).join("") + "</div></section>";
@@ -214,7 +214,7 @@
       var pick = { locket: "beniga-bracelet-locket", set: "luna-sol-bracelet", earrings: "pearl-heart-studs", accessory: "lorra-mini-heart-locket" }[ty];
       var cover = (pick && bySlug[pick]) || list.slice().sort(byLikes).find(function (p) { return p.t[0] === ty; }) || list[0];
       if (!cover) return "";
-      return '<a class="cat" href="#shop-' + ty + '"><div class="ph">' + img(cover.img[0], "") + kitty({ locket: "heart", bracelet: "wave", necklace: "sparkle", set: "gift", earrings: "drink", accessory: "shark" }[ty] || "peek", "tile-kitty") + "</div><div><b>" + esc(t("type_" + ty)) +
+      return '<a class="cat" href="#shop-' + ty + '"><div class="ph">' + img(cover.img[0], "") + kitty({ locket: "heart", bracelet: "peniBracelet", necklace: "sparkle", set: "peniGift", earrings: "drink", accessory: "peniBunny" }[ty] || "peek", "tile-kitty") + "</div><div><b>" + esc(t("type_" + ty)) +
         '</b><span class="tn">' + list.length + " " + esc(t("designs")) + "</span></div></a>";
     }).join("");
     var keep = ["lorrens-mini-heart-locket", "secret-story-locket", "foreveryou-heart-locket", "beniga-bracelet-locket", "my-story-bracelet", "lillys-mini-heart-locket"]
@@ -235,24 +235,24 @@
       '<div class="hero-actions"><a class="btn solid" href="#shop">' + esc(t("hero_cta")) + '</a>' +
       '<a class="btn ghost" href="' + waLink(tw("msg_hi")) + '" target="_blank" rel="noopener">' + esc(t("hero_wa")) + "</a></div>" +
       '<p class="proof"><span class="dot"></span>' + esc(t("hero_proof")) + "</p></div>" +
-      '<div class="pol-stack">' + hero + kitty("sharkSleep", "pol-kitty") + "</div></div>" + kitty("walk", "walker") + "</section>" +
+      '<div class="pol-stack">' + hero + mumiLink("peniSleep", "pol-kitty", "peni") + "</div></div>" + kitty("walk", "walker") + kitty("peniWalk", "walker walker2") + "</section>" +
       promisesHTML() +
       '<section class="section"><div class="wrap">' + head(t("cat_eyebrow"), t("cat_h"), "", "", "", "search") + '<div class="cats">' + cats + "</div></div></section>" +
       '<section class="section tight"><div class="wrap"><a class="mk-teaser" href="#make">' + kitty("peniBracelet", "teaser-kitty") +
       '<div class="mk-teaser-copy"><p class="eyebrow">' + esc(t("mk_new")) + "</p><h2>" + esc(t("mk_h")) + "</h2><p>" + esc(t("mk_teaser")) + '</p><span class="btn solid">' + esc(t("mk_cta")) + "</span></div>" +
       '<div class="mk-teaser-charms" aria-hidden="true">' + ["A1", "B20", "C25", "A7", "B4", "C37"].map(function (c) { return CH_BY[c] ? charmImg(c) : ""; }).join("") + "</div></a></div></section>" +
-      '<section class="section tight"><div class="wrap">' + head(t("best_eyebrow"), t("best_h"), "#shop", t("view_all"), "", "heart") + '<div class="grid">' + best.map(card).join("") + "</div></div></section>" +
+      '<section class="section tight"><div class="wrap">' + head(t("best_eyebrow"), t("best_h"), "#shop", t("view_all"), "", "peniHeart") + '<div class="grid">' + best.map(card).join("") + "</div></div></section>" +
       '<section class="section band"><div class="wrap keep-grid"><div class="keep-copy"><p class="eyebrow">' + esc(t("photo_eyebrow")) + "</p><h2>" + esc(t("photo_h")) + " " + kitty("gift", "sec-kitty") + "</h2>" +
       '<p class="lead">' + esc(t("photo_p")) + '</p><ul class="ticks">' +
       ["photo_l1", "photo_l2", "photo_l3"].map(function (k) { return "<li>" + ICON.tick + "<span>" + esc(t(k)) + "</span></li>"; }).join("") +
       '</ul><div><a class="btn" href="#c-photo">' + esc(t("photo_cta")) + '</a></div></div><div class="grid three">' + keep + "</div></div></section>" +
-      '<section class="section tight"><div class="wrap">' + head(t("new_eyebrow"), t("new_h"), "#shop", t("view_all"), "", "yay") + '<div class="grid">' + fresh.map(card).join("") + "</div></div></section>" +
+      '<section class="section tight"><div class="wrap">' + head(t("new_eyebrow"), t("new_h"), "#shop", t("view_all"), "", "peniYay") + '<div class="grid">' + fresh.map(card).join("") + "</div></div></section>" +
       duoHTML() +
       '<section class="section tight"><div class="wrap">' + head(t("col_eyebrow"), t("col_h")) + '<div class="chips-row">' + tags + "</div></div></section>" +
       '<section class="section band"><div class="wrap">' + head(t("steps_eyebrow"), t("steps_h"), "#order", t("view_all"), "", "phone") + stepsHTML() + "</div></section>" +
       '<section class="section"><div class="wrap">' + head(t("visit_eyebrow"), t("visit_h"), "", "", "", "wave") + visitHTML() + "</div></section>" +
-      '<section class="section tight"><div class="wrap">' + head("@minise.arte", t("ig_h"), IG, t("ig_cta"), "", "sharkPeek") + '<div class="ig-strip">' + igPics + "</div></div></section>" +
-      '<section class="section tight"><div class="wrap">' + head(t("faq_eyebrow"), t("faq_h"), "", "", "", "box") + faqHTML() + "</div></section>";
+      '<section class="section tight"><div class="wrap">' + head("@minise.arte", t("ig_h"), IG, t("ig_cta"), "", "peniBunnyPeek") + '<div class="ig-strip">' + igPics + "</div></div></section>" +
+      '<section class="section tight"><div class="wrap">' + head(t("faq_eyebrow"), t("faq_h"), "", "", "", "peniBox") + faqHTML() + "</div></section>";
   }
 
   /* shop */
@@ -297,7 +297,7 @@
       return '<button class="fbtn" type="button" data-ftag="' + g + '" aria-pressed="' + (F.tag === g) + '">' + esc(t("tag_" + g)) + "<span>" + n + "</span></button>";
     }).join("");
     var openFilters = window.matchMedia && window.matchMedia("(min-width: 901px)").matches;
-    return '<section class="wrap"><div class="shop-head kittied">' + kitty("sharkPeek", "head-kitty") + '<p class="eyebrow">' + esc(t("shop_eyebrow")) + '</p><h1 id="shopTitle">' + esc(shopTitle()) + "</h1>" +
+    return '<section class="wrap"><div class="shop-head kittied">' + kitty("peniSearch", "head-kitty") + '<p class="eyebrow">' + esc(t("shop_eyebrow")) + '</p><h1 id="shopTitle">' + esc(shopTitle()) + "</h1>" +
       '<p class="lead">' + esc(t("shop_lead")) + "</p></div>" +
       '<div class="shop-layout"><details class="filters"' + (openFilters ? " open" : "") + "><summary>" + esc(t("filters")) + " <span>＋</span></summary><div class=\"fbody\">" +
       '<div class="field"><label for="q">' + esc(t("search")) + '</label><input type="search" id="q" placeholder="' + esc(t("search_ph")) + '" value="' + esc(F.q) + '" autocomplete="off"></div>' +
@@ -306,7 +306,7 @@
       '<div class="fgroup"><h3>' + esc(t("availability")) + '</h3><select id="fav" aria-label="' + esc(t("availability")) + '">' +
       ["all", "cur", "old"].map(function (v) { return '<option value="' + v + '"' + (F.av === v ? " selected" : "") + ">" + esc(t("av_" + v)) + "</option>"; }).join("") +
       '</select><label class="check"><input type="checkbox" id="frts"' + (F.rts ? " checked" : "") + "> " + esc(t("rts_only")) + "</label></div>" +
-      kitty("sharkSleep", "filter-kitty") + "</div></details>" +
+      kitty("peniYarn", "filter-kitty") + "</div></details>" +
       '<div><div class="results-bar"><span class="count" id="count"></span><label class="check" for="fsort"><span class="sr">' + esc(t("sort")) + '</span><select id="fsort">' +
       ["best", "new", "lo", "hi", "az"].map(function (v) { return '<option value="' + v + '"' + (F.sort === v ? " selected" : "") + ">" + esc(t("so_" + v)) + "</option>"; }).join("") +
       '</select></label></div><div id="results"></div></div></div></section>';
@@ -452,7 +452,7 @@
       }).slice(0, 4);
     var otherLang = lang === "en" ? p.lo : describe(p, "en");
     return '<section class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="#shop">' + esc(t("nav_shop")) + '</a><span>/</span><a href="#shop-' + p.t[0] + '">' + esc(t("type_" + p.t[0])) + "</a><span>/</span><span>" + esc(p.n) + "</span></nav>" +
-      '<div class="pdp-grid"><div class="gallery">' + kitty(p.s.length % 2 ? "sharkPeek" : "peek", "gal-kitty") + '<div class="gmain">' + img(p.img[0], p.n, "", true).replace("<img", '<img id="gmain"') + "</div>" + thumbs + "</div>" +
+      '<div class="pdp-grid"><div class="gallery">' + kitty(["peek", "peniPeek", "sharkPeek", "peniBunnyPeek"][p.s.length % 4], "gal-kitty") + '<div class="gmain">' + img(p.img[0], p.n, "", true).replace("<img", '<img id="gmain"') + "</div>" + thumbs + "</div>" +
       '<div class="pinfo"><div><p class="ptype">' + esc(typeLabel(p)) + "</p><h1>" + esc(p.n) + '</h1></div><div id="priceBlock">' + priceBlock + "</div>" + features(p) +
       (!p.cur ? '<p class="notice">' + esc(t("earlier_note")) + "</p>" : "") +
       '<form class="pform" id="pform" novalidate>' + opts + col + ini + addon + photo +
@@ -517,7 +517,7 @@
       el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
       var pop = document.getElementById("bagPop");
       if (pop && window.MINISE_CAT) {
-        if (!pop.firstChild) pop.innerHTML = window.MINISE_CAT("peek");
+        pop.innerHTML = window.MINISE_CAT(n % 2 ? "peniPeek" : "peek");
         pop.classList.remove("go"); void pop.offsetWidth; pop.classList.add("go");
       }
     }
@@ -573,8 +573,8 @@
   }
   function renderDrawer() {
     var d = document.getElementById("drawer");
-    d.innerHTML = '<div class="drawer-head"><div class="drawer-title">' + (bag.length ? kitty("box", "drawer-kitty") : "") + '<h2 id="drawerTitle">' + esc(t("bag_h")) + '</h2></div><button class="icon-btn" type="button" data-close aria-label="' + esc(t("close")) + '">✕</button></div>' +
-      '<div class="drawer-body">' + (bag.length ? bagLines(true) : '<div class="empty">' + kitty("sleep", "empty-kitty") + "<p>" + esc(t("bag_empty")) + "</p></div>") + "</div>" +
+    d.innerHTML = '<div class="drawer-head"><div class="drawer-title">' + (bag.length ? kitty("peniBox", "drawer-kitty") : "") + '<h2 id="drawerTitle">' + esc(t("bag_h")) + '</h2></div><button class="icon-btn" type="button" data-close aria-label="' + esc(t("close")) + '">✕</button></div>' +
+      '<div class="drawer-body">' + (bag.length ? bagLines(true) : '<div class="empty">' + kitty("peniSleep", "empty-kitty") + "<p>" + esc(t("bag_empty")) + "</p></div>") + "</div>" +
       '<div class="drawer-foot">' + (bag.length ? totalHTML() + '<a class="btn wide" href="#checkout" data-close>' + esc(t("checkout")) + "</a>" : "") +
       '<button class="btn ghost wide" type="button" data-close>' + esc(t("keep")) + "</button></div>";
   }
@@ -738,7 +738,7 @@
       field("coNote", t("co_note"), '<textarea id="coNote" maxlength="500"></textarea>') +
       "</fieldset>";
     if (photos) {
-      html += '<fieldset class="co-step">' + kitty("heart", "step-kitty") + stepHead(n++, t("st_photos")) +
+      html += '<fieldset class="co-step">' + kitty("peniHeart", "step-kitty") + stepHead(n++, t("st_photos")) +
         '<p class="hint">' + esc(t("photos_need")) + '</p><div class="field" id="coPhotosF"><label class="file-drop" for="coPhotos">' + esc(t("photos_add")) +
         '<input type="file" id="coPhotos" accept="image/*" multiple class="sr"></label><div class="previews" id="coPhotosPrev">' + photoPreviews() + '</div><span class="err" id="coPhotosE" hidden></span></div></fieldset>';
     }
@@ -911,7 +911,7 @@
   function checkoutDone() {
     var d = CO.done;
     var name = "minise-receipt-" + d.id + ".png";
-    return '<section class="wrap co-done"><div class="done-head">' + kitty("yay", "done-kitty") + '<p class="eyebrow">' + esc(t("co_eyebrow_done")) + "</p><h1>" + esc(t("done_h")) + "</h1>" +
+    return '<section class="wrap co-done"><div class="done-head">' + '<span class="done-duo">' + kitty("yay", "done-kitty") + kitty("peniYay", "done-kitty") + "</span>" + '<p class="eyebrow">' + esc(t("co_eyebrow_done")) + "</p><h1>" + esc(t("done_h")) + "</h1>" +
       '<p class="lead">' + esc(t("done_p", { no: d.id, via: t("via_" + d.via) })) + "</p></div>" +
       '<div class="done-grid"><div class="rc-out"><img src="' + d.receipt + '" alt="' + esc(t("rc_title") + " " + d.id) + '">' +
       '<a class="btn wide" href="' + d.receipt + '" download="' + esc(name) + '">' + esc(t("rc_download")) + "</a><p class=\"hint\">" + esc(t("rc_saved_hint")) + "</p></div>" +
@@ -1077,7 +1077,7 @@
     for (var i = 1; i <= 8; i++) tl += "<li><time>" + esc(t("tl" + i + "d")) + "</time><p>" + esc(t("tl" + i)) + "</p></li>";
     return '<section class="wrap story-hero"><div class="copy"><p class="eyebrow">' + esc(t("story_eyebrow")) + "</p><h1>" + esc(t("story_h")) + '</h1><p class="lead">' + esc(t("story_lead")) + "</p>" +
       '<div class="hero-actions"><a class="btn" href="#shop">' + esc(t("hero_cta")) + '</a><a class="btn ghost" href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></div></div>' +
-      '<div class="story-pics">' + kitty("heart", "pics-kitty") + P.slice().sort(bestOrder).slice(0, 2).map(function (p) { return img(p.img[0], p.n); }).join("") + "</div></section>" +
+      '<div class="story-pics">' + kitty("heart", "pics-kitty") + kitty("peniHeart", "pics-kitty pics-kitty2") + P.slice().sort(bestOrder).slice(0, 2).map(function (p) { return img(p.img[0], p.n); }).join("") + "</div></section>" +
       promisesHTML() +
       '<section class="section"><div class="wrap">' + head(t("story_eyebrow"), t("tl_h")) + '<ol class="timeline">' + tl + "</ol></div></section>" +
       '<section class="section band"><div class="wrap">' + head("Minise Arte", t("values_h")) + '<div class="values">' +
@@ -1090,7 +1090,7 @@
       '<section class="section band"><div class="wrap">' + head(t("faq_eyebrow"), t("faq_h")) + faqHTML() + "</div></section>";
   }
   function visitPage() {
-    return '<section class="wrap page-head kittied">' + kitty("drink", "head-kitty") + '<p class="eyebrow">' + esc(t("visit_eyebrow")) + "</p><h1>" + esc(t("visit_h")) + "</h1></section>" +
+    return '<section class="wrap page-head kittied">' + kitty("peniMilk", "head-kitty") + '<p class="eyebrow">' + esc(t("visit_eyebrow")) + "</p><h1>" + esc(t("visit_h")) + "</h1></section>" +
       '<section class="section tight"><div class="wrap">' + visitHTML() + "</div></section>";
   }
 
@@ -1101,71 +1101,93 @@
     for (var i = 1; i <= n; i++) out += "<section><h2>" + esc(t(key + "_" + i + "h")) + "</h2><p>" + esc(t(key + "_" + i)) + "</p></section>";
     return out + "</div></section>";
   }
-  /* Meet Mumi: the shop cat's own page. Tap Mumi for a pet, or pick what Mumi does next.
-     The pet count is only remembered on this device. */
-  var MU = { pose: "wave", pets: 0, line: 0 };
-  try { MU.pets = parseInt(localStorage.getItem("minise_mumi_pets"), 10) || 0; } catch (e) { /* ignore */ }
-  var MUMI_DO = ["wave", "drink", "shark", "paint", "yay", "sleep"];
-  var MUMI_DAY = [["8:00", "drink"], ["9:30", "phone"], ["11:00", "search"], ["14:00", "gift"], ["17:00", "swim"], ["21:00", "sharkSleep"]];
-  function mumiPage() {
-    var C = window.MINISE_CAT || function () { return ""; };
-    var acts = MUMI_DO.map(function (p) {
-      return '<button type="button" data-mumi="' + p + '" aria-pressed="' + (MU.pose === p) + '"><span class="mo-kitty">' + C(p) + "</span><span>" + esc(t("mo_" + p)) + "</span></button>";
+  /* Meet Mumi and Meet Peni: each cat has the same kind of page. Tap the cat for a pet, pick what it does next,
+     read its staff card and its day, see its favourite pieces, and visit its friend. Pet counts stay on this device. */
+  var CATS = {
+    mumi: {
+      names: ["Mumi", "ມູມີ", "姆咪"], friend: "peni", acts: ["wave", "drink", "shark", "paint", "yay", "sleep"], love: "heart", photo: "drink", paw: "paw", sec: "sparkle", end: "box",
+      day: [["8:00", "drink"], ["9:30", "phone"], ["11:00", "search"], ["14:00", "gift"], ["17:00", "swim"], ["21:00", "sharkSleep"]],
+      favs: function (p) { return p.t.indexOf("locket") > -1; }, favLink: "#shop-locket", favPose: "heart", ctaHref: "#shop",
+      friendPics: ["peniWave", "peniSleep"],
+      k: { eyebrow: "mumi_eyebrow", h: "mumi_h", lead: "mumi_lead", cta: "mumi_cta", pet: "mumi_pet_label", pick: "mumi_pick", act: "mo_", say: "ms_", pp: "mp_", love: "mp_love",
+        idH: "idc_h", idP: "idc_p", no: "mid_no", val: "mid_", dayE: "day_eyebrow", day: "md_", favE: "fav_eyebrow", favH: "fav_h", findH: "find_h", findP: "find_p",
+        frE: "peni_eyebrow", frH: "peni_h", frP: "peni_p", frF: ["peni_f1", "peni_f2", "peni_f3"], frGo: "peni_visit" }
+    },
+    peni: {
+      names: ["Peni", "ເປນີ", "佩妮"], friend: "mumi", acts: ["peniWave", "peniMilk", "peniBunny", "peniYarn", "peniYay", "peniSleep"], love: "peniHeart", photo: "peniMilk", paw: "peniPaw", sec: "peniSparkle", end: "peniBox",
+      day: [["7:30", "peniSleep"], ["9:00", "peniMilk"], ["10:30", "peniSearch"], ["13:00", "peniYarn"], ["15:00", "peniGift"], ["18:00", "peniBunny"]],
+      favs: function (p) { return p.g.indexOf("clover") > -1; }, favLink: "#c-clover", favPose: "peniHeart", ctaHref: "#make",
+      friendPics: ["wave", "sharkSleep"],
+      k: { eyebrow: "pni_eyebrow", h: "pni_h", lead: "pni_lead", cta: "pni_cta", pet: "pni_pet_label", pick: "mumi_pick", act: "po_", say: "ps_", pp: "pp_", love: "pp_love",
+        idH: "pid_h", idP: "pid_p", no: "pid_no", val: "pid_", dayE: "pday_eyebrow", day: "pd_", favE: "pfav_eyebrow", favH: "pfav_h", findH: "pfind_h", findP: "pfind_p",
+        frE: "mfr_eyebrow", frH: "mfr_h", frP: "mfr_p", frF: ["mfr_f1", "mfr_f2", "mfr_f3"], frGo: "mumi_visit" }
+    }
+  };
+  var CP = { who: "mumi", line: 0, pose: { mumi: "wave", peni: "peniWave" }, pets: { mumi: 0, peni: 0 } };
+  ["mumi", "peni"].forEach(function (c) { try { CP.pets[c] = parseInt(localStorage.getItem("minise_" + c + "_pets"), 10) || 0; } catch (e) { /* ignore */ } });
+  function namePills(c) { var n = CATS[c].names; return '<p class="mumi-names"><span>' + n[0] + '</span><span lang="lo">' + n[1] + '</span><span lang="zh-CN">' + n[2] + "</span></p>"; }
+  function catPage(c) {
+    var cat = CATS[c], k = cat.k, fr = CATS[cat.friend], C = window.MINISE_CAT || function () { return ""; };
+    CP.who = c;
+    var pose = CP.pose[c];
+    var acts = cat.acts.map(function (p) {
+      return '<button type="button" data-cat-do="' + p + '" aria-pressed="' + (pose === p) + '"><span class="mo-kitty">' + C(p) + "</span><span>" + esc(t(k.act + p)) + "</span></button>";
     }).join("");
-    var rows = ["name", "job", "home", "drink", "piece", "hobby", "secret"].map(function (k) {
-      return "<div><dt>" + esc(t("mid_" + k + "_k")) + "</dt><dd>" + esc(t("mid_" + k)) + "</dd></div>";
+    var rows = ["name", "job", "home", "drink", "piece", "hobby", "secret"].map(function (r) {
+      return "<div><dt>" + esc(t("mid_" + r + "_k")) + "</dt><dd>" + esc(t(k.val + r)) + "</dd></div>";
     }).join("");
-    var day = MUMI_DAY.map(function (d, i) {
-      return '<li><span class="md-time tn">' + d[0] + "</span>" + kitty(d[1], "md-kitty") + "<p>" + esc(t("md_" + (i + 1))) + "</p></li>";
+    var day = cat.day.map(function (d, i) {
+      return '<li><span class="md-time tn">' + d[0] + "</span>" + kitty(d[1], "md-kitty") + "<p>" + esc(t(k.day + (i + 1))) + "</p></li>";
     }).join("");
-    var favs = P.filter(function (p) { return p.t.indexOf("locket") > -1; }).sort(bestOrder).slice(0, 4).map(card).join("");
+    var favs = P.filter(cat.favs).sort(bestOrder).slice(0, 4).map(card).join("");
     return '<section class="mumi-hero"><div class="wrap mumi-grid">' +
-      '<div class="mumi-copy"><p class="eyebrow">' + esc(t("mumi_eyebrow")) + "</p><h1>" + esc(t("mumi_h")) + "</h1>" +
-      '<p class="mumi-names"><span>Mumi</span><span lang="lo">ມູມີ</span><span lang="zh-CN">姆咪</span></p>' +
-      '<p class="lead">' + esc(t("mumi_lead")) + "</p>" +
-      '<div class="hero-actions"><a class="btn solid" href="#shop">' + esc(t("mumi_cta")) + "</a></div></div>" +
+      '<div class="mumi-copy"><p class="eyebrow">' + esc(t(k.eyebrow)) + "</p><h1>" + esc(t(k.h)) + "</h1>" + namePills(c) +
+      '<p class="lead">' + esc(t(k.lead)) + "</p>" +
+      '<div class="hero-actions"><a class="btn solid" href="' + cat.ctaHref + '">' + esc(t(k.cta)) + '</a><a class="btn ghost" href="#' + cat.friend + '">' + esc(t(k.frGo)) + "</a></div></div>" +
       '<div class="mumi-play"><div class="mumi-stage">' +
-      '<p class="mumi-says" id="mumiSays" role="status">' + esc(t("ms_" + MU.pose)) + "</p>" +
-      '<div class="mumi-window"><button class="mumi-pet" id="mumiPet" type="button" aria-label="' + esc(t("mumi_pet_label")) + '"><span class="mumi-fig" id="mumiFig">' + C(MU.pose) + "</span></button></div>" +
-      '<p class="mumi-cap"><span>' + esc(t("mumi_tap")) + '</span><span class="tn" id="mumiCount">' + esc(t("mumi_pets").replace("{n}", MU.pets)) + "</span></p></div>" +
-      '<div class="mumi-acts"><p id="mumiPick">' + esc(t("mumi_pick")) + '</p><div class="mumi-btns" role="group" aria-labelledby="mumiPick">' + acts + "</div></div></div></div></section>" +
+      '<p class="mumi-says" id="catSays" role="status">' + esc(t(k.say + pose)) + "</p>" +
+      '<div class="mumi-window"><button class="mumi-pet" id="catPet" type="button" aria-label="' + esc(t(k.pet)) + '"><span class="mumi-fig" id="catFig">' + C(pose) + "</span></button></div>" +
+      '<p class="mumi-cap"><span>' + esc(t("mumi_tap")) + '</span><span class="tn" id="catCount">' + esc(t("mumi_pets").replace("{n}", CP.pets[c])) + "</span></p></div>" +
+      '<div class="mumi-acts"><p id="catPick">' + esc(t(k.pick)) + '</p><div class="mumi-btns" role="group" aria-labelledby="catPick">' + acts + "</div></div></div></div></section>" +
       '<section class="section band"><div class="wrap mumi-id-grid">' +
-      '<div class="mumi-id-copy"><p class="eyebrow">' + esc(t("idc_eyebrow")) + "</p><h2>" + esc(t("idc_h")) + '</h2><p class="lead">' + esc(t("idc_p")) + "</p></div>" +
+      '<div class="mumi-id-copy"><p class="eyebrow">' + esc(t("idc_eyebrow")) + "</p><h2>" + esc(t(k.idH)) + '</h2><p class="lead">' + esc(t(k.idP)) + "</p></div>" +
       '<div class="mumi-id-hold"><div class="mumi-id"><div class="mid-top"><span>Minise Arte</span><span>' + esc(t("idc_eyebrow")) + "</span></div>" +
-      '<div class="mid-body"><div class="mid-photo"><div class="ph">' + C("drink") + '</div><b class="tn">' + esc(t("mid_no")) + "</b></div>" +
+      '<div class="mid-body"><div class="mid-photo"><div class="ph">' + C(cat.photo) + '</div><b class="tn">' + esc(t(k.no)) + "</b></div>" +
       '<dl class="mid-list">' + rows + "</dl></div>" +
-      '<div class="mid-foot"><span>' + esc(t("mid_sign")) + "</span>" + kitty("paw", "mid-paw") + "</div></div></div></div></section>" +
-      '<section class="section"><div class="wrap peni-grid"><div class="peni-pic">' + kitty("peniWave", "peni-kitty") + kitty("peniSleep", "peni-kitty2") + "</div>" +
-      '<div class="peni-copy"><p class="eyebrow">' + esc(t("peni_eyebrow")) + "</p><h2>" + esc(t("peni_h")) + '</h2><p class="mumi-names"><span>Peni</span><span lang="lo">ເປນີ</span><span lang="zh-CN">佩妮</span></p>' +
-      '<p class="lead">' + esc(t("peni_p")) + '</p><ul class="ticks">' + ["peni_f1", "peni_f2", "peni_f3"].map(function (k) { return "<li>" + ICON.tick + "<span>" + esc(t(k)) + "</span></li>"; }).join("") + "</ul>" +
-      '<div><a class="btn" href="#make">' + esc(t("peni_cta")) + "</a></div></div></div></section>" +
-      '<section class="section"><div class="wrap">' + head(t("day_eyebrow"), t("day_h"), "", "", "", "sparkle") + '<ol class="mumi-day">' + day + "</ol></div></section>" +
-      (favs ? '<section class="section tight band"><div class="wrap">' + head(t("fav_eyebrow"), t("fav_h"), "#shop-locket", t("view_all"), "", "heart") + '<div class="grid">' + favs + "</div></div></section>" : "") +
-      '<section class="mumi-end"><div class="wrap"><div class="mumi-end-card">' + kitty("box", "end-kitty") + "<h2>" + esc(t("find_h")) + "</h2><p>" + esc(t("find_p")) + '</p><a class="btn solid" href="#shop">' + esc(t("mumi_cta")) + "</a></div></div></section>";
+      '<div class="mid-foot"><span>' + esc(t("mid_sign")) + "</span>" + kitty(cat.paw, "mid-paw") + "</div></div></div></div></section>" +
+      '<section class="section"><div class="wrap">' + head(t(k.dayE), t("day_h"), "", "", "", cat.sec) + '<ol class="mumi-day">' + day + "</ol></div></section>" +
+      '<section class="section band"><div class="wrap peni-grid"><div class="peni-pic">' + kitty(cat.friendPics[0], "peni-kitty") + kitty(cat.friendPics[1], "peni-kitty2") + "</div>" +
+      '<div class="peni-copy"><p class="eyebrow">' + esc(t(k.frE)) + "</p><h2>" + esc(t(k.frH)) + "</h2>" + namePills(cat.friend) +
+      '<p class="lead">' + esc(t(k.frP)) + '</p><ul class="ticks">' + k.frF.map(function (f) { return "<li>" + ICON.tick + "<span>" + esc(t(f)) + "</span></li>"; }).join("") + "</ul>" +
+      '<div><a class="btn" href="#' + cat.friend + '">' + esc(t(k.frGo)) + " →</a></div></div></div></section>" +
+      '<section class="section"><div class="wrap">' + storyHTML() + "</div></section>" +
+      (c === "peni" ? '<section class="section tight"><div class="wrap">' + fortuneHTML() + "</div></section>" : "") +
+      (favs ? '<section class="section tight band"><div class="wrap">' + head(t(k.favE), t(k.favH), cat.favLink, t("view_all"), "", cat.favPose) + '<div class="grid">' + favs + "</div></div></section>" : "") +
+      '<section class="mumi-end"><div class="wrap"><div class="mumi-end-card">' + kitty(cat.end, "end-kitty") + "<h2>" + esc(t(k.findH)) + "</h2><p>" + esc(t(k.findP)) + '</p><a class="btn solid" href="' + cat.ctaHref + '">' + esc(t(k.cta)) + "</a></div></div></section>";
   }
-  function mumiSay(text) {
-    var s = document.getElementById("mumiSays");
+  function catSay(text) {
+    var s = document.getElementById("catSays");
     if (!s) return;
     s.textContent = text;
     s.classList.remove("pop"); void s.offsetWidth; s.classList.add("pop");
   }
-  function mumiHop(fig) { if (calm) return; fig.classList.remove("jump"); void fig.offsetWidth; fig.classList.add("jump"); }
+  function catHop(fig) { if (calm) return; fig.classList.remove("jump"); void fig.offsetWidth; fig.classList.add("jump"); }
   var HEART = '<svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 20.5C5.5 16 1.5 12.2 1.5 7.6 1.5 4.3 4 2 7 2c2 0 3.8 1.1 5 2.9C13.2 3.1 15 2 17 2c3 0 5.5 2.3 5.5 5.6 0 4.6-4 8.4-10.5 12.9Z" fill="#ec9aa9" stroke="#24396a" stroke-width="2" stroke-linejoin="round"/></svg>';
-  function mumiPet() {
-    var fig = document.getElementById("mumiFig");
+  function catPet() {
+    var fig = document.getElementById("catFig"), c = CP.who, cat = CATS[c];
     if (!fig) return;
-    MU.pets++;
-    try { localStorage.setItem("minise_mumi_pets", String(MU.pets)); } catch (e) { /* ignore */ }
-    // every tenth pet Mumi hugs a heart locket
-    var love = MU.pets % 10 === 0;
-    mumiSay(t(love ? "mp_love" : "mp_" + (MU.line++ % 4 + 1)));
-    document.getElementById("mumiCount").textContent = t("mumi_pets").replace("{n}", MU.pets);
+    CP.pets[c]++;
+    try { localStorage.setItem("minise_" + c + "_pets", String(CP.pets[c])); } catch (e) { /* ignore */ }
+    // every tenth pet the cat hugs a heart locket
+    var love = CP.pets[c] % 10 === 0;
+    catSay(t(love ? cat.k.love : cat.k.pp + (CP.line++ % 4 + 1)));
+    document.getElementById("catCount").textContent = t("mumi_pets").replace("{n}", CP.pets[c]);
     if (love && window.MINISE_CAT) {
-      fig.innerHTML = window.MINISE_CAT("heart");
-      clearTimeout(mumiPet._t);
-      mumiPet._t = setTimeout(function () { var f = document.getElementById("mumiFig"); if (f) f.innerHTML = window.MINISE_CAT(MU.pose); }, 2400);
+      fig.innerHTML = window.MINISE_CAT(cat.love);
+      clearTimeout(catPet._t);
+      catPet._t = setTimeout(function () { var f = document.getElementById("catFig"); if (f) f.innerHTML = window.MINISE_CAT(CP.pose[CP.who]); }, 2400);
     }
-    mumiHop(fig);
+    catHop(fig);
     if (calm) return;
     var stage = fig.closest(".mumi-stage");
     for (var i = 0; i < (love ? 8 : 3); i++) {
@@ -1179,21 +1201,79 @@
       stage.appendChild(h);
     }
   }
-  function mumiDo(pose) {
-    var fig = document.getElementById("mumiFig");
-    if (!fig || !window.MINISE_CAT || MUMI_DO.indexOf(pose) < 0) return;
-    clearTimeout(mumiPet._t);
-    MU.pose = pose;
+  function catDo(pose) {
+    var fig = document.getElementById("catFig"), cat = CATS[CP.who];
+    if (!fig || !window.MINISE_CAT || cat.acts.indexOf(pose) < 0) return;
+    clearTimeout(catPet._t);
+    CP.pose[CP.who] = pose;
     fig.innerHTML = window.MINISE_CAT(pose);
-    document.querySelectorAll("[data-mumi]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-mumi") === pose)); });
-    mumiSay(t("ms_" + pose));
-    mumiHop(fig);
+    document.querySelectorAll("[data-cat-do]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-cat-do") === pose)); });
+    catSay(t(cat.k.say + pose));
+    catHop(fig);
   }
   document.addEventListener("click", function (e) {
-    if (e.target.closest("#mumiPet")) { mumiPet(); return; }
-    var b = e.target.closest("[data-mumi]");
-    if (b) mumiDo(b.getAttribute("data-mumi"));
+    if (e.target.closest("#catPet")) { catPet(); return; }
+    var b = e.target.closest("[data-cat-do]");
+    if (b) catDo(b.getAttribute("data-cat-do"));
   });
+
+  /* Mumi & Peni stories: short four-panel comics, one episode at a time */
+  var EPISODES = [
+    [[["drink"], ["peniSleep", "pn-small"]], "mumi", "st_1"], [[["peni", "pn-big"], ["@A1"]], "peni", "st_2"], [[["paint"], ["peniBracelet"]], "mumi", "st_3"], [[["gift"], ["peniWave"]], "peni", "st_4"],
+    [[["shark"]], "mumi", "ep2_1"], [[["peniBunny"]], "peni", "ep2_2"], [[["sharkPeek"], ["peniHop"]], "mumi", "ep2_3"], [[["sharkSleep"], ["peniBunnySleep"]], "peni", "ep2_4"],
+    [[["phone"]], "mumi", "ep3_1"], [[["peniSearch"]], "peni", "ep3_2"], [[["paint"], ["peniHeart"]], "mumi", "ep3_3"], [[["gift"], ["peniYay"]], "peni", "ep3_4"],
+    [[["search"]], "mumi", "ep4_1"], [[["peniBox", "pn-big"]], "peni", "ep4_2"], [[["heart"], ["@A17"], ["@C23"]], "mumi", "ep4_3"], [[["peniWave"], ["drink"]], "peni", "ep4_4"]
+  ];
+  var EP = { n: 0 };
+  function storyPanels() {
+    return EPISODES.slice(EP.n * 4, EP.n * 4 + 4).map(function (p, i) {
+      var pics = p[0].map(function (x) {
+        if (x[0].charAt(0) === "@") return '<span class="pn-clover">' + charmImg(x[0].slice(1)) + "</span>";
+        return kitty(x[0], "pn-k" + (x[1] ? " " + x[1] : "") + (p[0].length === 1 ? " pn-solo" : ""));
+      }).join("");
+      return '<li><span class="pn-num tn">' + (i + 1) + '</span><div class="pn-pic">' + pics + '</div><p class="pn-say"><b>' + esc(t(p[1] === "mumi" ? "mid_name" : "peni_name")) + "</b>" + esc(t(p[2])) + "</p></li>";
+    }).join("");
+  }
+  function storyHTML() {
+    var tabs = [0, 1, 2, 3].map(function (n) {
+      return '<button type="button" class="ep-tab" data-ep="' + n + '" aria-pressed="' + (EP.n === n) + '"><span class="tn">' + esc(t("ep_n", { n: n + 1 })) + "</span>" + esc(t("ep" + (n + 1) + "_t")) + "</button>";
+    }).join("");
+    return '<div class="stories"><div class="ep-head"><p class="eyebrow">' + esc(t("ep_eyebrow")) + '</p><div class="ep-tabs" role="group" aria-label="' + esc(t("ep_eyebrow")) + '">' + tabs + "</div></div>" +
+      '<ol class="duo-story" id="duoStory">' + storyPanels() + "</ol></div>";
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-ep]");
+    if (!b) return;
+    EP.n = +b.getAttribute("data-ep");
+    document.querySelectorAll("[data-ep]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    var box = document.getElementById("duoStory");
+    if (box) { box.innerHTML = storyPanels(); pageIn(box); }
+  });
+
+  /* Peni's charm of the day: the same charm and wish for everyone today (Vientiane time), a new one tomorrow */
+  var LUCKY = ["A1", "A5", "A7", "A9", "A11", "A16", "A22", "A24", "B4", "B20", "B23", "C12", "C13", "C16", "C17", "C18", "C25", "C27", "C33", "C37", "C38", "A3", "B2", "C36"];
+  function fortuneToday() {
+    var day = Math.floor((Date.now() + 7 * 3600000) / 86400000);
+    var list = LUCKY.filter(function (c) { return CH_BY[c]; });
+    return { code: list[day % list.length], wish: "ft_" + ((day * 7) % 12 + 1) };
+  }
+  function fortuneHTML() {
+    var f = fortuneToday();
+    if (!f.code) return "";
+    return '<div class="fortune">' + kitty("peniSparkle", "fortune-kitty") + '<div class="fortune-copy"><p class="eyebrow">' + esc(t("ft_eyebrow")) + "</p><h3>" + esc(charmName(f.code)) + " <small class=\"tn\">" + f.code + "</small></h3>" +
+      "<p>“" + esc(t(f.wish)) + "”</p>" + '<button class="btn solid" type="button" data-lucky="' + f.code + '">' + esc(t("ft_use")) + "</button></div>" +
+      '<span class="fortune-charm">' + charmImg(f.code) + "</span></div>";
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-lucky]");
+    if (!b) return;
+    var code = b.getAttribute("data-lucky");
+    if (MK.ch.indexOf(code) < 0) { if (MK.ch.length >= MYO_MAX) MK.ch.pop(); MK.ch.push(code); }
+    MK.say = t("pn_lucky", { n: charmName(code) });
+    mkSave();
+    location.hash = "#make";
+  });
+
   /* Make your own bracelet: a coloured letter disc on a steel chain, plus up to MYO_MAX charms from the trays (js/charms.js).
      It is one product in the catalogue, so its price (the bracelet, and each charm as the add-on) is edited in the admin
      and checked again by the database when the order is sent. */
@@ -1436,17 +1516,9 @@
   }
   function duoHTML() {
     if (!GM.cards.length) gmNew();
-    var panels = [
-      [kitty("drink", "pn-k") + kitty("peniSleep", "pn-k pn-small"), "Mumi", "st_1"],
-      [kitty("peni", "pn-k pn-big") + '<span class="pn-clover">' + charmImg("A1") + "</span>", "Peni", "st_2"],
-      [kitty("paint", "pn-k") + kitty("peniBracelet", "pn-k"), "Mumi", "st_3"],
-      [kitty("gift", "pn-k") + kitty("peniWave", "pn-k"), "Peni", "st_4"]
-    ].map(function (p, i) {
-      return '<li><span class="pn-num tn">' + (i + 1) + '</span><div class="pn-pic">' + p[0] + '</div><p class="pn-say"><b>' + (p[1] === "Mumi" ? esc(t("mid_name")) : esc(t("peni_name"))) + "</b>" + esc(t(p[2])) + "</p></li>";
-    }).join("");
     return '<section class="duo"><div class="wrap">' +
-      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><a class="link" href="#mumi">' + esc(t("duo_more")) + " →</a>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
-      '<ol class="duo-story">' + panels + "</ol>" +
+      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><span class="duo-links"><a class="link" href="#mumi">' + esc(t("mumi_link")) + ' →</a><a class="link" href="#peni">' + esc(t("peni_link")) + " →</a></span>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
+      storyHTML() + fortuneHTML() +
       '<div class="gm" id="gm"><div class="gm-top"><div><h3>' + esc(t("gm_h")) + "</h3><p>" + esc(t("gm_p")) + '</p></div><div class="gm-stats" id="gmStats">' + gmStats() + "</div></div>" +
       '<div class="gm-board" id="gmBoard">' + GM.cards.map(function (c, i) { return gmCard(i); }).join("") + "</div>" +
       '<div class="gm-foot"><div class="gm-peni">' + kitty("peni", "gm-peni-kitty") + '<p class="gm-say" id="gmSay" role="status">' + esc(GM.say) + '</p></div><button class="link gm-reset" type="button" data-gm-again>' + esc(t("gm_again")) + "</button></div>" +
@@ -1517,12 +1589,12 @@
     }
   });
   function footer() {
-    return '<div class="wrap foot-wrap">' + kitty("shark", "foot-kitty") + kitty("sleep", "foot-kitty2") + '<div class="foot-grid"><div class="foot-brand"><span class="foot-logo">Minise Arte</span><p>' + esc(t("footer_tag")) + "</p>" +
+    return '<div class="wrap foot-wrap">' + kitty("shark", "foot-kitty") + kitty("peniBunnySleep", "foot-kitty2") + '<div class="foot-grid"><div class="foot-brand"><span class="foot-logo">Minise Arte</span><p>' + esc(t("footer_tag")) + "</p>" +
       '<p class="tn">' + WA.mainShow + " · " + WA.altShow + "</p></div>" +
       "<div><h4>" + esc(t("footer_shop")) + '</h4><ul><li><a href="#make">' + esc(t("nav_make")) + "</a></li>" + ["locket", "bracelet", "necklace", "set", "earrings", "accessory"].map(function (ty) {
         return '<li><a href="#shop-' + ty + '">' + esc(t("type_" + ty)) + "</a></li>";
       }).join("") + "</ul></div>" +
-      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
+      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
       "<div><h4>" + esc(t("footer_follow")) + '</h4><ul><li><a href="' + FB + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></li><li><a href="https://www.instagram.com/minise.studio/" target="_blank" rel="noopener">@minise.studio</a></li><li><a href="https://www.instagram.com/minise.au/" target="_blank" rel="noopener">@minise.au</a></li><li><a href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a></li><li><a href="https://linktr.ee/Miniseofficial" target="_blank" rel="noopener">Linktree</a></li></ul></div></div>' +
       '<div class="foot-base"><span>© 2026 Minise Arte · ມິນິເຊ່ ອາຕ໌</span><span>' + esc(t("footer_copy")) + "</span></div></div>";
   }
@@ -1549,7 +1621,7 @@
     else if (h === "visit") html = visitPage();
     else if (h === "privacy") html = legalPage("pv", 7, "sharkPeek");
     else if (h === "terms") html = legalPage("tm", 10, "paint");
-    else if (h === "mumi") html = mumiPage();
+    else if (h === "mumi" || h === "peni") html = catPage(h);
     else if (h === "checkout") html = checkout();
     else { h = "home"; html = home(); }
     if (h !== "checkout") CO.done = null;
@@ -1577,12 +1649,13 @@
 
   // the browser tab title and the page description follow the page you are on
   function setMeta(h) {
-    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), make: t("mk_h") };
+    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h") };
     var title = "Minise Arte · " + t("footer_tag").replace(/\.$/, ""), desc = t("hero_lead");
     if (S) { title = S.p.n + " · Minise Arte"; desc = (describe(S.p, lang) || describe(S.p, "en") || desc).slice(0, 155); }
     else if (h.indexOf("shop") === 0 || h.indexOf("c-") === 0) title = shopTitle() + " · Minise Arte";
     else if (names[h]) title = names[h] + " · Minise Arte";
     if (h === "mumi") desc = t("mumi_lead");
+    if (h === "peni") desc = t("pni_lead");
     if (h === "make") desc = t("mk_lead");
     document.title = title;
     var m = document.querySelector('meta[name="description"]');
@@ -1802,7 +1875,7 @@
   }
 
   /* the shop cat peeks up from the corner once you scroll; tap it for a tip and a way to chat */
-  var PK = { shown: false, pose: 0, msg: 0, off: false };
+  var PK = { shown: false, pose: 0, msg: 0, off: false, cat: "mumi" };
   try { PK.off = sessionStorage.getItem("minise_cat_off") === "1"; } catch (e) { /* ignore */ }
   function peekerEls() {
     var b = document.getElementById("peeker");
@@ -1820,8 +1893,10 @@
     if (want === PK.shown) return;
     PK.shown = want;
     if (want) {
-      b.innerHTML = window.MINISE_CAT(["peek", "peniPeek", "sharkPeek", "box"][PK.pose++ % 4]);
-      b.setAttribute("aria-label", t("peek_label"));
+      var pk = ["peek", "peniPeek", "sharkPeek", "peniBunnyPeek", "box", "peniBox"][PK.pose++ % 6];
+      PK.cat = pk.indexOf("peni") === 0 ? "peni" : "mumi";
+      b.innerHTML = window.MINISE_CAT(pk);
+      b.setAttribute("aria-label", t(PK.cat === "peni" ? "peek_label_p" : "peek_label"));
       b.hidden = false;
       requestAnimationFrame(function () { b.classList.add("up"); });
     } else {
@@ -1833,8 +1908,8 @@
   function peekerTalk() {
     var bub = document.getElementById("peekBubble");
     if (!bub.hidden) { bub.hidden = true; return; }
-    var tips = ["peek_1", "peek_2", "peek_3", "peek_4"];
-    bub.innerHTML = "<p>" + esc(t(tips[PK.msg++ % tips.length])) + '</p><div class="pb-row"><a class="btn" href="' + esc(waLink(tw("msg_hi"))) + '" target="_blank" rel="noopener">' + esc(t("peek_wa")) + '</a>' + (current !== "mumi" ? '<a class="link" href="#mumi">' + esc(t("mumi_link")) + " →</a>" : "") + '<button class="link" type="button" id="peekOff">' + esc(t("peek_hide")) + "</button></div>";
+    var tips = PK.cat === "peni" ? ["pk_p1", "pk_p2", "pk_p3", "pk_p4"] : ["peek_1", "peek_2", "peek_3", "peek_4"];
+    bub.innerHTML = "<p>" + esc(t(tips[PK.msg++ % tips.length])) + '</p><div class="pb-row"><a class="btn" href="' + esc(waLink(tw("msg_hi"))) + '" target="_blank" rel="noopener">' + esc(t("peek_wa")) + '</a>' + (current !== (PK.cat || "mumi") ? '<a class="link" href="#' + (PK.cat || "mumi") + '">' + esc(t((PK.cat || "mumi") + "_link")) + " →</a>" : "") + '<button class="link" type="button" id="peekOff">' + esc(t("peek_hide")) + "</button></div>";
     bub.hidden = false;
   }
   document.addEventListener("click", function (e) {

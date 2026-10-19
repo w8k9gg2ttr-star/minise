@@ -4,7 +4,8 @@
    MINISE_CAT(pose) returns an <svg> string. Poses:
    drink, wave, heart, gift, phone, yay, search, sleep, peek, paint, sparkle, box, walk, paw,
    shark, sharkPeek, sharkSleep, swim,
-   and Peni the fluffy kitten: peni, peniWave, peniBracelet, peniPeek, peniSleep */
+   and Peni the fluffy kitten: peni, peniWave, peniBracelet, peniPeek, peniSleep, peniMilk, peniHeart, peniGift, peniPhone,
+   peniYay, peniSearch, peniPaint, peniSparkle, peniBox, peniYarn, peniWalk, peniPaw, peniBunny, peniBunnyPeek, peniBunnySleep, peniHop */
 (function () {
   var INK = "#24396a", FUR = "#f8f4ea", SUIT = "#a9bfdb", SUIT_DARK = "#8ea8ca", BLUSH = "#f2c3cb", PINK = "#ec9aa9", WATER = "#c9d9ec", SW = 5.5;
   var STROKE = ' stroke="' + INK + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"';
@@ -23,7 +24,8 @@
     return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + wide + '" stroke-linecap="round" stroke-linejoin="round"/>' +
       '<path d="' + d + '" fill="none" stroke="' + (inner || FUR) + '" stroke-width="' + (wide - 11) + '" stroke-linecap="round" stroke-linejoin="round"/>';
   }
-  function paw(x, y, r, fill) { return '<circle cx="' + x + '" cy="' + y + '" r="' + (r || 10) + '" fill="' + (fill || FUR) + '"' + STROKE + "/>"; }
+  var PAWC = null; // set while drawing Peni, so props are held by Peni's paws
+  function paw(x, y, r, fill) { return '<circle cx="' + x + '" cy="' + y + '" r="' + (r || 10) + '" fill="' + (fill || PAWC || FUR) + '"' + STROKE + "/>"; }
   function star(x, y, r) {
     return '<path d="M' + x + " " + (y - r) + " Q" + x + " " + y + " " + (x + r) + " " + y + " Q" + x + " " + y + " " + x + " " + (y + r) + " Q" + x + " " + y + " " + (x - r) + " " + y + " Q" + x + " " + y + " " + x + " " + (y - r) + 'Z" fill="#fff"' + sw(3.5) + "/>";
   }
@@ -69,10 +71,11 @@
   function motion(x, y) { return g("k-motion", path("M" + x + " " + y + " q8 4 8 13", null, 4) + path("M" + (x + 10) + " " + (y - 12) + " q10 6 10 18", null, 4)); }
 
   /* ---------- props ---------- */
-  function iced() {
-    return path("M103 101 L112 132 L109 178", null, 4.5) +
+  function iced(milk) {
+    return path(milk ? "M101 125 L110 150 L108 178" : "M103 101 L112 132 L109 178", null, 4.5) +
       g("k-sip", path("M76 140 L83 194 Q100 201 117 194 L124 140 Z", "rgba(255,255,255,0.85)") +
-        '<path d="M80.5 162 L83.5 192 Q100 198 116.5 192 L119.5 162 Z" fill="#4a5f8c"/>' +
+        '<path d="M80.5 162 L83.5 192 Q100 198 116.5 192 L119.5 162 Z" fill="' + (milk ? "#f5b8c6" : "#4a5f8c") + '"/>' +
+        (milk ? g("k-twinkle", '<path d="M118 128 C126 128 130 136 126 144 C122 150 116 148 114 142 C112 136 112 128 118 128 Z" fill="#e8546b"' + sw(3) + '/>' + path("M112 128 Q118 122 124 128", "#7bb07d", 3) + dot(117, 137, 1.4, "#fff3c4") + dot(122, 141, 1.4, "#fff3c4")) : "") +
         g("k-ice", '<rect x="88" y="150" width="13" height="13" rx="3" fill="#fff" stroke="' + INK + '" stroke-width="3" transform="rotate(-10 94 156)"/>') +
         g("k-ice k-ice2", '<rect x="101" y="166" width="12" height="12" rx="3" fill="#dfe8f3" stroke="' + INK + '" stroke-width="3" transform="rotate(12 107 172)"/>') +
         path("M76 140 L124 140") + paw(76, 168, 9) + paw(124, 168, 9));
@@ -208,6 +211,36 @@
       paw(68, 172, 10, PFUR) + paw(132, 172, 10, PFUR);
   }
 
+  /* ---------- more Peni: props held by Peni, the yarn ball, walking, a paw, and the bunny suit ---------- */
+  function asPeni(fn) { var old = PAWC; PAWC = PFUR; try { return fn(); } finally { PAWC = old; } }
+  function down(dy, svg) { return '<g transform="translate(0 ' + dy + ')">' + svg + "</g>"; }
+  function yarn(x, y) {
+    return path("M" + (x - 16) + " " + (y + 8) + " C" + (x - 40) + " " + (y + 22) + " " + (x - 62) + " " + (y + 10) + " " + (x - 78) + " " + (y + 18), null, 3) +
+      g("k-roll", '<circle cx="' + x + '" cy="' + y + '" r="19" fill="#f4a9ba"' + sw(4.5) + "/>" +
+        path("M" + (x - 14) + " " + (y - 10) + " Q" + x + " " + (y - 2) + " " + (x + 12) + " " + (y - 14) + " M" + (x - 18) + " " + (y + 2) + " Q" + x + " " + (y + 10) + " " + (x + 18) + " " + (y - 2) + " M" + (x - 10) + " " + (y + 14) + " Q" + (x + 4) + " " + (y + 18) + " " + (x + 14) + " " + (y + 10), null, 3));
+  }
+  function peniWalker() {
+    function pleg(x, cls) { return g("k-leg " + cls, tube("M" + x + " 108 L" + (x - 2) + " 146", 22, PFUR)); }
+    return g("k-walkbob",
+      pleg(84, "k-leg-a") + pleg(164, "k-leg-b") +
+      g("k-tail k-tail-side", tube("M50 94 C28 88 20 66 28 46 C32 38 40 38 42 46", 22, PFUR)) +
+      path(fluff(114, 100, 66, 30, 14, 0.1), PFUR) + grey("M96 78 Q100 88 96 98 M112 76 Q116 86 112 96", 3.5) +
+      pleg(68, "k-leg-b") + pleg(148, "k-leg-a") +
+      '<g transform="translate(118 -12) scale(0.62)">' + peniHead({}) + "</g>");
+  }
+  // the bunny suit: a white hood with long ears, a pink belly and a cotton tail
+  var BUN = "#fbf8f3", BUN_PINK = "#f7cdd7";
+  var BEAR = "M64 56 C48 10 56 -24 72 -26 C88 -26 92 10 86 50 Z", BEAR_IN = "M68 50 C58 16 62 -12 72 -14 C80 -14 82 14 80 46 Z";
+  function bunnyHead(face) {
+    return g("k-ears", path(BEAR, BUN) + path(BEAR_IN, BUN_PINK, 0.01)) + g("k-ears k-ears2", path(mirror(BEAR), BUN) + path(mirror(BEAR_IN), BUN_PINK, 0.01)) +
+      path(HOOD, BUN) + oval(100, 108, 57, 44, PFUR, SW) +
+      '<g transform="translate(100 112) scale(0.8) translate(-100 -100)">' + peniFace(face) + "</g>";
+  }
+  function bunny(front) {
+    return g("k-cotton", path(fluff(150, 200, 15, 14, 10, 0.16), BUN)) + path(BODY, BUN) + oval(100, 186, 26, 24, BUN_PINK, 4) +
+      g("k-head", bunnyHead({ eyes: "happy" })) + (front || "");
+  }
+
   /* ---------- poses ---------- */
   var POSES = {
     drink: { box: "0 0 200 228", draw: function () { return cat({ face: { mouth: "none" } }) + iced(); } },
@@ -265,7 +298,42 @@
     peniPeek: { box: "0 26 200 140", draw: function () {
       return peniHead({}) + paw(62, 154, 13, PFUR) + paw(138, 154, 13, PFUR) + path("M56 150 L56 158 M64 148 L64 158", null, 3) + path(mirror("M56 150 L56 158 M64 148 L64 158"), null, 3);
     } },
-    peniSleep: { box: "0 26 224 196", draw: function () { return g("k-breathe", peniLoaf({ eyes: "sleep", mouth: "w" })) + zzz(166, 64); } }
+    peniSleep: { box: "0 26 224 196", draw: function () { return g("k-breathe", peniLoaf({ eyes: "sleep", mouth: "w" })) + zzz(166, 64); } },
+    peniMilk: { box: "0 26 200 206", draw: function () { return asPeni(function () { return peniSit({ eyes: "happy", mouth: "none" }) + iced(true); }); } },
+    peniHeart: { box: "0 26 200 206", draw: function () { return asPeni(function () { return peniSit({}) + down(6, heartLocket()); }); } },
+    peniGift: { box: "0 26 200 206", draw: function () { return asPeni(function () { return peniSit({ eyes: "happy" }) + down(4, giftBox()); }); } },
+    peniPhone: { box: "0 26 200 206", draw: function () { return asPeni(function () { return peniSit({ mouth: "o" }) + down(4, phone()); }); } },
+    peniYay: { box: "0 16 204 216", draw: function () {
+      var arms = g("k-cheer-l", tube("M64 164 C48 154 34 140 26 122", 16, PFUR)) + g("k-cheer-r", tube("M136 164 C152 154 166 140 174 122", 16, PFUR));
+      return confetti() + arms + peniSit({ eyes: "happy", mouth: "o" }) + g("k-cheer-l", paw(24, 118, 11, PFUR)) + g("k-cheer-r", paw(176, 118, 11, PFUR));
+    } },
+    peniSearch: { box: "0 26 204 206", draw: function () { return asPeni(function () { return peniSit({ mouth: "o" }, path("M68 170 Q78 184 92 180")) + down(12, magnifier()); }); } },
+    peniPaint: { box: "0 26 214 206", draw: function () {
+      return asPeni(function () {
+        var brush = g("k-brush", tube("M130 186 L176 130", 13) + path("M171 136 L181 124", null, 5) + path("M178 114 C186 106 196 108 194 118 C192 126 184 130 178 126 Z", "#f4a9ba", 4.5) + paw(130, 184, 10));
+        var painted = g("k-twinkle", path("M196 84 C184 76 182 66 188 62 C193 58 197 61 198 65 C199 61 203 58 208 62 C214 66 210 76 196 84 Z", "none", 4.5).replace('stroke="' + INK + '"', 'stroke="' + PINK + '"') + dot(178, 74, 3, PINK));
+        return painted + peniSit({ mouth: "o" }, path("M68 172 Q78 186 92 182")) + brush;
+      });
+    } },
+    peniSparkle: { box: "-8 18 216 214", draw: function () { return sparkles() + peniSit({}, path("M68 172 Q78 186 92 182") + path(mirror("M68 172 Q78 186 92 182"))); } },
+    peniBox: { box: "0 26 200 196", draw: function () {
+      return peniHead({ eyes: "happy" }) + asPeni(function () {
+        return down(18, g("k-boxjig", path("M30 112 L8 92 L24 84 L46 112 Z", BUN_PINK) + path(mirror("M30 112 L8 92 L24 84 L46 112 Z"), BUN_PINK) +
+          path("M30 112 L170 112 L170 196 L30 196 Z", "#f6d3d9") + path("M92 112 L108 112 L108 196 L92 196 Z", SUIT, 4.5) + paw(70, 114, 11) + paw(130, 114, 11)));
+      });
+    } },
+    peniYarn: { box: "0 26 224 196", draw: function () { return peniLoaf({ mouth: "o" }) + yarn(184, 196); } },
+    peniWalk: { box: "0 -8 238 166", draw: peniWalker },
+    peniPaw: { box: "0 0 92 134", draw: function () {
+      return tube("M46 150 L46 70", 44, PFUR) + grey("M28 104 Q46 99 64 104 M28 120 Q46 115 64 120", 4) + oval(46, 58, 30, 27, PFUR, SW) +
+        oval(29, 47, 5.5, 7, PEAR_PINK) + oval(46, 40, 6, 7.5, PEAR_PINK) + oval(63, 47, 5.5, 7, PEAR_PINK) + oval(46, 64, 12, 9.5, PEAR_PINK);
+    } },
+    peniBunny: { box: "0 -30 204 258", draw: function () {
+      return bunny(path("M66 152 Q76 166 90 164") + g("k-wave", tube("M136 150 C152 140 164 124 170 110", 16, BUN) + paw(171, 106, 11, BUN) + motion(184, 92)));
+    } },
+    peniBunnyPeek: { box: "0 -30 200 196", draw: function () { return g("k-head", bunnyHead({ mouth: "o" })) + paw(62, 160, 13, BUN) + paw(138, 160, 13, BUN); } },
+    peniBunnySleep: { box: "0 -30 220 196", draw: function () { return g("k-breathe-head", bunnyHead({ eyes: "sleep", mouth: "w" })) + zzz(156, 30); } },
+    peniHop: { box: "0 -40 204 278", draw: function () { return g("k-hopall", bunny(path("M66 152 Q76 166 90 164") + path(mirror("M66 152 Q76 166 90 164")))) + g("k-motion", path("M70 236 Q100 244 130 236", null, 4)); } }
   };
 
   var n = 0;

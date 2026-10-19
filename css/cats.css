@@ -2,7 +2,7 @@
    Each part moves around its own box (fill-box), so the same rules work at any size.
    Cats only move while on screen (.play is set by js/cats.js) and stay still for people who turn motion off. */
 .kitty { display: block; width: 100%; height: auto; overflow: visible; }
-.kitty-swim, .kitty-paw { overflow: hidden; }
+.kitty-swim, .kitty-paw, .kitty-peniPaw { overflow: hidden; }
 .kitty [class^="k-"], .kitty [class*=" k-"] { transform-box: fill-box; }
 .kitty:not(.play) * { animation-play-state: paused !important; }
 
@@ -92,6 +92,18 @@
 .k-swing { transform-origin: 50% 0%; animation: kSwing 2.6s ease-in-out infinite; }
 .k-charm { transform-origin: 30% 0%; animation: kSwing 1.7s ease-in-out infinite reverse; }
 @keyframes kSwing { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+/* more Peni: cheering arms, bunny ears that twitch, the yarn ball rolling, bunny hops */
+.kitty-peniYay .k-cheer-l { transform-box: view-box; transform-origin: 64px 164px; animation: kCheerL 0.9s ease-in-out infinite; }
+.kitty-peniYay .k-cheer-r { transform-box: view-box; transform-origin: 136px 164px; animation: kCheerR 0.9s ease-in-out infinite; }
+.kitty-peniBunny .k-wave { transform-box: view-box; transform-origin: 136px 150px; animation: kWave 1.1s ease-in-out infinite; }
+.k-ears { transform-origin: 50% 100%; animation: kEars 2.8s ease-in-out infinite; }
+.k-ears2 { animation-delay: -1.4s; }
+.k-cotton { transform-origin: center; animation: kBeat 2.4s ease-in-out infinite; }
+.k-roll { transform-origin: center; animation: kRoll 2.6s ease-in-out infinite; }
+.k-hopall { transform-origin: 50% 100%; animation: kHopAll 1.3s ease-in-out infinite; }
+@keyframes kEars { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(-6deg); } 60% { transform: rotate(3deg); } }
+@keyframes kRoll { 0%, 100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(-8px) rotate(-60deg); } }
+@keyframes kHopAll { 0%, 100% { transform: translateY(0) scale(1); } 15% { transform: translateY(0) scale(1.04, 0.95); } 45% { transform: translateY(-16px) scale(0.98, 1.03); } 75% { transform: translateY(0) scale(1.03, 0.96); } }
 /* swim: bobbing in the waves */
 .k-bob { transform-origin: 50% 100%; animation: kBob 2.6s ease-in-out infinite; }
 .k-waves { animation: kWaves 2.4s linear infinite; }

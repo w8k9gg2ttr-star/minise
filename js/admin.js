@@ -437,6 +437,7 @@
     via_facebook: ["Facebook Messenger", "Facebook Messenger"],
     via_instagram: ["Instagram", "Instagram"],
     sec_photos: ["Customer photos ({n})", "ຮູບຂອງລູກຄ້າ ({n})"],
+    photos_badge: ["📷 {n} photo(s) to print", "📷 ມີຮູບ {n} ຮູບ ທີ່ຕ້ອງພິມ"],
     photos_view: ["Show photos", "ເບິ່ງຮູບ"],
     photos_loading: ["Loading photos…", "ກຳລັງໂຫຼດຮູບ…"],
     photos_fail: ["Couldn't load the photos. Check the connection and try again.", "ໂຫຼດຮູບບໍ່ໄດ້. ກວດການເຊື່ອມຕໍ່ ແລ້ວລອງໃໝ່"],
@@ -648,7 +649,7 @@
   var dirty = 0, dir = null, savedDir = null, typedSettings = false;
   var USER = null;
   var SYNC = { snap: {}, at: 0, state: "wait", busy: false, pull: false, push: false, live: false, version: "", ready: false };
-  var NEWCOUNT = 0, SLIPS = {}, PHOTOS = {}, pendingRender = false;
+  var NEWCOUNT = 0, SLIPS = {}, PHOTOS = {}, PHOTOS_BUSY = {}, pendingRender = false;
   var tab = (location.hash || "").slice(1);
   if (TABS.indexOf(tab) < 0) tab = "dashboard";
   var PF = { q: "", type: "all", status: "all", sort: "name" };
@@ -1183,6 +1184,8 @@
   function showPhotos(id) {
     var o = orderById(id), box = document.getElementById("photoBox");
     if (!o || !box || !ONLINE) return;
+    PHOTOS_BUSY[id] = true;
+    setTimeout(function () { delete PHOTOS_BUSY[id]; }, 15000);
     box.innerHTML = '<p class="hint">' + esc(a("photos_loading")) + "</p>";
     sb.storage.from("order-photos").createSignedUrls(o.photos, 3600).then(function (res) {
       if (res.error) throw res.error;
@@ -1470,7 +1473,7 @@
           return '<tr class="click' + (SEL[o.id] ? " sel" : "") + '" data-open="' + esc(o.id) + '"><td class="cb"><input type="checkbox" data-sel="' + esc(o.id) + '"' + (SEL[o.id] ? " checked" : "") + ' aria-label="' + esc(o.id) + '"></td>' +
             '<td><span class="oid">' + esc(o.id) + "</span><small>" + esc(fmtDate(o.date)) + " · " + esc(a("m_" + o.method)) + (o.web ? " · " + esc(a("web_badge")) : "") + "</small></td>" +
             "<td><b>" + esc(o.name || "—") + "</b><small>" + esc(o.phone) + "</small></td>" +
-            "<td>" + esc(first) + "<small>" + esc(sub) + "</small>" + (o.items.length === 1 ? loLine(laoItem(o.items[0])) : "") + "</td>" +
+            "<td>" + esc(first) + "<small>" + esc(sub) + "</small>" + (o.items.length === 1 ? loLine(laoItem(o.items[0])) : "") + (o.photos.length ? '<small class="ph-badge">' + esc(a("photos_badge", { n: o.photos.length })) + "</small>" : "") + "</td>" +
             '<td class="num"><b>' + esc(money(orderTotal(o))) + "</b>" + (hasUnknown(o) ? "<small>" + esc(a("to_price")) + "</small>" : "") + "</td>" +
             "<td>" + payPill(o.pay) + "</td><td>" + stPill(o.stage) + "</td><td>" + duePill(o) + "</td></tr>";
         }).join("") + "</tbody></table>";
@@ -1559,6 +1562,7 @@
       (hist ? '<section class="dr-sec"><h3>' + esc(a("sec_history")) + '</h3><ul class="hist">' + hist + "</ul></section>" : "") +
       "</div>";
     if (DR.ask) { var ti = document.getElementById("trackIn"); if (ti) ti.focus(); }
+    if (ONLINE && o.photos.length && !PHOTOS[o.id] && !PHOTOS_BUSY[o.id]) showPhotos(o.id);
   }
   function drawerAction(act) {
     var o = orderById(DR.id); if (!o) return;

@@ -549,3 +549,4 @@ html[lang="lo"] .legend { letter-spacing: 0; text-transform: none; font-size: 0.
 .ig-cap small { color: var(--ink-3); font-size: 0.8rem; }
 #igCard .rows .r { gap: 10px; }
 #igCard h2 { display: flex; align-items: center; gap: 6px; }
+.tbl td small.ph-badge { display: inline-block; margin-top: 3px; padding: 0 8px; border-radius: 6px; background: var(--accent-soft); color: var(--ink); font-size: 0.82rem; }

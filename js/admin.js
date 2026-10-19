@@ -713,7 +713,7 @@
       var T = window.MINISE_T || {};
       LAO_KEYS.forEach(function (k) { if (T[k] && T[k][0] && T[k][1]) laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       LAO_PROV.forEach(function (x) { laoBase[x[0].toLowerCase()] = x[1]; });
-      Object.keys(T).forEach(function (k) { if (/^bc_/.test(k) || k === "letter" || k === "charm") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
+      Object.keys(T).forEach(function (k) { if (/^(bc|sh)_/.test(k) || k === "letter" || k === "charm" || k === "shape") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       ((window.MINISE_CHARMS || {}).list || []).forEach(function (c) { laoBase[c[4].toLowerCase()] = c[5]; });
       laoBase["district"] = "ເມືອງ";
       products.forEach(function (q) {

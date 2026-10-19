@@ -489,6 +489,7 @@
   function lineDetails(p, it) {
     var d = [];
     if (p.o.length > 1 || (p.o.length === 1 && p.o[0].en)) d.push(optName(p.o[it.opt]));
+    if (it.myo && it.shape) d.push(t("shape") + ": " + t("sh_" + it.shape));
     if (it.col) d.push(t("colour") + ": " + t(it.col));
     if (it.ini) d.push((it.myo ? t("letter") : t("initials")) + ": " + it.ini);
     if (p.add && it.addN && !it.myo) d.push(optName(p.add) + " × " + it.addN);
@@ -1196,14 +1197,18 @@
      It is one product in the catalogue, so its price (the bracelet, and each charm as the add-on) is edited in the admin
      and checked again by the database when the order is sent. */
   var MYO = "make-your-own-bracelet", MYO_MAX = 3, MYO_BASE = 225000, MYO_CHARM = 30000;
-  var MYO_COLS = [["pink", "#f2b8c6"], ["sky", "#a9cdea"], ["lilac", "#cdb6e3"], ["mint", "#a3dcc9"], ["white", "#f5f3ee"], ["black", "#2a2a30"]];
+  // enamel colours: [name, colour, dark (the silver letter then shows light)]
+  var MYO_COLS = [["pink", "#f4bccb", 0], ["hotpink", "#e7739f", 0], ["red", "#c83a3f", 1], ["yellow", "#f3d873", 0], ["mint", "#a3dcc9", 0], ["green", "#4f9a72", 1],
+    ["sky", "#a9cdea", 0], ["navy", "#33467e", 1], ["lilac", "#cdb6e3", 0], ["purple", "#8d63b5", 1], ["white", "#f5f3ee", 0], ["black", "#2a2a30", 1]];
+  var MYO_SHAPES = ["circle", "heart"];
   var CH = window.MINISE_CHARMS || { trays: [], list: [] }, CH_BY = {}, TRAY_BY = {};
   CH.trays.forEach(function (tr) { TRAY_BY[tr.id] = tr; });
   CH.list.forEach(function (c) { CH_BY[c[0]] = c; });
-  var MK = { col: "pink", ini: "", ch: [], tray: "a", note: "", say: "" };
+  var MK = { shape: "circle", col: "pink", ini: "", ch: [], tray: "a", note: "", say: "" };
   try {
     var mk0 = JSON.parse(sessionStorage.getItem("minise_make") || "null");
     if (mk0) {
+      if (MYO_SHAPES.indexOf(mk0.shape) > -1) MK.shape = mk0.shape;
       if (MYO_COLS.some(function (c) { return c[0] === mk0.col; })) MK.col = mk0.col;
       if (/^[A-Z]$/.test(mk0.ini || "")) MK.ini = mk0.ini;
       MK.ch = (mk0.ch || []).filter(function (c) { return CH_BY[c]; }).slice(0, MYO_MAX);
@@ -1211,7 +1216,7 @@
       MK.note = String(mk0.note || "").slice(0, 300);
     }
   } catch (e) { /* start fresh */ }
-  function mkSave() { try { sessionStorage.setItem("minise_make", JSON.stringify({ col: MK.col, ini: MK.ini, ch: MK.ch, tray: MK.tray, note: MK.note })); } catch (e) { /* ignore */ } }
+  function mkSave() { try { sessionStorage.setItem("minise_make", JSON.stringify({ shape: MK.shape, col: MK.col, ini: MK.ini, ch: MK.ch, tray: MK.tray, note: MK.note })); } catch (e) { /* ignore */ } }
   function charmName(code) { var c = CH_BY[code]; return c ? c[4 + LI[lang]] : code; }
   // a square cut of the tray photo, scaled so the charm fills the box
   function charmStyle(code) {
@@ -1228,6 +1233,25 @@
     return { base: live ? p.o[0].price : MYO_BASE, charm: live ? p.add.price : MYO_CHARM, live: live };
   }
   function myoTotal() { var pr = myoPrices(); return pr.base + MK.ch.length * pr.charm; }
+  // the initial charm, drawn around (0,0): a silver frame filled with coloured enamel, the letter in silver
+  var HEART = "M0 27 C-16 16 -33 3 -33 -11 C-33 -23 -24 -31 -14 -31 C-7 -31 -2 -27 0 -22 C2 -27 7 -31 14 -31 C24 -31 33 -23 33 -11 C33 3 16 16 0 27 Z";
+  function charmShape(shape, col, letter) {
+    var shine = col[2] ? "rgba(255,255,255,.2)" : "rgba(255,255,255,.55)";
+    var body = shape === "heart"
+      ? '<path d="' + HEART + '" fill="' + col[1] + '" stroke="#b3b9c4" stroke-width="6" stroke-linejoin="round"/><path d="' + HEART + '" transform="translate(0 -1) scale(.7)" fill="none" stroke="' + shine + '" stroke-width="3"/>'
+      : '<circle r="30" fill="' + col[1] + '" stroke="#b3b9c4" stroke-width="6"/><circle r="22" fill="none" stroke="' + shine + '" stroke-width="2"/>';
+    return body + (letter == null ? "" : '<text y="' + (shape === "heart" ? 6 : 11) + '" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="' + (shape === "heart" ? 26 : 31) + '" fill="' + (col[2] ? "#e3e6ec" : "#6c717d") + '">' + esc(letter) + "</text>");
+  }
+  function mkShapesHTML() {
+    return MYO_SHAPES.map(function (sh) {
+      return '<label class="mk-shape"><input type="radio" name="mkShape" value="' + sh + '"' + (MK.shape === sh ? " checked" : "") + '><svg viewBox="-40 -38 80 76" aria-hidden="true">' + charmShape(sh, myoColour(), MK.ini || "A") + "</svg><span>" + esc(t("sh_" + sh)) + "</span></label>";
+    }).join("");
+  }
+  function mkSwsHTML() {
+    return MYO_COLS.map(function (c) {
+      return '<label class="mk-sw"><input type="radio" name="mkCol" value="' + c[0] + '"' + (MK.col === c[0] ? " checked" : "") + '><svg class="dot" viewBox="-37 -37 74 74" aria-hidden="true">' + charmShape(MK.shape, c, null) + "</svg><span>" + esc(t("bc_" + c[0])) + "</span></label>";
+    }).join("");
+  }
   function myoColour() { return MYO_COLS.filter(function (c) { return c[0] === MK.col; })[0] || MYO_COLS[0]; }
 
   // the chain hangs in a curve; the letter disc sits at the bottom and the charms hang from it
@@ -1237,7 +1261,7 @@
   }
   var MK_SLOTS = [0.67, 0.33, 0.83];
   function mkPreview() {
-    var col = myoColour(), mid = chainAt(0.5), dark = col[0] === "black";
+    var col = myoColour(), mid = chainAt(0.5);
     var rings = "", hang = "";
     MK.ch.forEach(function (code, i) {
       var pt = chainAt(MK_SLOTS[i]);
@@ -1249,12 +1273,10 @@
       '<path d="' + chain + '" fill="none" stroke="#7d8696" stroke-width="7.5" stroke-linecap="round"/>' +
       '<path d="' + chain + '" fill="none" stroke="#e3e7ee" stroke-width="4" stroke-dasharray="5 3"/>' +
       '<circle cx="24" cy="50" r="8" fill="#e3e7ee" stroke="#7d8696" stroke-width="3"/><circle cx="336" cy="50" r="8" fill="#e3e7ee" stroke="#7d8696" stroke-width="3"/>' + rings +
-      '<circle cx="' + mid[0] + '" cy="' + mid[1] + '" r="30" fill="' + col[1] + '" stroke="#b3b9c4" stroke-width="6"/>' +
-      '<circle cx="' + mid[0] + '" cy="' + mid[1] + '" r="22" fill="none" stroke="' + (dark ? "rgba(255,255,255,.18)" : "rgba(255,255,255,.55)") + '" stroke-width="2"/>' +
-      '<text x="' + mid[0] + '" y="' + (mid[1] + 11) + '" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="31" fill="' + (dark ? "#dfe2e8" : "#6c717d") + '">' + esc(MK.ini || "?") + "</text></svg>" + hang;
+      '<g transform="translate(' + mid[0].toFixed(1) + " " + mid[1].toFixed(1) + ')">' + charmShape(MK.shape, col, MK.ini || "?") + "</g></svg>" + hang;
   }
   function mkDetails() {
-    var d = [t("colour") + ": " + t("bc_" + MK.col), t("letter") + ": " + (MK.ini || "?")];
+    var d = [t("shape") + ": " + t("sh_" + MK.shape), t("colour") + ": " + t("bc_" + MK.col), t("letter") + ": " + (MK.ini || "?")];
     MK.ch.forEach(function (c) { d.push(t("charm") + " " + c + ": " + charmName(c)); });
     if (MK.note.trim()) d.push("“" + MK.note.trim() + "”");
     return d;
@@ -1265,7 +1287,7 @@
     var btn = pr.live ? '<button class="btn solid wide" type="button" data-mk-add>' + esc(t("add")) + "</button>"
       : '<a class="btn solid wide" id="mkWa" target="_blank" rel="noopener" href="' + esc(mkWaLink()) + '">' + esc(t("mk_wa")) + "</a>";
     return '<h2 class="mk-sum-h">' + esc(t("mk_yours")) + "</h2>" +
-      '<dl class="mk-dl"><div><dt>' + esc(t("colour")) + '</dt><dd><span class="mk-swatch" style="background:' + myoColour()[1] + '"></span>' + esc(t("bc_" + MK.col)) + "</dd></div>" +
+      '<dl class="mk-dl"><div><dt>' + esc(t("shape")) + "</dt><dd>" + esc(t("sh_" + MK.shape)) + "</dd></div><div><dt>" + esc(t("colour")) + '</dt><dd><svg class="mk-swatch" viewBox="-37 -37 74 74" aria-hidden="true">' + charmShape(MK.shape, myoColour(), null) + "</svg>" + esc(t("bc_" + MK.col)) + "</dd></div>" +
       "<div><dt>" + esc(t("letter")) + "</dt><dd>" + esc(MK.ini || "—") + "</dd></div></dl>" +
       '<ul class="mk-picked">' + names + "</ul>" +
       '<div class="mk-money tn"><p><span>' + esc(t("mk_bracelet")) + "</span><b>" + esc(money(pr.base)) + "</b></p>" +
@@ -1287,9 +1309,6 @@
   function makePage() {
     var pr = myoPrices();
     if (!MK.say) MK.say = t("pn_hi");
-    var cols = MYO_COLS.map(function (c) {
-      return '<label class="mk-sw"><input type="radio" name="mkCol" value="' + c[0] + '"' + (MK.col === c[0] ? " checked" : "") + '><span class="dot" style="background:' + c[1] + '"></span><span>' + esc(t("bc_" + c[0])) + "</span></label>";
-    }).join("");
     var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(function (L) {
       return '<label class="mk-l"><input type="radio" name="mkIni" value="' + L + '"' + (MK.ini === L ? " checked" : "") + "><span>" + L + "</span></label>";
     }).join("");
@@ -1304,11 +1323,12 @@
       '<div class="mk-peni">' + kitty("peni", "mk-peni-kitty") + '<p class="mk-say" id="mkSay" role="status">' + esc(MK.say) + "</p></div></div>" +
       '<div class="mk-sum" id="mkSum">' + mkSummary() + "</div></div>" +
       '<form class="mk-steps" id="mkForm" novalidate>' +
-      '<fieldset class="mk-step"><legend><span class="num">1</span>' + esc(t("mk_s1")) + '</legend><div class="mk-sws">' + cols + "</div></fieldset>" +
-      '<fieldset class="mk-step"><legend><span class="num">2</span>' + esc(t("mk_s2")) + '</legend><div class="mk-ls">' + letters + '</div><p class="err" id="mkIniErr" hidden>' + esc(t("mk_pick_letter")) + "</p></fieldset>" +
-      '<fieldset class="mk-step"><legend><span class="num">3</span>' + esc(t("mk_s3")) + '</legend><p class="hint">' + esc(t("mk_s3_hint", { n: MYO_MAX, c: money(pr.charm) })) + "</p>" +
+      '<fieldset class="mk-step"><legend><span class="num">1</span>' + esc(t("mk_s0")) + '</legend><div class="mk-shapes" id="mkShapes">' + mkShapesHTML() + "</div></fieldset>" +
+      '<fieldset class="mk-step"><legend><span class="num">2</span>' + esc(t("mk_s1")) + '</legend><div class="mk-sws" id="mkSws">' + mkSwsHTML() + "</div></fieldset>" +
+      '<fieldset class="mk-step"><legend><span class="num">3</span>' + esc(t("mk_s2")) + '</legend><div class="mk-ls">' + letters + '</div><p class="err" id="mkIniErr" hidden>' + esc(t("mk_pick_letter")) + "</p></fieldset>" +
+      '<fieldset class="mk-step"><legend><span class="num">4</span>' + esc(t("mk_s3")) + '</legend><p class="hint">' + esc(t("mk_s3_hint", { n: MYO_MAX, c: money(pr.charm) })) + "</p>" +
       '<div class="mk-tabs">' + tabs + '</div><p class="mk-count tn" id="mkCount">' + esc(t("mk_count", { n: MK.ch.length, max: MYO_MAX })) + '</p><div class="mk-chs" id="mkChs">' + charmGrid() + "</div></fieldset>" +
-      '<fieldset class="mk-step"><legend><span class="num">4</span>' + esc(t("mk_s4")) + '</legend><textarea id="mkNote" maxlength="300" placeholder="' + esc(t("mk_note_ph")) + '">' + esc(MK.note) + "</textarea>" +
+      '<fieldset class="mk-step"><legend><span class="num">5</span>' + esc(t("mk_s4")) + '</legend><textarea id="mkNote" maxlength="300" placeholder="' + esc(t("mk_note_ph")) + '">' + esc(MK.note) + "</textarea>" +
       '<p class="hint">' + esc(t("mk_care")) + "</p></fieldset></form></div></section>" +
       '<div class="mk-bar" id="mkBar"></div>';
   }
@@ -1345,15 +1365,16 @@
       return;
     }
     if (!myoPrices().live) return;
-    bag.push({ s: MYO, opt: 0, addN: MK.ch.length, qty: 1, col: "bc_" + MK.col, ini: MK.ini, ch: MK.ch.slice(), note: MK.note.trim(), myo: 1 });
+    bag.push({ s: MYO, opt: 0, addN: MK.ch.length, qty: 1, shape: MK.shape, col: "bc_" + MK.col, ini: MK.ini, ch: MK.ch.slice(), note: MK.note.trim(), myo: 1 });
     saveBag();
     toast(t("added"), "gift");
     mkSay(t("pn_added"));
     openBag();
   }
   document.addEventListener("change", function (e) {
-    if (e.target.name === "mkCol") { MK.col = e.target.value; mkSay(t("pn_col", { c: t("bc_" + MK.col) })); mkUpdate(); }
-    else if (e.target.name === "mkIni") { MK.ini = e.target.value; document.getElementById("mkIniErr").hidden = true; mkSay(t("pn_letter", { l: MK.ini })); mkUpdate(); }
+    if (e.target.name === "mkShape") { MK.shape = e.target.value; mkSay(t("pn_shape", { s: t("sh_" + MK.shape) })); document.getElementById("mkSws").innerHTML = mkSwsHTML(); mkUpdate(); }
+    else if (e.target.name === "mkCol") { MK.col = e.target.value; mkSay(t("pn_col", { c: t("bc_" + MK.col) })); document.getElementById("mkShapes").innerHTML = mkShapesHTML(); mkUpdate(); }
+    else if (e.target.name === "mkIni") { MK.ini = e.target.value; document.getElementById("mkIniErr").hidden = true; document.getElementById("mkShapes").innerHTML = mkShapesHTML(); mkSay(t("pn_letter", { l: MK.ini })); mkUpdate(); }
   });
   document.addEventListener("input", function (e) {
     if (e.target.id !== "mkNote") return;

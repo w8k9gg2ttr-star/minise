@@ -87,6 +87,11 @@
 .k-finwave { transform-origin: 2% 82%; animation: kWave 1.1s ease-in-out infinite; }
 .k-sharktail { transform-origin: 0% 55%; animation: kTail 1.5s ease-in-out infinite; }
 @keyframes kFin { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
+/* Peni: the raised paw waves; the bracelet swings and its heart charm dangles */
+.kitty-peniWave .k-wave { transform-box: view-box; transform-origin: 134px 162px; animation: kWave 1.1s ease-in-out infinite; }
+.k-swing { transform-origin: 50% 0%; animation: kSwing 2.6s ease-in-out infinite; }
+.k-charm { transform-origin: 30% 0%; animation: kSwing 1.7s ease-in-out infinite reverse; }
+@keyframes kSwing { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
 /* swim: bobbing in the waves */
 .k-bob { transform-origin: 50% 100%; animation: kBob 2.6s ease-in-out infinite; }
 .k-waves { animation: kWaves 2.4s linear infinite; }

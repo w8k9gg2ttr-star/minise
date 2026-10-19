@@ -170,6 +170,16 @@
     subtotal: ["Subtotal", "ລວມສິນຄ້າ"],
     discount: ["Discount", "ສ່ວນຫຼຸດ"],
     f_code: ["Discount code", "ລະຫັດສ່ວນຫຼຸດ"],
+    vis_h: ["Website visitors (last 14 days)", "ຜູ້ເຂົ້າຊົມເວັບໄຊ (14 ມື້ລ່າສຸດ)"],
+    vis_p: ["Anonymous counts from minisearte.com: which page, which day and on what kind of device. No names or personal details.", "ການນັບແບບບໍ່ລະບຸຕົວຕົນຈາກ minisearte.com: ໜ້າໃດ ມື້ໃດ ແລະ ອຸປະກອນແບບໃດ. ບໍ່ມີຊື່ ຫຼື ຂໍ້ມູນສ່ວນຕົວ"],
+    vis_total: ["{n} page views", "ເຂົ້າຊົມ {n} ຄັ້ງ"],
+    vis_top: ["Most viewed", "ເບິ່ງຫຼາຍທີ່ສຸດ"],
+    vis_dev: ["Devices", "ອຸປະກອນ"],
+    dev_phone: ["Phone", "ໂທລະສັບ"],
+    dev_tablet: ["Tablet", "ແທັບເລັດ"],
+    dev_computer: ["Computer", "ຄອມພິວເຕີ"],
+    vis_none: ["No visits counted yet. Counting starts once update 1 is run and the new website files are online.", "ຍັງບໍ່ມີການນັບ. ຈະເລີ່ມນັບເມື່ອແລ່ນ update 1 ແລະ ອັບໂຫຼດໄຟລ໌ເວັບໄຊໃໝ່ແລ້ວ"],
+    vis_home: ["Home page", "ໜ້າຫຼັກ"],
     codes_h: ["Discount codes", "ລະຫັດສ່ວນຫຼຸດ"],
     codes_p: ["Customers type a code at checkout. The shop checks it and takes the percent off the total before they pay. Switch a code off to stop it working.", "ລູກຄ້າພິມລະຫັດຕອນສັ່ງຊື້. ລະບົບຈະກວດ ແລະ ຫັກເປີເຊັນອອກຈາກຍອດລວມກ່ອນຊຳລະ. ປິດລະຫັດເພື່ອຢຸດໃຊ້"],
     codes_none: ["No discount codes yet.", "ຍັງບໍ່ມີລະຫັດສ່ວນຫຼຸດ"],
@@ -703,6 +713,8 @@
       var T = window.MINISE_T || {};
       LAO_KEYS.forEach(function (k) { if (T[k] && T[k][0] && T[k][1]) laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       LAO_PROV.forEach(function (x) { laoBase[x[0].toLowerCase()] = x[1]; });
+      Object.keys(T).forEach(function (k) { if (/^bc_/.test(k) || k === "letter" || k === "charm") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
+      ((window.MINISE_CHARMS || {}).list || []).forEach(function (c) { laoBase[c[4].toLowerCase()] = c[5]; });
       laoBase["district"] = "ເມືອງ";
       products.forEach(function (q) {
         (q.o || []).forEach(function (o) { var k = String(o.en || "").toLowerCase(); if (k && o.lo && !laoBase[k]) laoBase[k] = o.lo; });
@@ -725,6 +737,8 @@
       if (hit) { changed = true; return hit; }
       var x = /^(.*?)\s*×\s*(\d+)$/.exec(k);
       if (x && m[x[1].toLowerCase()]) { changed = true; return m[x[1].toLowerCase()] + " × " + x[2]; }
+      var y = /^(.*?)\s+([A-C]\d{1,2})$/.exec(k);
+      if (y && m[y[1].toLowerCase()]) { changed = true; return m[y[1].toLowerCase()] + " " + y[2]; }
       return k;
     };
     var out = text.replace(/“[^”]*”|"[^"]*"/g, function (q) { notes.push(q); return "\u0000" + (notes.length - 1) + "\u0000"; })
@@ -741,6 +755,22 @@
     var kind = p && p.t && T["one_" + p.t[0]] ? T["one_" + p.t[0]][1] : "";
     var det = laoOf(it.details, p);
     return [kind, det].filter(Boolean).join(" · ");
+  }
+  // Make-your-own bracelets: show the charms the customer picked ("Charm A3: …") cut from the tray photos
+  function charmRow(details) {
+    var C = window.MINISE_CHARMS, codes = [], m, re = /Charm ([A-C]\d{1,2}):/g;
+    if (!C || !details) return "";
+    while ((m = re.exec(details))) codes.push(m[1]);
+    if (!codes.length) return "";
+    var trays = {}, list = {};
+    C.trays.forEach(function (tr) { trays[tr.id] = tr; });
+    C.list.forEach(function (c) { list[c[0]] = c; });
+    return '<span class="ch-row">' + codes.map(function (code) {
+      var c = list[code], tr = c && trays[code.charAt(0).toLowerCase()];
+      if (!tr) return "";
+      var sz = c[3], l = Math.max(0, Math.min(tr.w - sz, c[1] - sz / 2)), tp = Math.max(0, Math.min(tr.h - sz, c[2] - sz / 2));
+      return '<span class="ch-pic" title="' + esc(c[4]) + '"><span style="background-image:url(' + tr.img + ");background-size:" + (tr.w / sz * 100).toFixed(2) + "% auto;background-position:" + (l / (tr.w - sz) * 100).toFixed(2) + "% " + (tp / (tr.h - sz) * 100).toFixed(2) + '%"></span><b>' + code + "</b></span>";
+    }).join("") + "</span>";
   }
   function loLine(txt, tag) { return txt ? "<" + (tag || "small") + ' class="lo" lang="lo">' + esc(txt) + "</" + (tag || "small") + ">" : ""; }
   function orderSub(o) { return o.items.reduce(function (s, it) { return s + (it.price || 0); }, 0); }
@@ -1345,6 +1375,52 @@
       }).join("") + "</div>";
     return '<section class="card"><div class="card-head"><h2>' + esc(title) + "</h2></div>" + body + "</section>";
   }
+  /* website visitors: anonymous daily counts kept by the shop (site_views) */
+  var VIS = { state: "idle", rows: [], missing: false };
+  function loadVisits() {
+    VIS.state = "loading";
+    sb.from("site_views").select("day, path, device, views").gte("day", addDays(todayISO(), -13)).limit(5000).then(function (res) {
+      VIS.missing = !!res.error; VIS.rows = res.error ? [] : (res.data || []); VIS.state = "ready";
+    }, function () { VIS.missing = true; VIS.state = "ready"; }).then(function () { if (tab === "dashboard") render(); });
+  }
+  function pageName(path) {
+    if (path === "home") return a("vis_home");
+    if (path.indexOf("p-") === 0) { var slug = path.slice(2), p = products.find(function (x) { return x.s === slug; }); return p ? p.n : slug; }
+    var T = window.MINISE_T || {}, k = { shop: "nav_shop", story: "nav_story", order: "nav_order", visit: "nav_visit", checkout: "co_h", privacy: "pv_h", terms: "tm_h" }[path];
+    if (k && T[k]) return T[k][lang === "lo" ? 1 : 0];
+    if (path.indexOf("shop-") === 0 && T["type_" + path.slice(5)]) return T["type_" + path.slice(5)][lang === "lo" ? 1 : 0];
+    if (path.indexOf("c-") === 0 && T["tag_" + path.slice(2)]) return T["tag_" + path.slice(2)][lang === "lo" ? 1 : 0];
+    return path;
+  }
+  function visitsCard() {
+    if (!ONLINE) return "";
+    if (VIS.state === "idle") loadVisits();
+    var head = '<section class="card"><div class="card-head"><h2>' + esc(a("vis_h")) + "</h2>";
+    if (VIS.state !== "ready") return head + '</div><p class="hint">…</p></section>';
+    var total = VIS.rows.reduce(function (n, r) { return n + r.views; }, 0);
+    if (VIS.missing || !total) return head + '</div><p class="empty">' + esc(a("vis_none")) + "</p></section>";
+    var days = [], byDay = {}, byPath = {}, byDev = { phone: 0, tablet: 0, computer: 0 };
+    VIS.rows.forEach(function (r) {
+      byDay[r.day] = (byDay[r.day] || 0) + r.views;
+      byPath[r.path] = (byPath[r.path] || 0) + r.views;
+      if (byDev[r.device] != null) byDev[r.device] += r.views;
+    });
+    for (var d = 13; d >= 0; d--) { var k = addDays(todayISO(), -d); days.push({ label: +k.slice(8) + "/" + +k.slice(5, 7), v: byDay[k] || 0 }); }
+    var max = Math.max.apply(null, days.map(function (x) { return x.v; }).concat([1]));
+    var bars = '<div class="bars">' + days.map(function (b) {
+      return '<div class="bar' + (b.v ? "" : " zero") + '" title="' + esc(b.label + ": " + b.v) + '"><div class="col"><i style="height:' + (b.v ? Math.max(3, Math.round(b.v / max * 100)) : 2) + '%"></i></div><span>' + esc(b.label) + "</span></div>";
+    }).join("") + "</div>";
+    var top = Object.keys(byPath).sort(function (x, y) { return byPath[y] - byPath[x]; }).slice(0, 8).map(function (p, i) {
+      return '<div class="rank"><span class="n">' + (i + 1) + '</span><span class="nm">' + esc(pageName(p)) + '</span><span class="q"></span><b>' + byPath[p] + "</b></div>";
+    }).join("");
+    var devSum = byDev.phone + byDev.tablet + byDev.computer || 1;
+    var devs = ["phone", "tablet", "computer"].map(function (k) {
+      var pct = Math.round(byDev[k] / devSum * 100);
+      return '<div class="mrow"><div class="top-line"><span>' + esc(a("dev_" + k)) + "</span><b>" + pct + '%</b></div><div class="meter"><i style="width:' + pct + '%"></i></div></div>';
+    }).join("");
+    return head + '<span class="hint">' + esc(a("vis_total", { n: total })) + '</span></div><p class="page-intro">' + esc(a("vis_p")) + "</p>" + bars +
+      '<div class="cards even"><div><h3 class="legend">' + esc(a("vis_top")) + '</h3><div class="rows">' + top + '</div></div><div><h3 class="legend">' + esc(a("vis_dev")) + "</h3>" + devs + "</div></div></section>";
+  }
   function bestCard(paid) {
     var agg = {};
     paid.forEach(function (o) {
@@ -1420,7 +1496,7 @@
     ];
     return '<div class="dash-bar">' + seg + dates + (window.MINISE_CAT ? '<span class="dash-kitty">' + window.MINISE_CAT("drink") + "</span>" : "") + "</div>" +
       '<div class="kpis">' + kpis.map(function (k) { return '<div class="kpi"><span class="l">' + icon(k[0]) + esc(k[1]) + "</span><b>" + esc(k[2]) + '</b><span class="c">' + esc(k[3]) + "</span></div>"; }).join("") + "</div>" +
-      '<div class="cards two">' + salesCard(paid) + bestCard(paid) + "</div>" +
+      '<div class="cards two">' + salesCard(paid) + bestCard(paid) + "</div>" + visitsCard() +
       '<div class="cards even">' + recentCard() + dueCard() + "</div>" +
       '<div class="cards even">' + methodsCard(paid) + attentionCard() + "</div>";
   }
@@ -1533,7 +1609,7 @@
     var items = o.items.map(function (it) {
       var p = findProduct(it.name);
       return '<div class="oitem">' + (p && p.img[0] ? '<img src="' + esc(p.img[0]) + '" alt="">' : '<span class="noimg"></span>') +
-        '<div class="nm"><b>' + esc(it.name) + "</b>" + (it.details ? "<small>" + esc(it.details) + "</small>" : "") + loLine(laoItem(it)) + '</div><span class="q">× ' + (it.qty || 1) + '</span><span class="pz">' + (it.price ? esc(money(it.price)) : '<span class="ask">' + esc(a("to_price")) + "</span>") + "</span></div>";
+        '<div class="nm"><b>' + esc(it.name) + "</b>" + (it.details ? "<small>" + esc(it.details) + "</small>" : "") + loLine(laoItem(it)) + charmRow(it.details) + '</div><span class="q">× ' + (it.qty || 1) + '</span><span class="pz">' + (it.price ? esc(money(it.price)) : '<span class="ask">' + esc(a("to_price")) + "</span>") + "</span></div>";
     }).join("");
     var hist = o.log.slice().reverse().map(function (l) { return "<li><time>" + esc(fmtWhen(l.at)) + "</time>" + esc(l.k ? a("log_" + l.k) : l.what) + "</li>"; }).join("");
     document.getElementById("drawer").innerHTML =

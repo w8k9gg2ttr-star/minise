@@ -3,7 +3,8 @@
    Moving parts are grouped (k-eyes, k-tail, k-head, k-wave …) and animated by css/cats.css.
    MINISE_CAT(pose) returns an <svg> string. Poses:
    drink, wave, heart, gift, phone, yay, search, sleep, peek, paint, sparkle, box, walk, paw,
-   shark, sharkPeek, sharkSleep, swim */
+   shark, sharkPeek, sharkSleep, swim,
+   and Peni the fluffy kitten: peni, peniWave, peniBracelet, peniPeek, peniSleep */
 (function () {
   var INK = "#24396a", FUR = "#f8f4ea", SUIT = "#a9bfdb", SUIT_DARK = "#8ea8ca", BLUSH = "#f2c3cb", PINK = "#ec9aa9", WATER = "#c9d9ec", SW = 5.5;
   var STROKE = ' stroke="' + INK + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"';
@@ -157,6 +158,56 @@
       '<g transform="translate(116 -6) scale(0.64)">' + head({}) + "</g>");
   }
 
+  /* ---------- Peni: the fluffy silver Persian kitten ---------- */
+  // colours taken from the photo of the real Peni: warm cream fur, grey-brown tabby, a paler muzzle, dark brown eyes
+  var PFUR = "#e2d8ca", PLIGHT = "#f5f0e7", PSTRIPE = "#8f7f6d", PNOSE = "#5e4a44", PEYE = "#3a2a21", PEAR_PINK = "#ecc4bb", CHAIN = "#9aa3b2";
+  function r1(n) { return String(Math.round(n * 10) / 10); }
+  // an oval whose edge puffs out in little tufts of fur (flatter on top of the head)
+  function fluff(cx, cy, rx, ry, n, puff, flatTop) {
+    var d = "";
+    for (var i = 0; i <= n; i++) {
+      var a = i / n * Math.PI * 2 - Math.PI / 2, x = cx + rx * Math.cos(a), y = cy + ry * Math.sin(a);
+      if (!i) { d = "M" + r1(x) + " " + r1(y); continue; }
+      var am = (i - 0.5) / n * Math.PI * 2 - Math.PI / 2, k = puff * (i % 2 ? 1 : 0.75);
+      if (flatTop && Math.sin(am) < -0.6) k = puff * 0.3;
+      d += " Q" + r1(cx + rx * (1 + k) * Math.cos(am)) + " " + r1(cy + ry * (1 + k) * Math.sin(am)) + " " + r1(x) + " " + r1(y);
+    }
+    return d + " Z";
+  }
+  function grey(d, w) { return '<path d="' + d + '" fill="none" stroke="' + PSTRIPE + '" stroke-width="' + (w || 4) + '" stroke-linecap="round"/>'; }
+  var PEAR = "M44 74 Q34 36 56 36 Q70 40 82 54 Z", PEAR_IN = "M50 66 Q45 46 58 46 Q66 49 73 56 Z";
+  function peniFace(o) {
+    o = o || {};
+    var eyes;
+    if (o.eyes === "sleep") eyes = g("k-eyes-still", path("M63 99 Q76 108 89 99") + path("M111 99 Q124 108 137 99"));
+    else if (o.eyes === "happy") eyes = g("k-eyes-still", path("M63 102 Q76 87 89 102") + path("M111 102 Q124 87 137 102"));
+    // round dark eyes, like the photo
+    else eyes = g("k-eyes", dot(76, 99, 13, PEYE) + dot(124, 99, 13, PEYE) + dot(81, 93, 4.4, "#fff") + dot(129, 93, 4.4, "#fff") + dot(71, 105, 2, "#fff") + dot(119, 105, 2, "#fff"));
+    return oval(100, 121, 24, 15, PLIGHT) +
+      grey("M86 58 Q90 66 88 74 M100 52 L100 69 M114 58 Q110 66 112 74") + grey("M72 60 Q76 66 75 72 M128 60 Q124 66 125 72", 3.5) +
+      grey("M40 104 Q48 102 55 105 M42 114 Q49 113 56 116") + grey(mirror("M40 104 Q48 102 55 105 M42 114 Q49 113 56 116")) +
+      oval(61, 117, 8, 5, BLUSH) + oval(139, 117, 8, 5, BLUSH) + eyes +
+      path("M94 112 Q100 108 106 112 Q103 118 100 119 Q97 118 94 112 Z", PNOSE, 3) +
+      (o.mouth === "o" ? oval(100, 127, 4, 5, PINK, 3.5) : path("M91 123 Q95.5 128 100 123 Q104.5 128 109 123", null, 3.5));
+  }
+  function peniHead(o) {
+    return g("k-head", path(PEAR, PFUR) + path(mirror(PEAR), PFUR) + path(PEAR_IN, PEAR_PINK, 0.01) + path(mirror(PEAR_IN), PEAR_PINK, 0.01) +
+      path(fluff(100, 98, 64, 52, 18, 0.11, true), PFUR) + peniFace(o));
+  }
+  function peniTail(d) { return g("k-tail", tube(d || "M156 186 C186 182 198 160 186 140", 24, PFUR)); }
+  function peniPaws(y) { var toes = "M68 " + (y - 4) + " L68 " + (y + 5) + " M78 " + (y - 5) + " L78 " + (y + 5); return oval(73, y, 19, 11, PLIGHT, SW) + oval(127, y, 19, 11, PLIGHT, SW) + grey("M60 " + (y - 8) + " Q66 " + (y - 11) + " 72 " + (y - 9), 3) + path(toes, null, 3) + path(mirror(toes), null, 3); }
+  function peniLoaf(face) { return peniTail("M150 182 C180 180 194 160 184 140") + path(fluff(100, 166, 70, 37, 16, 0.1), PFUR) + grey("M40 158 Q46 166 44 176") + grey(mirror("M40 158 Q46 166 44 176")) + peniHead(face) + peniPaws(197); }
+  function peniSit(face, front) {
+    return peniTail("M138 204 C170 206 186 188 178 166") + path(fluff(100, 176, 50, 44, 14, 0.1), PFUR) + paw(80, 216, 11, PFUR) + paw(120, 216, 11, PFUR) + peniHead(face) + (front || "");
+  }
+  function bracelet(letter) {
+    return g("k-swing", '<ellipse cx="100" cy="174" rx="34" ry="15" fill="none" stroke="' + CHAIN + '" stroke-width="5" stroke-dasharray="5 2.5"/>' +
+      '<circle cx="100" cy="190" r="12" fill="#f2b8c6" stroke="#aeb4bf" stroke-width="4"/>' +
+      '<text x="100" y="195.5" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#6f7480">' + letter + "</text>" +
+      g("k-charm", path("M126 182 L128 190", null, 2.5) + '<path d="M128 206 C116 198 114 190 119 186 C123 183 127 185 128 189 C129 185 133 183 137 186 C142 190 140 198 128 206 Z" fill="#dfe3ea"' + sw(3) + "/>")) +
+      paw(68, 172, 10, PFUR) + paw(132, 172, 10, PFUR);
+  }
+
   /* ---------- poses ---------- */
   var POSES = {
     drink: { box: "0 0 200 228", draw: function () { return cat({ face: { mouth: "none" } }) + iced(); } },
@@ -205,7 +256,16 @@
       return g("k-head", sharkHead({ mouth: "o" })) + path("M40 166 C46 150 64 146 78 156 Z", SUIT) + path(mirror("M40 166 C46 150 64 146 78 156 Z"), SUIT);
     } },
     sharkSleep: { box: "0 -6 200 172", draw: function () { return g("k-breathe-head", sharkHead({ eyes: "sleep", mouth: "w" })) + zzz(150, 40); } },
-    swim: { box: "0 -6 200 196", draw: function () { return g("k-bob", sharkHead({ mouth: "w" })) + water(); } }
+    swim: { box: "0 -6 200 196", draw: function () { return g("k-bob", sharkHead({ mouth: "w" })) + water(); } },
+    peni: { box: "0 26 200 196", draw: function () { return peniLoaf(); } },
+    peniWave: { box: "0 26 204 206", draw: function () {
+      return peniSit({ eyes: "happy" }, path("M68 170 Q78 184 92 180") + g("k-wave", tube("M134 162 C150 152 160 136 166 122", 16, PFUR) + paw(167, 118, 11, PFUR) + motion(180, 104)));
+    } },
+    peniBracelet: { box: "0 26 200 206", draw: function () { return peniSit({ mouth: "o" }, bracelet("P")); } },
+    peniPeek: { box: "0 26 200 140", draw: function () {
+      return peniHead({}) + paw(62, 154, 13, PFUR) + paw(138, 154, 13, PFUR) + path("M56 150 L56 158 M64 148 L64 158", null, 3) + path(mirror("M56 150 L56 158 M64 148 L64 158"), null, 3);
+    } },
+    peniSleep: { box: "0 26 224 196", draw: function () { return g("k-breathe", peniLoaf({ eyes: "sleep", mouth: "w" })) + zzz(166, 64); } }
   };
 
   var n = 0;

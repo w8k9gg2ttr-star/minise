@@ -592,7 +592,44 @@
   ];
   var VIAS = ["whatsapp", "phone", "facebook", "instagram"];
   var DELS = ["d_pick", "d_anou", "d_mix", "d_houng", "d_abroad"];
-  var CO = { slipImg: null, slipUrl: "", photos: [], sending: false, done: null };
+  var CO = { slipImg: null, slipUrl: "", photos: [], sending: false, done: null, code: null };
+  // discount code: the database checks it and works out the discount again when the order is saved
+  try { CO.code = JSON.parse(sessionStorage.getItem("minise_code") || "null"); } catch (e) { CO.code = null; }
+  function setCode(c) {
+    CO.code = c;
+    try { if (c) sessionStorage.setItem("minise_code", JSON.stringify(c)); else sessionStorage.removeItem("minise_code"); } catch (e) { /* memory only */ }
+  }
+  function discountOf(sum) { return CO.code ? Math.round(sum * CO.code.percent / 100) : 0; }
+  function payTotal() { var s = bagTotals().sum; return s - discountOf(s); }
+  function checkoutTotals() {
+    var tt = bagTotals(), d = discountOf(tt.sum);
+    return '<div class="total"><span>' + esc(t("subtotal")) + '</span><b>' + esc(money(tt.sum)) + "</b></div>" +
+      (d ? '<div class="total discount"><span>' + esc(t("discount")) + " · " + esc(CO.code.code.toUpperCase()) + " (−" + CO.code.percent + "%)</span><b>−" + esc(money(d)) + "</b></div>" +
+        '<div class="total grand"><span>' + esc(t("to_pay")) + "</span><b>" + esc(money(tt.sum - d)) + "</b></div>" : "");
+  }
+  function codeField() {
+    var c = CO.code;
+    return '<div class="field" id="coCodeF"><label for="coCode">' + esc(t("code_label")) + '</label><div class="code-row">' +
+      '<input type="text" id="coCode" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(t("code_ph")) + '"' + (c ? ' value="' + esc(c.code) + '" readonly' : "") + ">" +
+      '<button class="btn ghost" type="button" id="' + (c ? "coCodeRemove" : "coCodeApply") + '">' + esc(t(c ? "code_remove" : "code_apply")) + "</button></div>" +
+      '<span class="hint ok" id="coCodeH"' + (c ? "" : " hidden") + ">" + (c ? esc(t("code_ok", { code: c.code.toUpperCase(), p: c.percent })) : "") + "</span>" +
+      '<span class="err" id="coCodeE" hidden></span></div>';
+  }
+  function applyCode() {
+    var inp = document.getElementById("coCode"), btn = document.getElementById("coCodeApply");
+    var code = (inp ? inp.value : "").trim().toLowerCase();
+    if (!code) { setErr("coCode", t("code_bad")); return; }
+    if (!API) { setErr("coCode", t("err_net")); return; }
+    btn.disabled = true; btn.textContent = t("code_checking"); setErr("coCode", "");
+    rpc("check_discount", { p_code: code }).then(function (r) {
+      if (!r || !r.ok) throw new Error("bad");
+      setCode({ code: r.code, percent: r.percent });
+      route();
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = t("code_apply");
+      setErr("coCode", t("code_bad"));
+    });
+  }
   var slipImg = null; // kept for the receipt drawing
   var orderNo = "";
   function newOrderNo() {
@@ -696,9 +733,9 @@
         '<p class="hint">' + esc(t("photos_need")) + '</p><div class="field" id="coPhotosF"><label class="file-drop" for="coPhotos">' + esc(t("photos_add")) +
         '<input type="file" id="coPhotos" accept="image/*" multiple class="sr"></label><div class="previews" id="coPhotosPrev">' + photoPreviews() + '</div><span class="err" id="coPhotosE" hidden></span></div></fieldset>';
     }
-    html += '<fieldset class="co-step">' + kitty("phone", "step-kitty") + stepHead(n++, t("st_pay")) +
+    html += '<fieldset class="co-step">' + kitty("phone", "step-kitty") + stepHead(n++, t("st_pay")) + codeField() +
       '<div class="paybox"><div class="pay-qr"><img src="' + esc(QR) + '" alt="LAO QR" width="220" height="220"><p class="hint">' + esc(t("acct")) + ": <b>" + esc(ACCOUNT) + "</b></p></div>" +
-      '<ol class="pay-steps"><li>' + esc(t("pay1")) + "</li><li>" + esc(t("pay2")) + ' <b class="tn big">' + esc(money(tt.sum)) + "</b></li><li>" + esc(t("pay3")) + ' <b class="tn big">' + esc(no) + '</b> <button class="mini-btn" type="button" data-copy="' + esc(no) + '">' + esc(t("copy")) + "</button></li><li>" + esc(t("pay4")) + "</li></ol></div>" +
+      '<ol class="pay-steps"><li>' + esc(t("pay1")) + "</li><li>" + esc(t("pay2")) + ' <b class="tn big" id="payAmount">' + esc(money(payTotal())) + "</b></li><li>" + esc(t("pay3")) + ' <b class="tn big">' + esc(no) + '</b> <button class="mini-btn" type="button" data-copy="' + esc(no) + '">' + esc(t("copy")) + "</button></li><li>" + esc(t("pay4")) + "</li></ol></div>" +
       '<div class="field" id="coSlipF"><label class="file-drop' + (CO.slipUrl ? " has" : "") + '" for="coSlip" id="coSlipL">' + esc(CO.slipUrl ? t("slip_change") : t("slip_req")) +
       '<input type="file" id="coSlip" accept="image/*" class="sr"></label><div class="previews" id="coSlipPrev">' + (CO.slipUrl ? '<img src="' + CO.slipUrl + '" alt="">' : "") + '</div><span class="hint">' + esc(t("slip_hint2")) + '</span><span class="err" id="coSlipE" hidden></span></div>' +
       field("rcRef", t("rc_ref"), '<input type="text" id="rcRef" maxlength="80" placeholder="' + esc(t("rc_ref_ph")) + '">') +
@@ -707,7 +744,7 @@
       '<button class="btn wide big" type="submit" id="coSend">' + esc(t("send_order")) + "</button>" +
       '<p class="hint center">' + esc(t("send_note")) + "</p>" +
       "</form>" +
-      '<aside class="co-side"><div class="panel"><h2>' + esc(t("summary")) + "</h2>" + bagLines(false) + totalHTML() + "</div></aside></div></section>";
+      '<aside class="co-side"><div class="panel"><h2>' + esc(t("summary")) + "</h2>" + bagLines(false) + checkoutTotals() + "</div></aside></div></section>";
     return html;
   }
   function photoPreviews() {
@@ -799,7 +836,7 @@
     return inLang(shopLang(), function () { return {
       id: currentOrderNo(), date: todayLocal(), lang: lang, method: "rc",
       name: fieldVal("coName"), phone: readPhone(),
-      contact_via: fieldVal("coVia"), contact_handle: fieldVal("coHandle"),
+      contact_via: fieldVal("coVia"), contact_handle: fieldVal("coHandle"), discount_code: CO.code ? CO.code.code : "",
       delivery: delText(), delivery_type: fieldVal("coDel").replace("d_", ""),
       address: addressText(), note: fieldVal("coNote"), ref: fieldVal("rcRef"),
       items: bag.map(function (it) {
@@ -825,7 +862,8 @@
     var slip = shrink(CO.slipImg, 1200, 0.8).toDataURL("image/jpeg", 0.8);
     var snap = {
       name: payload.name, phone: prettyPhone(payload.phone), via: payload.contact_via, delivery: delText(),
-      address: addressText(), note: payload.note, ref: payload.ref, bag: bag.slice(), total: bagTotals().sum,
+      address: addressText(), note: payload.note, ref: payload.ref, bag: bag.slice(), total: payTotal(), subtotal: bagTotals().sum,
+      discount: discountOf(bagTotals().sum), code: CO.code ? CO.code.code.toUpperCase() : "", pct: CO.code ? CO.code.percent : 0,
       wa: { delivery: payload.delivery, address: payload.address }
     };
     rpc("place_order", { p_order: payload, p_slip: slip }).then(function (res) {
@@ -835,13 +873,14 @@
         throw new Error(err || (res && res.message) || "error");
       }
       snap.id = res.id; snap.total = res.total || snap.total;
+      if (typeof res.discount === "number") snap.discount = res.discount;
       slipImg = CO.slipImg;
       // the order is safely saved now; if the photos fail we ask for them on WhatsApp instead
       var photos = CO.photos.length && res.photo_key ? uploadPhotos(res.id, res.photo_key).catch(function () { snap.photosFailed = true; }) :
         Promise.resolve(CO.photos.length ? (snap.photosFailed = true) : 0);
       return photos.then(function () { return drawReceipt(snap); }).then(function (c) {
         snap.receipt = c.toDataURL("image/png");
-        CO.done = snap; CO.slipImg = null; CO.slipUrl = ""; CO.photos = []; CO.sending = false;
+        CO.done = snap; CO.slipImg = null; CO.slipUrl = ""; CO.photos = []; CO.sending = false; setCode(null);
         orderNo = ""; try { sessionStorage.removeItem("minise_order_no"); } catch (e) { /* ignore */ }
         bag = []; saveBag();
         route();
@@ -850,6 +889,7 @@
     }).catch(function (e) {
       CO.sending = false; btn.disabled = false; btn.textContent = t("send_order");
       var m = String(e && e.message || "");
+      if (m === "code") { setCode(null); route(); showMsg(t("code_gone")); return; }
       showMsg(m === "busy" ? t("err_busy") : m === "unavailable" || m === "price_needed" ? t("err_unavailable") : m === "slip" ? t("err_slip_bad") :
         m === "phone" || m === "address" || m === "contact" || m === "name" ? t("fix_fields") : t("err_net"));
     });
@@ -874,6 +914,7 @@
       lines.push((i + 1) + ". " + p.n + " × " + it.qty + (det.length ? " (" + det.join(", ") + ")" : "") + " — " + (u == null ? t("msg_confirm") : money(u * it.qty)));
     });
     if (d.unpaid) return lines.join("\n");
+    if (d.discount) lines.push(t("rc_discount") + " (" + d.code + " −" + d.pct + "%): −" + money(d.discount));
     lines.push(t("rc_paid") + ": " + money(d.total), t("msg_paid"), "", t("name") + ": " + d.name, t("phone") + ": " + d.phone, t("delivery") + ": " + (d.wa || d).delivery + ((d.wa || d).address ? " — " + (d.wa || d).address : ""));
     if (d.note) lines.push(t("co_note") + " " + d.note);
     return lines.join("\n");
@@ -942,7 +983,7 @@
       infoRows.forEach(function (r) { H += r.v.length * 38 + 16; });
       H += 60;
       rows.forEach(function (r) { H += r.name.length * 40 + r.det.length * 32 + 28; });
-      H += 140 + (slipImg ? slipH + 90 : 0) + foot.length * 34 + 110;
+      H += 140 + (d.discount ? 54 : 0) + (slipImg ? slipH + 90 : 0) + foot.length * 34 + 110;
 
       var c = document.createElement("canvas");
       c.width = W; c.height = Math.ceil(H);
@@ -978,6 +1019,12 @@
         y += r.name.length * 40 + r.det.length * 32 + 12;
         x.fillStyle = line; x.fillRect(P, y, inner, 2); y += 40;
       });
+      if (d.discount) {
+        x.font = "400 28px " + sans; x.fillStyle = soft;
+        x.fillText(t("rc_discount") + " · " + d.code + " (−" + d.pct + "%)", P, y + 6);
+        x.textAlign = "right"; x.fillText("−" + money(d.discount), W - P, y + 6); x.textAlign = "left";
+        y += 54;
+      }
       x.font = "400 34px " + sans; x.fillStyle = ink;
       x.fillText(t("rc_paid"), P, y + 10);
       x.textAlign = "right"; x.font = "400 40px " + sans; x.fillText(money(d.total), W - P, y + 12); x.textAlign = "left";
@@ -1162,6 +1209,8 @@
       var pp = document.getElementById("coPhotosPrev"); if (pp) pp.innerHTML = photoPreviews();
       return;
     }
+    if (e.target.closest("#coCodeApply")) { applyCode(); return; }
+    if (e.target.closest("#coCodeRemove")) { setCode(null); route(); return; }
     if (e.target.closest("#rcNew")) { CO.done = null; location.hash = "#shop"; return; }
   });
 
@@ -1235,6 +1284,7 @@
   });
 
   document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.id === "coCode" && !e.target.readOnly) { e.preventDefault(); applyCode(); return; }
     if (e.key === "Escape" && !document.getElementById("drawer").hidden) closeBag();
   });
   document.getElementById("scrim").addEventListener("click", closeBag);

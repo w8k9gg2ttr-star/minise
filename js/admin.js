@@ -169,6 +169,26 @@
     f_created: ["Created", "ສ້າງເມື່ອ"],
     subtotal: ["Subtotal", "ລວມສິນຄ້າ"],
     discount: ["Discount", "ສ່ວນຫຼຸດ"],
+    f_code: ["Discount code", "ລະຫັດສ່ວນຫຼຸດ"],
+    codes_h: ["Discount codes", "ລະຫັດສ່ວນຫຼຸດ"],
+    codes_p: ["Customers type a code at checkout. The shop checks it and takes the percent off the total before they pay. Switch a code off to stop it working.", "ລູກຄ້າພິມລະຫັດຕອນສັ່ງຊື້. ລະບົບຈະກວດ ແລະ ຫັກເປີເຊັນອອກຈາກຍອດລວມກ່ອນຊຳລະ. ປິດລະຫັດເພື່ອຢຸດໃຊ້"],
+    codes_none: ["No discount codes yet.", "ຍັງບໍ່ມີລະຫັດສ່ວນຫຼຸດ"],
+    codes_offline: ["Discount codes need the database (Supabase).", "ລະຫັດສ່ວນຫຼຸດຕ້ອງໃຊ້ຖານຂໍ້ມູນ (Supabase)"],
+    codes_missing: ["Run update-1-pay-first.sql in Supabase to turn on discount codes.", "ກະລຸນາແລ່ນ update-1-pay-first.sql ໃນ Supabase ເພື່ອເປີດໃຊ້ລະຫັດສ່ວນຫຼຸດ"],
+    code_col: ["Code", "ລະຫັດ"],
+    pct_col: ["Off", "ຫຼຸດ"],
+    uses_col: ["Used", "ໃຊ້ແລ້ວ"],
+    on_col: ["On", "ເປີດ"],
+    code_new: ["New code", "ລະຫັດໃໝ່"],
+    code_new_ph: ["e.g. newyear10", "ເຊັ່ນ newyear10"],
+    pct_new: ["Percent off", "ຫຼຸດກີ່ເປີເຊັນ"],
+    code_add: ["Add code", "ເພີ່ມລະຫັດ"],
+    code_added: ["Code added", "ເພີ່ມລະຫັດແລ້ວ"],
+    code_bad_new: ["Use 3–40 letters or numbers (no spaces) and a percent from 1 to 90.", "ໃຊ້ຕົວອັກສອນ ຫຼື ຕົວເລກ 3–40 ໂຕ (ບໍ່ມີຍະຫວ່າງ) ແລະ ເປີເຊັນ 1 ຫາ 90"],
+    code_exists: ["That code already exists.", "ມີລະຫັດນີ້ແລ້ວ"],
+    code_del_confirm: ["Delete the code {c}? Orders that used it keep their discount.", "ລຶບລະຫັດ {c}? ອໍເດີທີ່ໃຊ້ແລ້ວຍັງຄົງສ່ວນຫຼຸດໄວ້"],
+    code_deleted: ["Code deleted", "ລຶບລະຫັດແລ້ວ"],
+    code_fail: ["Couldn't save the code: {e}", "ບັນທຶກລະຫັດບໍ່ໄດ້: {e}"],
     fee: ["Delivery fee", "ຄ່າສົ່ງ"],
     total: ["Total", "ຍອດລວມ"],
     to_price: ["price to confirm", "ລໍຖ້າລາຄາ"],
@@ -604,7 +624,7 @@
     ["id", "name", "phone", "delivery", "address", "note", "due", "tracking", "ref", "slip"].forEach(function (k) { o[k] = o[k] || ""; });
     o.lang = o.lang === "lo" ? "lo" : "en";
     o.web = !!o.web;
-    o.via = o.via || ""; o.handle = o.handle || "";
+    o.via = o.via || ""; o.handle = o.handle || ""; o.code = o.code || "";
     o.photos = Array.isArray(o.photos) ? o.photos.filter(function (x) { return typeof x === "string"; }) : [];
     return o;
   }
@@ -933,7 +953,7 @@
       address: r.address, note: r.note, ref: r.ref, lang: r.lang, items: Array.isArray(r.items) ? r.items : [],
       discount: r.discount, fee: r.fee, due: r.due || "", tracking: r.tracking, web: r.web,
       slip: r.has_slip ? "1" : "", log: Array.isArray(r.log) ? r.log : [],
-      via: r.contact_via || "", handle: r.contact_handle || "", photos: Array.isArray(r.photos) ? r.photos : []
+      via: r.contact_via || "", handle: r.contact_handle || "", photos: Array.isArray(r.photos) ? r.photos : [], code: r.discount_code || ""
     });
   }
   function toRow(o) {
@@ -953,7 +973,7 @@
       web: !!o.web, log: (o.log || []).slice(-100)
     };
   }
-  var OKEYS = ["id", "date", "created", "updated", "stage", "pay", "method", "name", "phone", "delivery", "address", "note", "ref", "lang", "items", "discount", "fee", "due", "tracking", "web", "slip", "log", "via", "handle", "photos"];
+  var OKEYS = ["id", "date", "created", "updated", "stage", "pay", "method", "name", "phone", "delivery", "address", "note", "ref", "lang", "items", "discount", "fee", "due", "tracking", "web", "slip", "log", "via", "handle", "photos", "code"];
   function orderSig(o) { return JSON.stringify(OKEYS.map(function (k) { return o[k] == null ? "" : o[k]; })); }
   function syncDone(ok) {
     SYNC.busy = false;
@@ -1528,7 +1548,7 @@
       "<dt>" + esc(a("f_delivery")) + "</dt><dd>" + esc(o.delivery || "—") + loLine(laoOf(o.delivery)) + "</dd>" + (o.address ? "<dt>" + esc(a("f_address")) + "</dt><dd>" + esc(o.address) + loLine(laoOf(o.address)) + "</dd>" : "") + "</dl></section>" +
       '<section class="dr-sec"><h3>' + esc(a("sec_items")) + '</h3><div class="oitems">' + (items || '<p class="empty">—</p>') + "</div>" +
       '<div class="sum"><div><span>' + esc(a("subtotal")) + "</span><span>" + esc(money(orderSub(o))) + "</span></div>" +
-      (o.discount ? "<div><span>" + esc(a("discount")) + "</span><span>− " + esc(money(o.discount)) + "</span></div>" : "") +
+      (o.discount ? "<div><span>" + esc(a("discount")) + (o.code ? " · " + esc(o.code.toUpperCase()) : "") + "</span><span>− " + esc(money(o.discount)) + "</span></div>" : "") +
       (o.fee ? "<div><span>" + esc(a("fee")) + "</span><span>" + esc(money(o.fee)) + "</span></div>" : "") +
       '<div class="total"><span>' + esc(a("total")) + "</span><span>" + esc(money(orderTotal(o))) + "</span></div>" +
       (hasUnknown(o) ? '<p class="hint">' + esc(a("plus_unknown")) + "</p>" : "") + "</div></section>" +
@@ -1919,7 +1939,55 @@
       '<section class="card"><div class="card-head"><h2>' + esc(a("s_pay")) + '</h2></div><div class="field"><label for="s_account">' + esc(a("s_account")) + '</label><input type="text" id="s_account" value="' + esc(settings.account) + '"></div>' +
       '<div class="field"><span class="lbl">' + esc(a("s_qr")) + '</span><img class="qr-prev" id="qrPrev" src="' + esc(settings.qr) + '" alt="LAO QR">' +
       '<div><label class="btn ghost sm" for="s_qr" style="cursor:pointer">' + icon("upload") + esc(a("s_qr_btn")) + '</label><input type="file" id="s_qr" accept="image/*" class="sr"></div></div></section>' +
-      '<p class="hint">' + esc(a("s_note")) + "</p></form>";
+      '<p class="hint">' + esc(a("s_note")) + "</p></form>" + codesCard();
+  }
+  /* discount codes (kept in the database; the shop checks them when an order is placed) */
+  var CODES = { state: "idle", list: [], missing: false };
+  function loadCodes() {
+    CODES.state = "loading";
+    sb.from("discount_codes").select("*").order("created_at", { ascending: true }).then(function (res) {
+      if (res.error) { CODES.missing = true; CODES.list = []; } else { CODES.missing = false; CODES.list = res.data || []; }
+      CODES.state = "ready";
+    }, function () { CODES.missing = true; CODES.state = "ready"; }).then(function () { if (tab === "shop") render(); });
+  }
+  function codesCard() {
+    var head = '<section class="card" id="codesCard"><div class="card-head"><h2>' + esc(a("codes_h")) + "</h2></div>";
+    if (!ONLINE) return head + '<p class="hint">' + esc(a("codes_offline")) + "</p></section>";
+    if (CODES.state === "idle") loadCodes();
+    if (CODES.state !== "ready") return head + '<p class="hint">…</p></section>';
+    if (CODES.missing) return head + '<p class="alert info">' + esc(a("codes_missing")) + "</p></section>";
+    var rows = CODES.list.length ? '<div class="table-wrap"><table class="tbl"><thead><tr><th>' + esc(a("code_col")) + '</th><th class="num">' + esc(a("pct_col")) + '</th><th class="num">' + esc(a("uses_col")) + "</th><th>" + esc(a("on_col")) + "</th><th></th></tr></thead><tbody>" +
+      CODES.list.map(function (c) {
+        return "<tr><td><code class=\"code\">" + esc(String(c.code).toUpperCase()) + "</code>" + (c.note ? "<small>" + esc(c.note) + "</small>" : "") + '</td><td class="num">' + esc(c.percent) + '%</td><td class="num">' + esc(c.uses) + (c.max_uses ? " / " + esc(c.max_uses) : "") + "</td>" +
+          '<td><label class="sw"><input type="checkbox" data-code-on="' + esc(c.code) + '"' + (c.active ? " checked" : "") + '><span></span></label></td>' +
+          '<td class="actions"><button class="btn danger sm" type="button" data-code-del="' + esc(c.code) + '">' + icon("trash") + "</button></td></tr>";
+      }).join("") + "</tbody></table></div>" : '<p class="hint">' + esc(a("codes_none")) + "</p>";
+    return head + '<p class="page-intro">' + esc(a("codes_p")) + "</p>" + rows +
+      '<form class="on-form" id="codeForm" novalidate><div class="grid3"><div class="field"><label for="codeNew">' + esc(a("code_new")) + '</label><input type="text" id="codeNew" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(a("code_new_ph")) + '"></div>' +
+      '<div class="field"><label for="codePct">' + esc(a("pct_new")) + '</label><input type="number" id="codePct" min="1" max="90" step="1" inputmode="numeric" value="5"></div>' +
+      '<div class="field"><span class="lbl">&nbsp;</span><button class="btn" type="submit">' + icon("plus") + esc(a("code_add")) + "</button></div></div></form></section>";
+  }
+  function addCode() {
+    var code = document.getElementById("codeNew").value.trim().toLowerCase(), pct = parseInt(document.getElementById("codePct").value, 10);
+    if (!/^[a-z0-9_-]{3,40}$/.test(code) || !(pct >= 1 && pct <= 90)) { toast(a("code_bad_new"), 6000); return; }
+    if (CODES.list.some(function (c) { return c.code === code; })) { toast(a("code_exists"), 5000); return; }
+    sb.from("discount_codes").insert({ code: code, percent: pct }).then(function (res) {
+      if (res.error) throw res.error;
+      toast(a("code_added")); loadCodes();
+    }).catch(function (e) { toast(a("code_fail", { e: dbErr(e) }), 8000); });
+  }
+  function setCodeOn(code, on) {
+    sb.from("discount_codes").update({ active: on }).eq("code", code).then(function (res) {
+      if (res.error) throw res.error;
+      loadCodes();
+    }).catch(function (e) { toast(a("code_fail", { e: dbErr(e) }), 8000); loadCodes(); });
+  }
+  function deleteCode(code) {
+    if (!confirm(a("code_del_confirm", { c: code.toUpperCase() }))) return;
+    sb.from("discount_codes").delete().eq("code", code).then(function (res) {
+      if (res.error) throw res.error;
+      toast(a("code_deleted")); loadCodes();
+    }).catch(function (e) { toast(a("code_fail", { e: dbErr(e) }), 8000); });
   }
   function messagesPage() {
     var ph = ["{name}", "{id}", "{total}", "{delivery}", "{tracking}", "{account}"];
@@ -2463,6 +2531,7 @@
     if (e.target.closest("#saveBtn")) { saveAll(); return; }
     if (e.target.closest("#logoutBtn")) { logout(); return; }
     if (e.target.closest("#igCheck")) { igCheckNow(); return; }
+    if ((el = e.target.closest("[data-code-del]"))) { deleteCode(el.getAttribute("data-code-del")); return; }
     if (e.target.closest("#onSync")) { SYNC.state = "wait"; render(); pullOrders(); if (ONLINE) loadCatalogOnline(); return; }
     if (e.target.closest("#bkFiles")) {
       download("products.js", productsFile(), "text/javascript;charset=utf-8");
@@ -2554,6 +2623,8 @@
       else { logEvent(x, a("log_edited")); orders[orders.indexOf(ref)] = x; if (DR && DR.id === ref.id) DR.id = x.id; }
       var pm = document.getElementById("pasteMsg"); if (pm && wasNew) pm.value = "";
       saveOrders(); closeDialog(); render(); toast(a("o_saved"));
+    } else if (id === "codeForm") {
+      addCode();
     } else if (id === "igForm") {
       // the token goes straight to the database; it is never kept in this page
       var tk = document.getElementById("igToken"), val = tk.value.trim();
@@ -2591,6 +2662,7 @@
 
   document.addEventListener("change", function (e) {
     var t = e.target;
+    if (t.hasAttribute && t.hasAttribute("data-code-on")) { setCodeOn(t.getAttribute("data-code-on"), t.checked); return; }
     if (t.id === "opay") { OF.pay = t.value; renderOrderTable(); return; }
     if (t.id === "omethod") { OF.method = t.value; renderOrderTable(); return; }
     if (t.id === "ptype") { PF.type = t.value; renderProductTable(); return; }

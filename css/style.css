@@ -683,3 +683,12 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--focus); out
 .main-nav.more { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 44px), transparent); }
 /* checkout: long step titles (Lao, Chinese) wrap before the cat sitting on the box edge */
 .co-step legend { max-width: calc(100% - 84px); }
+/* discount code */
+.code-row { display: flex; gap: 10px; align-items: flex-end; }
+.code-row input { flex: 1 1 auto; min-width: 0; text-transform: uppercase; letter-spacing: 0.04em; }
+.code-row input::placeholder { text-transform: none; letter-spacing: 0; }
+.code-row input[readonly] { background-color: var(--sky); border-bottom-color: var(--accent); }
+.code-row .btn { flex: none; min-height: 44px; padding-inline: 18px; }
+.total.discount span, .total.discount b { color: var(--accent); }
+.total.grand { border-top: 1.5px solid var(--ink); padding-top: 8px; }
+.total.grand b { font-size: 1.45rem; }

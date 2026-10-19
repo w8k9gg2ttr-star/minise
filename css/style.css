@@ -1,6 +1,6 @@
 /* Minise Arte storefront.
    Look: a hand-lettered paper shop. Cream paper, navy ink, painted navy and powder-blue stripes,
-   a checker edge under the header. Everything is written in Patrick Hand (Lao in Noto Sans Lao Looped).
+   a checker edge under the header. Everything is written in Patrick Hand (Lao in Noto Sans Lao, Chinese in Noto Sans SC).
    One deliberate light look, so it reads the same on every phone. */
 :root {
   --paper: #f2ebdd;
@@ -28,8 +28,8 @@
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M1.5 2.2c1.8 1.6 3.6 3.4 5.4 5.4 1.9-2 3.7-3.8 5.6-5.6' fill='none' stroke='%2324396a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --checker: repeating-linear-gradient(90deg, var(--ink) 0 18px, transparent 18px 36px);
 
-  --f-display: "Patrick Hand", "Noto Sans Lao Looped", "Noto Sans Lao", "Comic Sans MS", system-ui, sans-serif;
-  --f-body: "Patrick Hand", "Noto Sans Lao Looped", "Noto Sans Lao", "Comic Sans MS", system-ui, sans-serif;
+  --f-display: "Patrick Hand", "Noto Sans Lao", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Comic Sans MS", system-ui, sans-serif;
+  --f-body: "Patrick Hand", "Noto Sans Lao", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Comic Sans MS", system-ui, sans-serif;
   --f-lao-display: var(--f-display);
   --f-lao-body: var(--f-body);
 
@@ -65,7 +65,7 @@ button { cursor: pointer; }
 h1, h2, h3 { font-family: var(--f-display); font-weight: 400; line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: 0; }
 html[lang="lo"] h1, html[lang="lo"] h2, html[lang="lo"] h3 { line-height: 1.4; }
 p { margin: 0; }
-.wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+.wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px)) max(var(--gutter), env(safe-area-inset-right, 0px)); }
 .eyebrow { font-size: 0.95rem; letter-spacing: 0.02em; color: var(--ink-2); }
 .lead { font-size: var(--step-1); color: var(--ink-2); max-width: 36em; }
 .skip { position: absolute; left: -999px; top: 8px; background: var(--btn); color: var(--on-btn); padding: 8px 14px; z-index: 50; border-radius: 8px; }
@@ -111,7 +111,7 @@ p { margin: 0; }
 }
 .site-head::after { content: ""; display: block; height: 12px; background: var(--checker); }
 .head-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; min-height: 74px; }
-.logo { display: block; text-decoration: none; font-family: var(--f-display); font-size: 2.05rem; line-height: 1; white-space: nowrap; color: var(--ink); }
+.logo { display: flex; align-items: center; min-height: 44px; text-decoration: none; font-family: var(--f-display); font-size: 2.05rem; line-height: 1; white-space: nowrap; color: var(--ink); }
 .main-nav { display: flex; gap: 0; justify-content: center; overflow-x: auto; scrollbar-width: none; }
 .main-nav::-webkit-scrollbar { display: none; }
 .main-nav a {
@@ -131,15 +131,27 @@ html[lang="en"] .main-nav a { text-transform: lowercase; }
 .bag-count { font-size: 1.05rem; font-variant-numeric: tabular-nums; display: inline-block; }
 .bag-count::before { content: "("; }
 .bag-count::after { content: ")"; }
-.lang-btn { font-family: "Noto Sans Lao Looped", var(--f-body); border: 1.5px solid var(--ink); }
-@media (max-width: 1180px) { .main-nav a { padding-inline: 7px; font-size: 1rem; } }
-@media (max-width: 1040px) {
-  .head-row { grid-template-columns: auto 1fr; grid-template-areas: "logo actions" "nav nav"; gap: 0 12px; padding-top: 6px; }
-  .logo { grid-area: logo; font-size: 1.75rem; }
-  .head-actions { grid-area: actions; justify-self: end; }
-  .main-nav { grid-area: nav; justify-content: flex-start; margin-inline: calc(var(--gutter) * -1); padding: 0 var(--gutter) 4px; }
-}
-@media (max-width: 380px) { .head-ig, .head-sep { display: none; } }
+.lang-btn { border: 1.5px solid var(--ink); gap: 6px; padding: 0 10px; }
+.lang-btn .icon { width: 19px; height: 19px; }
+/* language menu: English, ລາວ, 中文 */
+.lang-wrap { position: relative; }
+.lang-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 25; min-width: 150px; display: grid; padding: 6px; background: var(--card); border: 2px solid var(--ink); border-radius: 8px; box-shadow: 0 16px 30px -18px var(--shadow); }
+.lang-menu button { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 42px; padding: 4px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font-size: 1.05rem; text-align: left; }
+.lang-menu button:hover { background: var(--sky); }
+.lang-menu button[aria-checked="true"]::after { content: "✓"; }
+.lang-menu:not([hidden]) { animation: kittyPop 0.3s cubic-bezier(.3, 1.4, .5, 1) both; transform-origin: 90% 0; }
+/* Chinese reads better with a little more room */
+html[lang="zh-CN"] body { line-height: 1.7; }
+html[lang="zh-CN"] h1, html[lang="zh-CN"] h2, html[lang="zh-CN"] h3 { line-height: 1.3; letter-spacing: 0.02em; }
+html[lang="zh-CN"] .hero h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.4rem); }
+@media (max-width: 1320px) { .main-nav a { padding-inline: 7px; font-size: 1rem; } }
+/* the menu moves to its own row whenever it doesn't fit beside the logo (any screen, any language);
+   js/app.js sets .stack after measuring */
+.site-head.stack .head-row { grid-template-columns: auto 1fr; grid-template-areas: "logo actions" "nav nav"; gap: 0 12px; padding-top: 6px; }
+.site-head.stack .logo { grid-area: logo; font-size: 1.75rem; }
+.site-head.stack .head-actions { grid-area: actions; justify-self: end; }
+.site-head.stack .main-nav { grid-area: nav; justify-content: flex-start; margin-inline: calc(var(--gutter) * -1); padding: 0 var(--gutter) 4px; }
+@media (max-width: 470px) { .head-ig, .head-sep { display: none; } }
 
 /* sections */
 main { display: block; }
@@ -293,7 +305,7 @@ html[lang="lo"] .hero h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem); }
 .faq details p { padding: 0 0 18px; color: var(--ink-2); max-width: 62ch; }
 
 /* footer: the checker edge again, then cream paper */
-.site-foot { background: var(--card); padding-block: 0 32px; margin-top: 40px; }
+.site-foot { background: var(--card); padding-block: 0 32px; margin-top: calc(clamp(84px, 9vw, 104px) * 1.17 + 10px); }
 .site-foot::before { content: ""; display: block; height: 12px; background: var(--checker); margin-bottom: 52px; }
 .foot-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
 .foot-grid h4 { margin: 0 0 10px; font-size: 1.15rem; color: var(--ink); font-weight: 400; }
@@ -360,7 +372,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--focus); out
 @media (min-width: 901px) { .filters .fbody { display: grid; gap: 26px; } }
 
 /* product page */
-.crumbs { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.95rem; color: var(--ink-2); padding-block: 22px; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.95rem; color: var(--ink-2); padding-block: 22px; padding-right: 112px; }
 .crumbs a { text-decoration: none; }
 .crumbs a:hover { text-decoration: underline; }
 .pdp-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
@@ -661,3 +673,13 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--focus); out
 .foot-kitty2 { position: absolute; left: var(--gutter); bottom: calc(100% + 52px); width: clamp(96px, 10vw, 128px); }
 @media (max-width: 520px) { .foot-kitty2 { width: 88px; } }
 @media (max-width: 600px) { .peeker { width: 64px; left: 6px; } .peek-bubble { bottom: calc(env(safe-area-inset-bottom, 0px) + 64px); } }
+/* phones and iPads: comfortable taps, nothing hidden behind cats or the notch */
+.store > .link { display: inline-flex; align-items: center; min-height: 44px; }
+.peeker { left: max(12px, env(safe-area-inset-left, 0px)); }
+@media (max-width: 520px) {
+  .gal-kitty { width: 70px; right: 12px; }
+  .crumbs { padding-right: 86px; }
+}
+.main-nav.more { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 44px), transparent); }
+/* checkout: long step titles (Lao, Chinese) wrap before the cat sitting on the box edge */
+.co-step legend { max-width: calc(100% - 84px); }

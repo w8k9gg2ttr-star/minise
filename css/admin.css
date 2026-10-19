@@ -1,6 +1,6 @@
 /* Minise Arte admin console.
    Same look as the shop: cream paper, navy ink, painted stripes, a checker edge under the top bar,
-   lettered in Patrick Hand (Lao in Noto Sans Lao Looped). Status colours are muted and carry meaning only. */
+   lettered in Patrick Hand (Lao in Noto Sans Lao). Status colours are muted and carry meaning only. */
 :root {
   --side-bg: #ebe2d0;
   --side-line: rgba(36, 57, 106, 0.22);
@@ -29,7 +29,7 @@
   --bad: #a3382d;       --bad-bg: #f5dbd3;
   --radius: 8px;
   --shadow: none;
-  --f: "Patrick Hand", "Noto Sans Lao Looped", "Noto Sans Lao", "Comic Sans MS", system-ui, sans-serif;
+  --f: "Patrick Hand", "Noto Sans Lao", "PingFang SC", "Microsoft YaHei", "Comic Sans MS", system-ui, sans-serif;
   --stripes: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='480' viewBox='0 0 76 480'%3E %3Cfilter id='w' x='-30%25' y='-10%25' width='160%25' height='120%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03 0.008' numOctaves='2' seed='7' stitchTiles='stitch' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='6' xChannelSelector='R' yChannelSelector='B'/%3E%3C/filter%3E %3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.07 0.009' numOctaves='3' seed='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.2 -0.05'/%3E%3C/filter%3E %3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.14 0 0 0 0 0.28 0 0 0 0.16 0'/%3E%3C/filter%3E %3Crect width='76' height='480' fill='%23a9bfdb'/%3E %3Cg filter='url(%23w)'%3E%3Crect x='-30' y='-40' width='136' height='560' fill='%23a9bfdb'/%3E%3Crect x='19' y='-40' width='38' height='560' fill='%233f5684'/%3E%3C/g%3E %3Crect width='76' height='480' filter='url(%23p)'/%3E %3Crect width='76' height='480' filter='url(%23g)'/%3E %3C/svg%3E");
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   --checker: repeating-linear-gradient(90deg, var(--ink) 0 16px, transparent 16px 32px);
@@ -471,7 +471,7 @@ html[lang="lo"] .legend { letter-spacing: 0; text-transform: none; font-size: 0.
 .login { background: var(--stripe-light) var(--stripes) 0 0 / 76px 480px repeat; }
 .login-card { border: 0; border-radius: 0; background: var(--card); box-shadow: 0 30px 60px -36px rgba(20, 30, 60, 0.6); }
 .login-word { font-size: 2.6rem; line-height: 1; }
-.login-lang { border: 2px solid var(--ink); background: var(--card); color: var(--ink); border-radius: 8px; font-family: "Noto Sans Lao Looped", var(--f); }
+.login-lang { border: 2px solid var(--ink); background: var(--card); color: var(--ink); border-radius: 8px; font-family: "Noto Sans Lao", var(--f); }
 .side { border-right: 2px solid var(--ink); background: var(--side-bg) var(--grain); }
 .brand { padding: 0; margin: -22px -14px 0; display: block; }
 .brand-stripes { display: grid; place-items: center; padding: 22px 16px 18px; background: var(--stripe-light) var(--stripes) 0 0 / 76px 480px repeat; border-bottom: 2px solid var(--ink); }
@@ -496,7 +496,7 @@ html[lang="lo"] .legend { letter-spacing: 0; text-transform: none; font-size: 0.
 .badge-n { background: var(--ink); color: var(--card); }
 .kpi .l .ic, .empty-state > .ic { background: var(--accent-soft); color: var(--ink); }
 /* Lao line under English order details */
-.lo { display: block; font-family: "Noto Sans Lao Looped", "Noto Sans Lao", var(--f); font-size: 0.86em; line-height: 1.5; color: var(--ink-2); }
+.lo { display: block; font-family: "Noto Sans Lao", var(--f); font-size: 0.86em; line-height: 1.5; color: var(--ink-2); }
 .oitem .nm .lo, .tbl td .lo { color: var(--accent); }
 .doc .lo { font-size: 9.5pt; color: #333; }
 @media (max-width: 960px) { .top { position: relative; } .brand { margin: -12px -12px 0; width: calc(100% + 24px); } }
@@ -518,3 +518,25 @@ html[lang="lo"] .legend { letter-spacing: 0; text-transform: none; font-size: 0.
 .dr-who { flex: 1; min-width: 0; }
 .dr-kitty { width: 58px; flex: none; transform-origin: 50% 100%; animation: kittyPop 0.6s cubic-bezier(.3, 1.5, .5, 1) both; }
 .dr-kitty .kitty-walk { margin-top: 10px; }
+/* phones: the date bar wraps and the cat sits at the end of it instead of on top */
+@media (max-width: 700px) {
+  .dash-bar { padding-right: 0; }
+  .dash-kitty { position: static; width: 52px; margin-left: auto; }
+  .dates { flex: 1 1 100%; flex-wrap: wrap; }
+  .dates input { flex: 1 1 130px; width: auto; min-width: 0; }
+  .seg { max-width: 100%; }
+}
+/* keep clear of the notch on phones held sideways */
+.main, .top { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 961px) { .main, .top { padding-left: 32px; padding-right: 32px; } }
+.dr-who h2 { overflow-wrap: anywhere; }
+/* the hidden switch inputs stay inside their table (otherwise the Stock page scrolls sideways on phones) */
+.sw { position: relative; }
+/* small phones: the search box and Save button share the row, wrapping if needed */
+.top-r { flex-wrap: wrap; }
+@media (max-width: 960px) { .gsearch { flex: 1 1 170px; min-width: 0; } }
+@media (max-width: 420px) {
+  .dr-kitty { width: 42px; }
+  .dr-top h2 { font-size: 1.2rem; }
+  .dr-head, .dr-body { padding-left: 14px; padding-right: 14px; }
+}

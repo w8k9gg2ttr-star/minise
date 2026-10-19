@@ -247,6 +247,7 @@
       ["photo_l1", "photo_l2", "photo_l3"].map(function (k) { return "<li>" + ICON.tick + "<span>" + esc(t(k)) + "</span></li>"; }).join("") +
       '</ul><div><a class="btn" href="#c-photo">' + esc(t("photo_cta")) + '</a></div></div><div class="grid three">' + keep + "</div></div></section>" +
       '<section class="section tight"><div class="wrap">' + head(t("new_eyebrow"), t("new_h"), "#shop", t("view_all"), "", "yay") + '<div class="grid">' + fresh.map(card).join("") + "</div></div></section>" +
+      duoHTML() +
       '<section class="section tight"><div class="wrap">' + head(t("col_eyebrow"), t("col_h")) + '<div class="chips-row">' + tags + "</div></div></section>" +
       '<section class="section band"><div class="wrap">' + head(t("steps_eyebrow"), t("steps_h"), "#order", t("view_all"), "", "phone") + stepsHTML() + "</div></section>" +
       '<section class="section"><div class="wrap">' + head(t("visit_eyebrow"), t("visit_h"), "", "", "", "wave") + visitHTML() + "</div></section>" +
@@ -330,7 +331,7 @@
   var seen = ("IntersectionObserver" in window) && !calm ? new IntersectionObserver(function (entries) {
     entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); seen.unobserve(e.target); } });
   }, { rootMargin: "0px 0px -6% 0px", threshold: 0.06 }) : null;
-  var REVEAL = ".section-head, .cat, .card, .coll, .promise, .timeline li, .values > div, .steps li, .faq details, .ig-strip a, .visit-grid > *, .story-pics img, .mumi-day li";
+  var REVEAL = ".section-head, .cat, .card, .coll, .promise, .timeline li, .values > div, .steps li, .faq details, .ig-strip a, .visit-grid > *, .story-pics img, .mumi-day li, .duo-story li";
   function reveal(root) {
     if (!seen) return;
     var vh = window.innerHeight;
@@ -1404,6 +1405,116 @@
       return;
     }
     if (e.target.closest("[data-mk-add]")) mkAdd();
+  });
+  /* home: a little Mumi & Peni comic, and a charm-matching game (Peni mixed up the tray).
+     Winning offers to start a bracelet with the matched charms. The best score stays on this device. */
+  var GM_POOL = ["A1", "A7", "A9", "A11", "A15", "A16", "A20", "A24", "B4", "B12", "B20", "B23", "C13", "C16", "C17", "C25", "C33", "C37"];
+  var GM = { cards: [], open: [], done: {}, moves: 0, lock: false, won: false, say: "" };
+  function gmBest() { try { return parseInt(localStorage.getItem("minise_gm_best"), 10) || 0; } catch (e) { return 0; } }
+  function shuffled(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a;
+  }
+  function gmNew() {
+    var pick = shuffled(GM_POOL.filter(function (c) { return CH_BY[c]; })).slice(0, 6);
+    GM = { cards: shuffled(pick.concat(pick)), open: [], done: {}, moves: 0, lock: false, won: false, say: t("gm_say_start") };
+  }
+  function gmCard(i) {
+    var code = GM.cards[i], up = GM.done[i] || GM.open.indexOf(i) > -1;
+    return '<button type="button" class="gm-card' + (up ? " is-up" : "") + (GM.done[i] ? " is-done" : "") + '" data-gm="' + i + '" aria-label="' + esc(t("gm_card", { n: i + 1 }) + (up ? ": " + charmName(code) : "")) + '">' +
+      '<span class="gm-inner"><span class="gm-back">' + kitty("paw", "gm-paw") + '</span><span class="gm-front">' + charmImg(code) + "</span></span></button>";
+  }
+  function gmStats() {
+    var pairs = Object.keys(GM.done).length / 2, best = gmBest();
+    return '<span class="tn">' + esc(t("gm_moves", { n: GM.moves })) + '</span><span class="tn">' + esc(t("gm_pairs", { n: pairs, t: GM.cards.length / 2 })) + "</span>" +
+      (best ? '<span class="tn">' + esc(t("gm_best", { n: best })) + "</span>" : "");
+  }
+  function gmWin() {
+    if (!GM.won) return "";
+    return '<div class="gm-win" role="status">' + kitty("yay", "gm-win-kitty") + '<div><p>' + esc(t("gm_win", { n: GM.moves })) + '</p><div class="gm-win-btns"><button class="btn solid" type="button" data-gm-use>' + esc(t("gm_use")) + '</button><button class="btn" type="button" data-gm-again>' + esc(t("gm_again")) + "</button></div></div>" + kitty("peniWave", "gm-win-kitty") + "</div>";
+  }
+  function duoHTML() {
+    if (!GM.cards.length) gmNew();
+    var panels = [
+      [kitty("drink", "pn-k") + kitty("peniSleep", "pn-k pn-small"), "Mumi", "st_1"],
+      [kitty("peni", "pn-k pn-big") + '<span class="pn-clover">' + charmImg("A1") + "</span>", "Peni", "st_2"],
+      [kitty("paint", "pn-k") + kitty("peniBracelet", "pn-k"), "Mumi", "st_3"],
+      [kitty("gift", "pn-k") + kitty("peniWave", "pn-k"), "Peni", "st_4"]
+    ].map(function (p, i) {
+      return '<li><span class="pn-num tn">' + (i + 1) + '</span><div class="pn-pic">' + p[0] + '</div><p class="pn-say"><b>' + (p[1] === "Mumi" ? esc(t("mid_name")) : esc(t("peni_name"))) + "</b>" + esc(t(p[2])) + "</p></li>";
+    }).join("");
+    return '<section class="duo"><div class="wrap">' +
+      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><a class="link" href="#mumi">' + esc(t("duo_more")) + " →</a>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
+      '<ol class="duo-story">' + panels + "</ol>" +
+      '<div class="gm" id="gm"><div class="gm-top"><div><h3>' + esc(t("gm_h")) + "</h3><p>" + esc(t("gm_p")) + '</p></div><div class="gm-stats" id="gmStats">' + gmStats() + "</div></div>" +
+      '<div class="gm-board" id="gmBoard">' + GM.cards.map(function (c, i) { return gmCard(i); }).join("") + "</div>" +
+      '<div class="gm-foot"><div class="gm-peni">' + kitty("peni", "gm-peni-kitty") + '<p class="gm-say" id="gmSay" role="status">' + esc(GM.say) + '</p></div><button class="link gm-reset" type="button" data-gm-again>' + esc(t("gm_again")) + "</button></div>" +
+      '<div id="gmWin">' + gmWin() + "</div></div></div></section>";
+  }
+  function gmSay(text) {
+    GM.say = text;
+    var el = document.getElementById("gmSay");
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+  }
+  function gmSync() {
+    var board = document.getElementById("gmBoard");
+    if (!board) return;
+    board.querySelectorAll("[data-gm]").forEach(function (b) {
+      var i = +b.getAttribute("data-gm"), up = GM.done[i] || GM.open.indexOf(i) > -1;
+      b.classList.toggle("is-up", !!up);
+      b.classList.toggle("is-done", !!GM.done[i]);
+      b.setAttribute("aria-label", t("gm_card", { n: i + 1 }) + (up ? ": " + charmName(GM.cards[i]) : ""));
+    });
+    document.getElementById("gmStats").innerHTML = gmStats();
+    document.getElementById("gmWin").innerHTML = gmWin();
+  }
+  function gmFlip(i) {
+    if (GM.lock || GM.won || GM.done[i] || GM.open.indexOf(i) > -1) return;
+    GM.open.push(i);
+    if (GM.open.length === 2) {
+      GM.moves++;
+      var a = GM.open[0], b = GM.open[1];
+      if (GM.cards[a] === GM.cards[b]) {
+        GM.done[a] = GM.done[b] = true;
+        GM.open = [];
+        if (Object.keys(GM.done).length === GM.cards.length) {
+          GM.won = true;
+          var best = gmBest();
+          if (!best || GM.moves < best) { try { localStorage.setItem("minise_gm_best", String(GM.moves)); } catch (e) { /* ignore */ } }
+          gmSay(t("gm_say_win"));
+        } else gmSay(t("gm_say_match", { n: charmName(GM.cards[a]) }));
+      } else {
+        GM.lock = true;
+        gmSay(t("gm_say_miss"));
+        setTimeout(function () { GM.open = []; GM.lock = false; gmSync(); }, calm ? 500 : 950);
+      }
+    }
+    gmSync();
+    if (GM.won) { var w = document.querySelector(".gm-win"); if (w) w.scrollIntoView({ block: "nearest", behavior: calm ? "auto" : "smooth" }); }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-gm]");
+    if (b) { gmFlip(+b.getAttribute("data-gm")); return; }
+    if (e.target.closest("[data-gm-again]")) {
+      gmNew();
+      var board = document.getElementById("gmBoard");
+      if (board) board.innerHTML = GM.cards.map(function (c, i) { return gmCard(i); }).join("");
+      gmSync();
+      gmSay(t("gm_say_start"));
+      return;
+    }
+    if (e.target.closest("[data-gm-use]")) {
+      // start a bracelet with three of the charms just matched
+      var seen = [];
+      GM.cards.forEach(function (c) { if (seen.indexOf(c) < 0) seen.push(c); });
+      MK.ch = seen.slice(0, MYO_MAX);
+      MK.say = t("pn_from_game");
+      mkSave();
+      location.hash = "#make";
+    }
   });
   function footer() {
     return '<div class="wrap foot-wrap">' + kitty("shark", "foot-kitty") + kitty("sleep", "foot-kitty2") + '<div class="foot-grid"><div class="foot-brand"><span class="foot-logo">Minise Arte</span><p>' + esc(t("footer_tag")) + "</p>" +

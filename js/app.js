@@ -2141,59 +2141,241 @@
     }
   });
 
-  /* ---------- A little film: the Minise Arte story, told by Mumi & Peni (plays in the page, with subtitles) ---------- */
+  /* ---------- The film: the Minise Arte story as a little cartoon. Scenes are drawn in SVG (park, booth, street, city, night),
+     and the music is played live with Web Audio (a soft ukulele tune, bass and bells), starting only when someone presses Play. ---------- */
+  var INKC = "#24396a";
+  function fmSvg(inner) { return '<svg class="fm-bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + inner + "</svg>"; }
+  function fmSky(v) {
+    var g = { day: ["#b9e0f6", "#eef8fc"], sunset: ["#f6ad9b", "#fde3c4"], night: ["#18224a", "#3a4f86"], dusk: ["#b7a6e6", "#fbd5c4"] }[v];
+    return '<defs><linearGradient id="fmSky-' + v + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + g[0] + '"/><stop offset="1" stop-color="' + g[1] + '"/></linearGradient>' +
+      '<pattern id="fmCheck" width="44" height="44" patternUnits="userSpaceOnUse"><rect width="44" height="44" fill="#f7c6d2"/><rect width="22" height="22" fill="#fff8fa"/><rect x="22" y="22" width="22" height="22" fill="#fff8fa"/></pattern></defs>' +
+      '<rect width="1600" height="900" fill="url(#fmSky-' + v + ')"/>';
+  }
+  function fmSun(x, y, col) { return '<g class="fm-sun"><circle cx="' + x + '" cy="' + y + '" r="130" fill="' + col + '" opacity=".22"/><circle cx="' + x + '" cy="' + y + '" r="82" fill="' + col + '" stroke="' + INKC + '" stroke-width="3"/></g>'; }
+  function fmMoon(x, y) { return '<g class="fm-glow"><circle cx="' + x + '" cy="' + y + '" r="110" fill="#fff3c4" opacity=".14"/></g><circle cx="' + x + '" cy="' + y + '" r="62" fill="#fff3c4" stroke="' + INKC + '" stroke-width="3"/><circle cx="' + (x - 18) + '" cy="' + (y - 14) + '" r="11" fill="#f1dfa0"/><circle cx="' + (x + 20) + '" cy="' + (y + 16) + '" r="8" fill="#f1dfa0"/>'; }
+  function fmStars() { return [[120, 90], [300, 160], [460, 70], [640, 140], [820, 60], [980, 170], [1140, 90], [1460, 220], [220, 260], [760, 240]].map(function (s, i) { return '<circle class="fm-star s' + (i % 3) + '" cx="' + s[0] + '" cy="' + s[1] + '" r="' + (i % 2 ? 4 : 6) + '" fill="#fff6d2"/>'; }).join(""); }
+  function fmCloud(x, y, s, cls) { return '<g class="fm-cloud ' + cls + '"><path transform="translate(' + x + " " + y + ") scale(" + s + ')" d="M0 40 C-2 14 26 2 46 14 C58 -12 108 -12 118 16 C142 4 172 20 164 46 Z" fill="#fff" stroke="' + INKC + '" stroke-width="3" stroke-linejoin="round"/></g>'; }
+  function fmClouds() { return fmCloud(140, 120, 1.3, "c1") + fmCloud(620, 70, 1, "c2") + fmCloud(1000, 150, 1.5, "c3"); }
+  function fmBirds() { return '<g class="fm-birds"><path d="M0 0 q14 -12 28 0 q14 -12 28 0 M70 30 q10 -9 20 0 q10 -9 20 0" fill="none" stroke="' + INKC + '" stroke-width="4" stroke-linecap="round" transform="translate(300 230)"/></g>'; }
+  function fmHills(back, front) {
+    return '<path class="fm-hill-b" d="M-40 540 C240 440 560 480 860 460 C1160 440 1400 490 1640 462 V900 H-40 Z" fill="' + back + '"/>' +
+      '<path d="M-20 650 C360 570 760 650 1140 610 C1360 588 1500 616 1620 606 V900 H-20 Z" fill="' + front + '" stroke="' + INKC + '" stroke-width="3"/>';
+  }
+  function fmTree(x, y, s, leaf, lights) {
+    var bulbs = lights ? [[-70, -6], [-28, 36], [14, -44], [54, 22], [84, -16], [-52, -62], [32, -86], [-6, 4]].map(function (b, i) { return '<circle class="fm-bulb b' + (i % 3) + '" cx="' + b[0] + '" cy="' + b[1] + '" r="10" stroke="' + INKC + '" stroke-width="2.5"/>'; }).join("") : "";
+    return '<g transform="translate(' + x + " " + y + ") scale(" + s + ')"><path d="M-16 0 L-11 168 L11 168 L16 0 Z" fill="#c1946a" stroke="' + INKC + '" stroke-width="4" stroke-linejoin="round"/>' +
+      '<g class="fm-sway"><circle cx="-62" cy="14" r="62" fill="' + leaf[0] + '" stroke="' + INKC + '" stroke-width="4"/><circle cx="62" cy="14" r="62" fill="' + leaf[0] + '" stroke="' + INKC + '" stroke-width="4"/><circle cx="0" cy="-38" r="86" fill="' + leaf[1] + '" stroke="' + INKC + '" stroke-width="4"/>' + bulbs + "</g></g>";
+  }
+  function fmFlowers(dark) {
+    var cols = dark ? ["#8c9ccc", "#a99cd6", "#7f95c4"] : ["#f4a9ba", "#f3d873", "#ffffff", "#cdb6e3"];
+    return '<g class="fm-flowers">' + [[90, 820], [230, 860], [420, 800], [560, 868], [1050, 830], [1190, 870], [1360, 812], [1500, 858], [700, 880], [900, 850]].map(function (f, i) {
+      var c = cols[i % cols.length], p = "";
+      for (var k = 0; k < 5; k++) { var a = k / 5 * Math.PI * 2; p += '<circle cx="' + (f[0] + Math.cos(a) * 11).toFixed(1) + '" cy="' + (f[1] + Math.sin(a) * 11).toFixed(1) + '" r="9" fill="' + c + '" stroke="' + INKC + '" stroke-width="2"/>'; }
+      return '<g class="fm-fl f' + (i % 3) + '">' + p + '<circle cx="' + f[0] + '" cy="' + f[1] + '" r="6" fill="#f6b84a"/></g>';
+    }).join("") + "</g>";
+  }
+  function fmPark(o) {
+    o = o || {};
+    var leaf = o.dark ? ["#4c7f88", "#568a92"] : o.warm ? ["#9ccf86", "#a8d690"] : ["#7fc68c", "#8dcf99"];
+    var hills = o.dark ? ["#3b5a8e", "#2e4b7d"] : o.warm ? ["#d9d79f", "#b4d18f"] : ["#b5e0b9", "#94cf9c"];
+    return fmSky(o.sky || "day") + (o.dark ? fmStars() + fmMoon(1320, 170) : fmSun(o.warm ? 1200 : 1320, o.warm ? 330 : 170, o.warm ? "#ffd27a" : "#ffe7a0")) + (o.dark ? "" : fmClouds() + fmBirds()) +
+      fmHills(hills[0], hills[1]) + (o.noTrees ? "" : fmTree(180, 470, 1, leaf, false) + fmTree(1430, 490, 0.85, leaf, false)) + (o.center ? fmTree(800, 470, 1.25, leaf, o.lights) : "") + fmFlowers(o.dark);
+  }
+  function fmEasel() {
+    return '<g transform="translate(1010 430)"><g class="fm-pop"><path d="M30 0 L-10 300 M190 0 L230 300 M110 0 L110 300" stroke="#b98b62" stroke-width="12" stroke-linecap="round"/>' +
+      '<rect x="-6" y="-10" width="232" height="190" rx="8" fill="#fffaf0" stroke="' + INKC + '" stroke-width="5"/>' +
+      '<circle cx="70" cy="70" r="34" fill="#f3d873"/><path d="M20 160 C60 110 100 150 140 120 C170 100 200 130 210 150 L210 170 L10 170 Z" fill="#94cf9c"/><path d="M150 62 C140 48 146 38 155 42 C160 36 170 40 168 50 C166 60 156 64 150 62 Z" fill="#f4a9ba"/>' +
+      '<rect x="20" y="186" width="180" height="14" rx="6" fill="#b98b62"/></g></g>';
+  }
+  function fmTent() {
+    var scal = "";
+    for (var i = 0; i < 8; i++) scal += '<path d="M' + (560 + i * 60) + " 420 a30 30 0 0 0 60 0 Z\" fill=\"" + (i % 2 ? "#a9bfdb" : "#3f5684") + '" stroke="' + INKC + '" stroke-width="3"/>';
+    var str = "";
+    for (var j = 0; j < 8; j++) str += '<path d="M' + (800 + (j - 4) * 30) + " 270 L" + (560 + j * 60) + " 420 L" + (620 + j * 60) + " 420 L" + (800 + (j - 3) * 30) + ' 270 Z" fill="' + (j % 2 ? "#a9bfdb" : "#3f5684") + '"/>';
+    return '<g class="fm-pop"><path d="M600 420 V720 M1000 420 V720" stroke="#b98b62" stroke-width="14"/>' + str + '<path d="M680 270 L920 270 L1040 420 L560 420 Z" fill="none" stroke="' + INKC + '" stroke-width="4" stroke-linejoin="round"/>' + scal +
+      '<rect x="560" y="640" width="480" height="40" rx="8" fill="#fbf3e3" stroke="' + INKC + '" stroke-width="4"/><path d="M580 680 V780 M1020 680 V780" stroke="' + INKC + '" stroke-width="8"/>' +
+      '<path d="M570 680 Q800 720 1030 680" fill="#f7c6d2" stroke="' + INKC + '" stroke-width="3"/></g>';
+  }
+  function fmBush(x, y, s) { return '<g transform="translate(' + x + " " + y + ") scale(" + s + ')"><circle cx="-60" cy="0" r="58" fill="#7cc48a" stroke="' + INKC + '" stroke-width="4"/><circle cx="60" cy="0" r="58" fill="#7cc48a" stroke="' + INKC + '" stroke-width="4"/><circle cx="0" cy="-34" r="70" fill="#86cc93" stroke="' + INKC + '" stroke-width="4"/><circle cx="-20" cy="-50" r="6" fill="#f4a9ba"/><circle cx="34" cy="-20" r="6" fill="#f4a9ba"/></g>'; }
+  function fmBowls() { return '<g class="fm-pop"><path d="M860 770 Q900 812 940 770 Z" fill="#f6c9d3" stroke="' + INKC + '" stroke-width="4"/><path d="M990 780 Q1030 822 1070 780 Z" fill="#a9cdea" stroke="' + INKC + '" stroke-width="4"/><circle cx="880" cy="764" r="7" fill="#c1946a"/><circle cx="898" cy="760" r="7" fill="#c1946a"/><circle cx="1020" cy="774" r="7" fill="#c1946a"/></g>'; }
+  function fmBlanket() { return '<ellipse cx="800" cy="800" rx="420" ry="70" fill="url(#fmCheck)" stroke="' + INKC + '" stroke-width="4"/>'; }
+  function fmStreet() {
+    var win = "";
+    for (var i = 0; i < 4; i++) win += '<rect x="' + (300 + i * 280) + '" y="150" width="120" height="90" rx="10" fill="#d5e6f6" stroke="' + INKC + '" stroke-width="4"/><path d="M' + (360 + i * 280) + " 150 V240 M" + (300 + i * 280) + " 195 H" + (420 + i * 280) + '" stroke="' + INKC + '" stroke-width="3"/>';
+    var aw = "";
+    for (var k = 0; k < 10; k++) aw += '<path d="M' + (420 + k * 76) + " 330 h76 v70 a38 22 0 0 1 -76 0 Z\" fill=\"" + (k % 2 ? "#a9bfdb" : "#3f5684") + '" stroke="' + INKC + '" stroke-width="3"/>';
+    var balloons = [[330, 560, "#f4a9ba"], [380, 520, "#f3d873"], [1260, 540, "#a9cdea"], [1310, 500, "#cdb6e3"]].map(function (b, i) { return '<g class="fm-balloon bl' + i + '"><path d="M' + b[0] + " " + (b[1] + 50) + " Q" + (b[0] + 12) + " " + (b[1] + 130) + " " + (i < 2 ? 420 : 1180) + ' 760" fill="none" stroke="' + INKC + '" stroke-width="2.5"/><ellipse cx="' + b[0] + '" cy="' + b[1] + '" rx="38" ry="48" fill="' + b[2] + '" stroke="' + INKC + '" stroke-width="3.5"/><path d="M' + (b[0] - 14) + " " + (b[1] - 20) + " q6 -12 18 -14\" stroke=\"#fff\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/></g>"; }).join("");
+    return fmSky("day") + fmClouds() + '<rect x="160" y="60" width="1280" height="720" fill="#fbf3e3" stroke="' + INKC + '" stroke-width="5"/>' + win +
+      '<rect x="560" y="268" width="480" height="58" rx="10" fill="#fff" stroke="' + INKC + '" stroke-width="4"/><text x="800" y="310" text-anchor="middle" font-family="Patrick Hand, Comic Sans MS, sans-serif" font-size="42" fill="' + INKC + '">Minise Arte</text>' + aw +
+      '<rect x="460" y="430" width="300" height="250" rx="12" fill="#d5e6f6" stroke="' + INKC + '" stroke-width="4"/><rect x="840" y="430" width="200" height="350" rx="12" fill="#f4b3c2" stroke="' + INKC + '" stroke-width="4"/><circle cx="1010" cy="610" r="8" fill="' + INKC + '"/>' +
+      '<g class="fm-swing2"><path d="M900 470 L940 440 L980 470" fill="none" stroke="' + INKC + '" stroke-width="3"/><rect x="884" y="468" width="112" height="44" rx="8" fill="#fff" stroke="' + INKC + '" stroke-width="3"/><text x="940" y="499" text-anchor="middle" font-family="Patrick Hand, Comic Sans MS, sans-serif" font-size="26" fill="#d6496a">OPEN</text></g>' +
+      '<rect x="0" y="780" width="1600" height="120" fill="#e9dfcb" stroke="' + INKC + '" stroke-width="4"/><path d="M0 830 H1600" stroke="#d8ccb2" stroke-width="4" stroke-dasharray="40 30"/>' + balloons;
+  }
+  function fmCity() {
+    var b = "", xs = [[60, 520, 150], [230, 440, 120], [370, 560, 170], [560, 380, 110], [690, 480, 160], [870, 420, 130], [1020, 540, 150], [1190, 360, 120], [1330, 470, 180]];
+    xs.forEach(function (q, i) {
+      b += '<rect x="' + q[0] + '" y="' + q[1] + '" width="' + q[2] + '" height="' + (800 - q[1]) + '" fill="' + (i % 2 ? "#8e7cc0" : "#a693d2") + '" stroke="' + INKC + '" stroke-width="3"/>';
+      for (var yy = q[1] + 30; yy < 760; yy += 60) for (var xx = q[0] + 22; xx < q[0] + q[2] - 20; xx += 44) b += '<rect class="fm-win w' + ((xx + yy) % 3) + '" x="' + xx + '" y="' + yy + '" width="18" height="24" rx="3" fill="#ffe7a0"/>';
+    });
+    var plane = '<g class="fm-plane2"><path d="M-260 0 H-60" stroke="' + INKC + '" stroke-width="3"/><rect x="-420" y="-34" width="170" height="68" rx="14" fill="#fff" stroke="' + INKC + '" stroke-width="4"/><text x="-335" y="10" text-anchor="middle" font-family="Patrick Hand, Comic Sans MS, sans-serif" font-size="30" fill="#d6496a">Melbourne ♥</text>' +
+      '<path d="M-60 -18 C40 -30 150 -24 190 0 C150 24 40 30 -60 18 Z" fill="#fff" stroke="' + INKC + '" stroke-width="4"/><path d="M40 -20 L-10 -80 L30 -80 L90 -22 Z M40 20 L-10 80 L30 80 L90 22 Z M-50 -16 L-80 -56 L-56 -56 L-30 -18 Z" fill="#a9bfdb" stroke="' + INKC + '" stroke-width="4" stroke-linejoin="round"/>' +
+      '<circle cx="110" cy="-4" r="8" fill="#a9cdea" stroke="' + INKC + '" stroke-width="2.5"/><circle cx="84" cy="-4" r="8" fill="#a9cdea" stroke="' + INKC + '" stroke-width="2.5"/><circle cx="58" cy="-4" r="8" fill="#a9cdea" stroke="' + INKC + '" stroke-width="2.5"/></g>';
+    return fmSky("sunset") + fmSun(1260, 300, "#ffd27a") + fmCloud(160, 140, 1.2, "c1") + fmCloud(900, 90, 1, "c2") + b + plane + '<rect x="0" y="790" width="1600" height="110" fill="#c9b6a0" stroke="' + INKC + '" stroke-width="4"/>';
+  }
   var FILM = [
-    { bg: "s", cats: [["peek", "l"], ["peniPeek", "r"]], title: ["fm_title1", "fm_title2"] },
-    { bg: "c", date: "tl1d", cats: [["paint", "c"]], props: "paint" },
-    { bg: "p", date: "tl2d", cats: [["heart", "c"]], props: "lockets" },
-    { bg: "b", date: "tl3d", cats: [["wave", "c"]], props: "letters" },
-    { bg: "w", date: "tl4d", cats: [["heart", "l"], ["peniPeek", "peek"]], props: "food" },
-    { bg: "m", cats: [["wave", "l"], ["peniWave", "r"]], props: "hearts" },
-    { bg: "p", date: "tl5d", cats: [["gift", "l"], ["peniGift", "r"]], props: "boxes" },
-    { bg: "b", date: "tl6d", cats: [["wave", "l"], ["peniYay", "r"]], props: "shop" },
-    { bg: "c", date: "tl7d", cats: [["walk", "walk"], ["peniHop", "r"]], props: "plane" },
-    { bg: "l", date: "tl8d", cats: [["peniSparkle", "c"]], props: "treasure" },
-    { bg: "s", cats: [["yay", "l"], ["peniYay", "r"]], props: "party", title: ["fm_end1", "fm_end2"], end: true }
+    { bg: function () { return fmPark({}) + fmBlanket(); }, cats: [["peek", "l2"], ["peniPeek", "r2"]], title: ["fm_title1", "fm_title2"] },
+    { bg: function () { return fmPark({}) + fmEasel(); }, date: "tl1d", cats: [["paint", "l"]], dots: true },
+    { bg: function () { return fmPark({ center: true, lights: true, noTrees: false }); }, date: "tl2d", cats: [["heart", "r"]], props: "lockets" },
+    { bg: function () { return fmPark({ noTrees: true }) + fmTent(); }, date: "tl3d", cats: [["wave", "l"]], props: "letters" },
+    { bg: function () { return fmPark({}) + fmBowls() + fmBush(1330, 760, 1.1); }, date: "tl4d", cats: [["heart", "l"], ["peniPeek", "bush"]], props: "food", mew: 1 },
+    { bg: function () { return fmPark({ sky: "dusk", warm: true }); }, cats: [["wave", "l"], ["peniWave", "r"]], props: "butterflies" },
+    { bg: function () { return fmPark({}) + fmBlanket(); }, date: "tl5d", cats: [["gift", "l"], ["peniGift", "r"]], props: "boxes" },
+    { bg: fmStreet, date: "tl6d", cats: [["wave", "l"], ["peniYay", "r"]] },
+    { bg: fmCity, date: "tl7d", cats: [["walk", "walk"], ["peniHop", "r"]] },
+    { bg: function () { return fmPark({ dark: true, sky: "night" }); }, date: "tl8d", cats: [["peniSparkle", "c"]], props: "treasure" },
+    { bg: function () { return fmPark({ sky: "sunset", warm: true }); }, cats: [["yay", "l"], ["peniYay", "r"]], props: "party", title: ["fm_end1", "fm_end2"], end: true }
   ];
-  var FM = { i: 0, on: false, t: 0, started: false };
   function fmProps(k) {
     var bit = function (code, cls) { return '<span class="fm-bit ' + cls + '">' + charmImg(code) + "</span>"; };
     var disc = function (sh, col, l, cls) { return '<span class="fm-disc ' + cls + '"><svg viewBox="-40 -38 80 76" aria-hidden="true">' + charmShape(sh, col, l) + "</svg></span>"; };
-    if (k === "paint") return '<span class="fm-frame"><span>' + charmImg("A7") + "</span></span>" + '<i class="fm-dot d1"></i><i class="fm-dot d2"></i><i class="fm-dot d3"></i>';
-    if (k === "lockets") return bit("C14", "b1") + bit("A18", "b2") + bit("C36", "b3");
-    if (k === "letters") return disc("circle", MYO_COLS[0], "M", "b1") + disc("heart", MYO_COLS[8], "A", "b2") + disc("circle", MYO_COLS[4], "P", "b3");
-    if (k === "food") return '<span class="fm-bowl"></span>' + bit("B14", "b1") + bit("B13", "b2");
-    if (k === "hearts") return [1, 2, 3, 4, 5].map(function (n) { return '<span class="fm-heart h' + n + '">' + HEART + "</span>"; }).join("");
+    if (k === "lockets") return bit("C14", "fm-hang h1") + bit("A18", "fm-hang h2") + bit("C36", "fm-hang h3");
+    if (k === "letters") return disc("circle", MYO_COLS[0], "M", "on-table t1") + disc("heart", MYO_COLS[8], "A", "on-table t2") + disc("circle", MYO_COLS[4], "P", "on-table t3") + disc("heart", MYO_COLS[1], "N", "on-table t4");
+    if (k === "food") return bit("B14", "fm-food f1");
+    if (k === "butterflies") return [1, 2, 3].map(function (n) { return '<span class="fm-bf bf' + n + '"><i></i><i></i></span>'; }).join("");
     if (k === "boxes") return '<span class="fm-box x1"></span><span class="fm-box x2"></span><span class="fm-box x3"></span>';
-    if (k === "shop") return '<span class="fm-awning"></span><span class="fm-sign">Minise Arte</span><span class="fm-open">OPEN</span>';
-    if (k === "plane") return '<span class="fm-cloud c1"></span><span class="fm-cloud c2"></span>' + bit("A20", "fm-plane");
-    if (k === "treasure") return bit("C33", "b1") + bit("C25", "b2") + bit("C37", "b3") + bit("A1", "b4");
-    if (k === "party") return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (n) { return '<i class="fm-conf f' + n + '"></i>'; }).join("");
+    if (k === "treasure") return bit("C33", "fm-glowbit g1") + bit("C25", "fm-glowbit g2") + bit("C37", "fm-glowbit g3") + bit("A1", "fm-glowbit g4") + [1, 2, 3, 4, 5, 6].map(function (n) { return '<i class="fm-ff ff' + n + '"></i>'; }).join("");
+    if (k === "party") return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(function (n) { return '<i class="fm-conf f' + n + '"></i>'; }).join("");
     return "";
   }
-  function fmScene(i) {
+  var FM = { i: 0, on: false, t: 0, started: false };
+  function fmScene(i, enter) {
     var s = FILM[i];
-    return '<div class="fm-scene fm-bg-' + s.bg + '">' + (s.date ? '<span class="fm-date">' + esc(t(s.date)) + "</span>" : "") +
-      (s.title ? '<div class="fm-title"><span>' + esc(t(s.title[0])) + "</span><b>" + esc(t(s.title[1])) + "</b></div>" : "") +
-      '<div class="fm-props fm-pr-' + (s.props || "none") + '" aria-hidden="true">' + fmProps(s.props) + "</div>" +
-      s.cats.map(function (c, n) { return '<span class="fm-cat fm-c-' + c[1] + '" style="animation-delay:' + (0.2 + n * 0.35) + 's">' + (window.MINISE_CAT ? window.MINISE_CAT(c[0]) : "") + "</span>"; }).join("") +
-      '<span class="fm-floor" aria-hidden="true"></span></div>';
+    return '<div class="fm-scene' + (enter ? " enter" : "") + '"><div class="fm-world">' + fmSvg(s.bg()) +
+      '<div class="fm-props" aria-hidden="true">' + fmProps(s.props) + "</div>" +
+      s.cats.map(function (c, n) { return '<span class="fm-cat fm-c-' + c[1] + '" style="animation-delay:' + (0.5 + n * 0.4) + 's">' + (window.MINISE_CAT ? window.MINISE_CAT(c[0]) : "") + "</span>"; }).join("") + "</div>" +
+      (s.date ? '<span class="fm-date">' + esc(t(s.date)) + "</span>" : "") +
+      (s.title ? '<div class="fm-title"><span>' + esc(t(s.title[0])) + "</span><b>" + esc(t(s.title[1])) + "</b></div>" : "") + "</div>";
   }
+
+  // ---- the music: a soft ukulele strum (I–vi–IV–V in C), a sine bass, a little melody with a bell on top, and a hi-hat tick
+  var SND = { ctx: null, on: true, playing: false, next: 0, step: 0, timer: 0, out: null, verb: null, noise: null };
+  try { SND.on = localStorage.getItem("minise_film_sound") !== "off"; } catch (e) { /* ignore */ }
+  var VOL = 0.5;
+  function sndCtx() {
+    if (SND.ctx) return SND.ctx;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    var c = new AC(), out = c.createGain(), lp = c.createBiquadFilter(), comp = c.createDynamicsCompressor();
+    out.gain.value = SND.on ? VOL : 0;
+    lp.type = "lowpass"; lp.frequency.value = 5600;
+    out.connect(lp); lp.connect(comp); comp.connect(c.destination);
+    // a cosy room: decaying noise as the reverb
+    var len = Math.floor(c.sampleRate * 2.4), ir = c.createBuffer(2, len, c.sampleRate);
+    for (var ch = 0; ch < 2; ch++) { var d = ir.getChannelData(ch); for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+    var verb = c.createConvolver(), wet = c.createGain();
+    verb.buffer = ir; wet.gain.value = 0.3; verb.connect(wet); wet.connect(out);
+    var nb = c.createBuffer(1, Math.floor(c.sampleRate * 0.2), c.sampleRate), nd = nb.getChannelData(0);
+    for (var k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1;
+    SND.ctx = c; SND.out = out; SND.verb = verb; SND.noise = nb;
+    return c;
+  }
+  function tone(t, f, dur, vol, type, glide) {
+    var c = SND.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type || "triangle";
+    o.frequency.setValueAtTime(f, t);
+    if (glide) glide.forEach(function (p) { o.frequency.exponentialRampToValueAtTime(p[0], t + p[1]); });
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(SND.out); g.connect(SND.verb);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function tick(t, vol) {
+    var c = SND.ctx, s = c.createBufferSource(), hp = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = SND.noise; hp.type = "highpass"; hp.frequency.value = 7000;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    s.connect(hp); hp.connect(g); g.connect(SND.out);
+    s.start(t); s.stop(t + 0.06);
+  }
+  var NOTE = function (n) { return 440 * Math.pow(2, (n - 69) / 12); };
+  var CHORDS = [[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]];
+  var MELODY = [
+    [76, 79, 81, 79, 76, 0, 74, 72], [72, 76, 81, 0, 79, 76, 0, 74], [72, 0, 77, 81, 0, 79, 77, 76], [74, 0, 79, 0, 71, 74, 79, 0],
+    [76, 79, 84, 81, 79, 0, 76, 79], [81, 0, 79, 76, 72, 0, 74, 76], [77, 81, 0, 84, 81, 79, 77, 0], [79, 0, 74, 76, 74, 71, 72, 0]
+  ];
+  var EIGHTH = 60 / 88 / 2;
+  function sndSchedule() {
+    var c = SND.ctx;
+    if (!c) return;
+    if (!document.getElementById("fmStage")) { sndStop(); return; }
+    while (SND.next < c.currentTime + 0.3) {
+      var s = SND.step, bar = Math.floor(s / 8) % 8, e = s % 8, t0 = SND.next, ch = CHORDS[bar % 4];
+      if ([0, 3, 5, 6].indexOf(e) > -1) ch.forEach(function (n, k) { tone(t0 + k * 0.02, NOTE(n), 0.9, e === 0 ? 0.045 : 0.03, "triangle"); });
+      if (e === 0 || e === 4) tone(t0, NOTE(ch[0] - 12), 0.85, 0.11, "sine");
+      if (e % 2 === 1) tick(t0, 0.018);
+      var m = MELODY[bar][e];
+      if (m) { tone(t0, NOTE(m), 0.6, 0.07, "sine"); tone(t0, NOTE(m + 12), 0.3, 0.018, "triangle"); }
+      SND.step++;
+      SND.next += EIGHTH;
+    }
+  }
+  function sndStart() {
+    var c = sndCtx();
+    if (!c) return;
+    if (c.state === "suspended") c.resume();
+    SND.out.gain.cancelScheduledValues(c.currentTime);
+    SND.out.gain.setTargetAtTime(SND.on ? VOL : 0, c.currentTime, 0.15);
+    if (SND.playing) return;
+    SND.playing = true;
+    SND.next = c.currentTime + 0.12;
+    clearInterval(SND.timer);
+    SND.timer = setInterval(sndSchedule, 60);
+  }
+  function sndStop(slow) {
+    if (!SND.ctx) return;
+    clearInterval(SND.timer);
+    SND.playing = false;
+    var c = SND.ctx;
+    SND.out.gain.cancelScheduledValues(c.currentTime);
+    SND.out.gain.setTargetAtTime(0.0001, c.currentTime, slow ? 0.7 : 0.08);
+  }
+  // little sound effects: a chime between scenes, a pop when a cat appears, a tiny "mew" for Peni
+  function sfx(kind, delay) {
+    if (!SND.ctx || !SND.on || !FM.on) return;
+    var t = SND.ctx.currentTime + (delay || 0);
+    if (kind === "chime") [84, 88, 91].forEach(function (n, i) { tone(t + i * 0.07, NOTE(n), 0.9, 0.035, "sine"); });
+    if (kind === "pop") tone(t, 420, 0.16, 0.06, "sine", [[900, 0.08]]);
+    if (kind === "mew") tone(t, 760, 0.45, 0.05, "triangle", [[1180, 0.12], [820, 0.4]]);
+    if (kind === "yay") [72, 76, 79, 84, 88].forEach(function (n, i) { tone(t + i * 0.06, NOTE(n), 0.7, 0.04, "sine"); });
+  }
+
   function filmHTML() {
     var dots = FILM.map(function (s, i) { return '<button type="button" class="fm-dot-btn" data-fm-go="' + i + '" aria-label="' + (i + 1) + '"' + (i === FM.i ? ' aria-current="true"' : "") + "></button>"; }).join("");
+    var canFull = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
     return '<div class="film" id="film"><div class="fm-head"><p class="eyebrow">' + esc(t("fm_eyebrow")) + "</p><h2>" + esc(t("fm_h")) + "</h2></div>" +
-      '<div class="fm-screen"><div class="fm-stage" id="fmStage">' + fmScene(FM.i) + "</div>" +
-      (FM.started ? "" : '<button class="fm-big" type="button" data-fm="play" id="fmBig"><span class="fm-big-i" aria-hidden="true"></span><span>' + esc(t("fm_watch")) + "</span></button>") +
+      '<div class="fm-screen" id="fmScreen"><div class="fm-stage" id="fmStage">' + fmScene(FM.i) + "</div>" +
+      '<span class="fm-mark" aria-hidden="true">Minise Arte</span>' +
+      '<p class="fm-cc" id="fmSub" aria-live="polite">' + esc(t("fm_" + FM.i)) + "</p>" +
+      (FM.started ? "" : '<button class="fm-big" type="button" data-fm="play" id="fmBig"><span class="fm-big-i" aria-hidden="true"></span><span>' + esc(t("fm_watch")) + '</span><small>' + esc(t("fm_hint")) + "</small></button>") +
       '<div class="fm-bar" aria-hidden="true"><span id="fmBar" style="width:' + (FM.i / (FILM.length - 1) * 100) + '%"></span></div></div>' +
-      '<p class="fm-sub" id="fmSub" aria-live="polite">' + esc(t("fm_" + FM.i)) + "</p>" +
-      '<div class="fm-ctl"><button class="btn solid" type="button" data-fm="toggle" id="fmToggle">' + esc(t(FM.on ? "fm_pause" : "fm_play")) + '</button><button class="btn ghost" type="button" data-fm="restart">' + esc(t("fm_again")) + '</button><span class="fm-dots">' + dots + "</span></div>" +
+      '<div class="fm-ctl"><button class="btn solid" type="button" data-fm="toggle" id="fmToggle">' + esc(t(FM.on ? "fm_pause" : "fm_play")) + '</button>' +
+      '<button class="btn ghost" type="button" data-fm="restart">' + esc(t("fm_again")) + "</button>" +
+      '<button class="btn ghost fm-snd" type="button" data-fm="sound" id="fmSnd" aria-pressed="' + SND.on + '">' + esc(t(SND.on ? "fm_sound_on" : "fm_sound_off")) + "</button>" +
+      (canFull ? '<button class="btn ghost" type="button" data-fm="full">' + esc(t("fm_full")) + "</button>" : "") +
+      '<span class="fm-dots">' + dots + "</span></div>" +
       '<details class="fm-read"><summary>' + esc(t("fm_read")) + "</summary><ol>" + FILM.map(function (s, i) { return "<li>" + (s.date ? "<b>" + esc(t(s.date)) + "</b> " : "") + esc(t("fm_" + i)) + "</li>"; }).join("") + "</ol></details></div>";
   }
   function fmShow(i) {
     var st = document.getElementById("fmStage");
     if (!st) { FM.on = false; clearTimeout(FM.t); return; }
     FM.i = i;
-    st.innerHTML = fmScene(i);
+    // the new scene opens in a circle over the old one (calm mode: just swap)
+    if (calm) st.innerHTML = fmScene(i);
+    else {
+      st.insertAdjacentHTML("beforeend", fmScene(i, true));
+      var all = st.querySelectorAll(".fm-scene");
+      setTimeout(function () { for (var k = 0; k < all.length - 1; k++) if (all[k].parentNode) all[k].remove(); }, 1000);
+    }
     var sub = document.getElementById("fmSub");
     sub.textContent = t("fm_" + i);
     sub.classList.remove("pop"); void sub.offsetWidth; sub.classList.add("pop");
@@ -2201,18 +2383,29 @@
     var bar = document.getElementById("fmBar"), n = FILM.length - 1;
     bar.style.transition = "none";
     bar.style.width = (i / n * 100) + "%";
-    if (FM.on && !FILM[i].end) { void bar.offsetWidth; bar.style.transition = "width 5.6s linear"; bar.style.width = ((i + 1) / n * 100) + "%"; }
+    if (FM.on && !FILM[i].end) { void bar.offsetWidth; bar.style.transition = "width 6.4s linear"; bar.style.width = ((i + 1) / n * 100) + "%"; }
+    if (FM.on) {
+      sfx("chime");
+      FILM[i].cats.forEach(function (c, k) { sfx("pop", 0.5 + k * 0.4); });
+      if (FILM[i].mew) sfx("mew", 2.1);
+      if (FILM[i].end) { sfx("yay", 0.6); setTimeout(function () { if (FILM[FM.i].end) sndStop(true); }, 4500); }
+    }
   }
-  function fmButtons() { var b = document.getElementById("fmToggle"); if (b) b.textContent = t(FM.on ? "fm_pause" : "fm_play"); }
+  function fmButtons() {
+    var b = document.getElementById("fmToggle");
+    if (b) b.textContent = t(FM.on ? "fm_pause" : "fm_play");
+    var s = document.getElementById("fmSnd");
+    if (s) { s.textContent = t(SND.on ? "fm_sound_on" : "fm_sound_off"); s.setAttribute("aria-pressed", String(SND.on)); }
+  }
   function fmTick() {
     clearTimeout(FM.t);
     if (!FM.on) return;
     if (FILM[FM.i].end) { FM.on = false; fmButtons(); return; }
     FM.t = setTimeout(function () {
-      if (!document.getElementById("fmStage")) { FM.on = false; return; }
+      if (!document.getElementById("fmStage")) { FM.on = false; sndStop(); return; }
       fmShow(FM.i + 1);
       fmTick();
-    }, 5600);
+    }, 6400);
   }
   function fmPlay(from) {
     FM.started = true;
@@ -2221,11 +2414,12 @@
     if (typeof from === "number") FM.i = from;
     else if (FILM[FM.i].end) FM.i = 0;
     FM.on = true;
+    sndStart();
     fmShow(FM.i);
     fmTick();
     fmButtons();
   }
-  function fmPause() { FM.on = false; clearTimeout(FM.t); fmShow(FM.i); fmButtons(); }
+  function fmPause() { FM.on = false; clearTimeout(FM.t); sndStop(); var bar = document.getElementById("fmBar"); if (bar) { bar.style.transition = "none"; bar.style.width = (FM.i / (FILM.length - 1) * 100) + "%"; } fmButtons(); }
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-fm]");
     if (b) {
@@ -2233,10 +2427,26 @@
       if (a === "play") fmPlay();
       else if (a === "toggle") { if (FM.on) fmPause(); else fmPlay(); }
       else if (a === "restart") fmPlay(0);
+      else if (a === "sound") {
+        SND.on = !SND.on;
+        try { localStorage.setItem("minise_film_sound", SND.on ? "on" : "off"); } catch (err) { /* ignore */ }
+        if (SND.ctx) SND.out.gain.setTargetAtTime(SND.on && SND.playing ? VOL : 0.0001, SND.ctx.currentTime, 0.1);
+        if (SND.on && FM.on) sndStart();
+        fmButtons();
+      } else if (a === "full") {
+        var sc = document.getElementById("fmScreen");
+        if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        else if (sc.requestFullscreen) sc.requestFullscreen();
+        else if (sc.webkitRequestFullscreen) sc.webkitRequestFullscreen();
+      }
       return;
     }
     b = e.target.closest("[data-fm-go]");
-    if (b) { if (FM.on) fmPlay(+b.getAttribute("data-fm-go")); else { FM.started = true; var big = document.getElementById("fmBig"); if (big) big.remove(); fmShow(+b.getAttribute("data-fm-go")); } }
+    if (b) {
+      var go = +b.getAttribute("data-fm-go");
+      if (FM.on) fmPlay(go);
+      else { FM.started = true; var big = document.getElementById("fmBig"); if (big) big.remove(); fmShow(go); }
+    }
   });
 
   function footer() {

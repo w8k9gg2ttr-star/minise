@@ -149,10 +149,10 @@
     return b.slice(0, 2).join("");
   }
   function card(p) {
-    return '<a class="card" href="' + (p.s === MYO ? "#make" : "#p-" + p.s) + '">' +
+    return '<div class="card-wrap"><a class="card" href="' + (p.s === MYO ? "#make" : "#p-" + p.s) + '">' +
       '<div class="pimg">' + img(p.img[0], p.n, "a") + (p.img[1] ? img(p.img[1], "", "b") : "") +
       '<div class="badges">' + badges(p) + "</div>" + kitty(p.s.length % 2 ? "peniPaw" : "paw", "card-paw") + "</div>" +
-      '<div class="pmeta"><span class="ptype">' + esc(typeLabel(p)) + '</span><span class="pname">' + esc(p.n) + "</span>" + priceHTML(p) + "</div></a>";
+      '<div class="pmeta"><span class="ptype">' + esc(typeLabel(p)) + '</span><span class="pname">' + esc(p.n) + "</span>" + priceHTML(p) + "</div></a>" + wishBtn(p.s) + "</div>";
   }
   // the shop cat (js/cats.js); decorative, so screen readers skip it
   function kitty(pose, cls) { return window.MINISE_CAT ? '<span class="' + (cls || "kitty-wrap") + '">' + window.MINISE_CAT(pose) + "</span>" : ""; }
@@ -453,12 +453,12 @@
     var otherLang = lang === "en" ? p.lo : describe(p, "en");
     return '<section class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="#shop">' + esc(t("nav_shop")) + '</a><span>/</span><a href="#shop-' + p.t[0] + '">' + esc(t("type_" + p.t[0])) + "</a><span>/</span><span>" + esc(p.n) + "</span></nav>" +
       '<div class="pdp-grid"><div class="gallery">' + kitty(["peek", "peniPeek", "sharkPeek", "peniBunnyPeek"][p.s.length % 4], "gal-kitty") + '<div class="gmain">' + img(p.img[0], p.n, "", true).replace("<img", '<img id="gmain"') + "</div>" + thumbs + "</div>" +
-      '<div class="pinfo"><div><p class="ptype">' + esc(typeLabel(p)) + "</p><h1>" + esc(p.n) + '</h1></div><div id="priceBlock">' + priceBlock + "</div>" + features(p) +
+      '<div class="pinfo"><div><p class="ptype">' + esc(typeLabel(p)) + "</p><h1>" + esc(p.n) + "</h1>" + wishPdp(p.s) + '</div><div id="priceBlock">' + priceBlock + "</div>" + features(p) +
       (!p.cur ? '<p class="notice">' + esc(t("earlier_note")) + "</p>" : "") +
       '<form class="pform" id="pform" novalidate>' + opts + col + ini + addon + photo +
       '<div class="field"><label for="pnote">' + esc(t("note")) + '</label><textarea id="pnote" placeholder="' + esc(t("note_ph")) + '"></textarea></div>' +
       '<div class="field"><span class="lbl">' + esc(t("qty")) + '</span><div class="stepper"><button type="button" data-step="qty" data-d="-1" aria-label="' + esc(t("less")) + '">−</button><output id="qty">1</output><button type="button" data-step="qty" data-d="1" aria-label="' + esc(t("more")) + '">+</button></div></div>' +
-      '<div class="actions">' + (p.so ? '<p class="notice">' + esc(t("so_note")) + '</p><button class="btn wide" type="submit" disabled>' + esc(t("so_btn")) : '<button class="btn wide" type="submit">' + esc(t("add"))) + '</button><a class="btn ghost wide" id="askWa" target="_blank" rel="noopener" href="#">' + esc(t("wa_this")) + "</a></div></form>" +
+      '<div class="actions">' + (p.so ? '<p class="notice">' + esc(t("so_note")) + '</p><button class="btn wide" type="submit" disabled>' + esc(t("so_btn")) : '<button class="btn wide" type="submit">' + esc(t("add"))) + '</button><a class="btn ghost wide" id="askWa" target="_blank" rel="noopener" href="#">' + esc(t("wa_this")) + "</a></div></form>" + '<p class="nt-pdp"><a class="link" href="#note">' + esc(t("nt_pdp")) + " →</a></p>" +
       '<div class="desc"><h2>' + esc(t("about")) + "</h2><p>" + esc(describe(p, lang) || describe(p, "en")) + "</p>" +
       (otherLang ? "<details><summary>" + esc(t("in_lao")) + "</summary><p>" + esc(otherLang) + "</p></details>" : "") + "</div>" +
       (p.ig.length ? '<p class="igproof">' + esc(t("ig_proof", { n: p.pc, d: fmtDate(p.lp) })) + ' <a class="link" href="' + igPost(p.ig[0]) + '" target="_blank" rel="noopener">' + esc(t("ig_view")) + " →</a></p>" : "") +
@@ -735,7 +735,7 @@
       '<div class="row2" id="addrRow2">' + field("coVill", t("vill"), '<input type="text" id="coVill" maxlength="60">') + field("coBranch", t("branch"), '<input type="text" id="coBranch" maxlength="80" placeholder="' + esc(t("branch_ph")) + '">') + "</div>" +
       field("coCountry", t("country"), '<input type="text" id="coCountry" maxlength="60" autocomplete="country-name">') +
       field("coAddr", t("addr_more"), '<textarea id="coAddr" maxlength="300"></textarea>') +
-      field("coNote", t("co_note"), '<textarea id="coNote" maxlength="500"></textarea>') +
+      field("coNote", t("co_note"), '<textarea id="coNote" maxlength="500">' + esc(giftNote()) + "</textarea>") + '<p class="hint nt-co"><a class="link" href="#note">' + esc(t(giftNote() ? "nt_edit" : "nt_hint_co")) + " →</a></p>" +
       "</fieldset>";
     if (photos) {
       html += '<fieldset class="co-step">' + kitty("peniHeart", "step-kitty") + stepHead(n++, t("st_photos")) +
@@ -1078,6 +1078,7 @@
     return '<section class="wrap story-hero"><div class="copy"><p class="eyebrow">' + esc(t("story_eyebrow")) + "</p><h1>" + esc(t("story_h")) + '</h1><p class="lead">' + esc(t("story_lead")) + "</p>" +
       '<div class="hero-actions"><a class="btn" href="#shop">' + esc(t("hero_cta")) + '</a><a class="btn ghost" href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></div></div>' +
       '<div class="story-pics">' + kitty("heart", "pics-kitty") + kitty("peniHeart", "pics-kitty pics-kitty2") + P.slice().sort(bestOrder).slice(0, 2).map(function (p) { return img(p.img[0], p.n); }).join("") + "</div></section>" +
+      '<section class="section tight"><div class="wrap">' + filmHTML() + "</div></section>" +
       promisesHTML() +
       '<section class="section"><div class="wrap">' + head(t("story_eyebrow"), t("tl_h")) + '<ol class="timeline">' + tl + "</ol></div></section>" +
       '<section class="section band"><div class="wrap">' + head("Minise Arte", t("values_h")) + '<div class="values">' +
@@ -1524,7 +1525,7 @@
   function duoHTML() {
     if (!GM.cards.length) gmNew();
     return '<section class="duo"><div class="wrap">' +
-      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><span class="duo-links"><a class="link" href="#mumi">' + esc(t("mumi_link")) + ' →</a><a class="link" href="#peni">' + esc(t("peni_link")) + " →</a></span>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
+      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><span class="duo-links"><a class="link" href="#mumi">' + esc(t("mumi_link")) + ' →</a><a class="link" href="#peni">' + esc(t("peni_link")) + ' →</a><a class="link" href="#story">' + esc(t("fm_watch")) + " →</a></span>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
       storyHTML() + fortuneHTML() +
       gameHTML() + "</div></section>";
   }
@@ -1765,7 +1766,8 @@
     }).join("");
     return '<section class="wl-hero"><div class="wrap"><div class="wl-head"><p class="eyebrow">' + esc(t("wl_eyebrow")) + "</p><h1>" + esc(t("wl_h")) + '</h1><p class="lead">' + esc(t("wl_lead")) + "</p></div>" +
       wlStage() + '<p class="wl-hint">' + esc(t("wl_tap")) + "</p></div></section>" +
-      '<section class="section tight"><div class="wrap wl-meets">' + meet + "</div></section>" +
+      '<section class="section band"><div class="wrap">' + filmHTML() + "</div></section>" +
+      '<section class="section tight"><div class="wrap"><div class="wl-meets">' + meet + '</div><div class="wl-more">' + [["#gift", "gift", "gf_link"], ["#note", "peniWave", "nt_link"], ["#make", "peniBracelet", "nav_make"], ["#wish", "peniBox", "wish_h"]].map(function (m) { return '<a href="' + m[0] + '">' + kitty(m[1], "wl-more-k") + "<span>" + esc(t(m[2])) + "</span></a>"; }).join("") + "</div></div></section>" +
       '<section class="section band"><div class="wrap">' + sgHTML() + "</div></section>" +
       '<section class="section"><div class="wrap">' + qzHTML() + "</div></section>" +
       '<section class="section band"><div class="wrap">' + storyHTML() + "</div></section>" +
@@ -1835,7 +1837,7 @@
     return '<div class="gf-result"><div class="gf-box" aria-hidden="true"><span class="gf-pop">' + kitty("yay", "gf-pop-k") + kitty("peniYay", "gf-pop-k") + '</span><span class="gf-base"></span><span class="gf-lid"></span></div>' +
       '<p class="eyebrow">' + esc(t("gf_r_eyebrow")) + "</p><h2>" + esc(t("gf_r_h")) + '</h2><p class="gf-chips">' + chips + '</p><p class="lead">' + esc(t("gf_r_p")) + "</p>" +
       '<div class="grid gf-grid">' + picks.map(card).join("") + "</div>" +
-      '<div class="gf-more"><a class="btn solid" href="#make">' + esc(t("gf_r_own")) + '</a><a class="btn" href="' + esc(waLink(ask)) + '" target="_blank" rel="noopener">' + esc(t("gf_r_ask")) + '</a><button class="btn ghost" type="button" data-gf-again>' + esc(t("gf_r_again")) + "</button></div></div>";
+      '<div class="gf-more"><a class="btn solid" href="#make">' + esc(t("gf_r_own")) + '</a><a class="btn" href="' + esc(waLink(ask)) + '" target="_blank" rel="noopener">' + esc(t("gf_r_ask")) + '</a><a class="btn" href="#note">' + esc(t("nt_link")) + '</a><button class="btn ghost" type="button" data-gf-again>' + esc(t("gf_r_again")) + "</button></div></div>";
   }
   function giftPage() {
     return '<section class="gf-hero"><div class="wrap"><div class="gf-head"><div><p class="eyebrow">' + esc(t("gf_eyebrow")) + "</p><h1>" + esc(t("gf_h")) + '</h1><p class="lead">' + esc(t("gf_lead")) + "</p></div></div>" +
@@ -1856,13 +1858,394 @@
     if (e.target.closest("[data-gf-again]")) { GF = { step: 0, a: {} }; gfRender(); }
   });
 
+  /* ---------- Wishlist ("Peni's treasure box"): a heart on every piece, kept on this device ---------- */
+  var WISH = [];
+  try { WISH = (JSON.parse(localStorage.getItem("minise_wish") || "[]") || []).filter(function (s) { return typeof s === "string" && /^[a-z0-9-]{1,80}$/.test(s); }).slice(0, 80); } catch (e) { /* ignore */ }
+  var HEART_I = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.8-4.7-7.8-10.4A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 7.8 2.7c0 5.7-7.8 10.4-7.8 10.4Z"/></svg>';
+  function wishSave() { try { localStorage.setItem("minise_wish", JSON.stringify(WISH)); } catch (e) { /* ignore */ } wishCount(); }
+  function wishCount() {
+    var el = document.getElementById("wishCount");
+    if (!el) return;
+    var n = WISH.filter(function (s) { return bySlug[s]; }).length;
+    el.textContent = n;
+    el.hidden = !n;
+  }
+  function wishBtn(s) {
+    var on = WISH.indexOf(s) > -1;
+    return '<button type="button" class="wish-btn' + (on ? " on" : "") + '" data-wish="' + s + '" aria-pressed="' + on + '" aria-label="' + esc(t(on ? "wish_remove" : "wish_add")) + '">' + HEART_I + "</button>";
+  }
+  function wishPdp(s) {
+    var on = WISH.indexOf(s) > -1;
+    return '<button type="button" class="btn ghost wish-pdp' + (on ? " on" : "") + '" data-wish="' + s + '" aria-pressed="' + on + '">' + HEART_I + "<span>" + esc(t(on ? "wish_saved" : "wish_save")) + "</span></button>";
+  }
+  function wishToggle(s) {
+    var i = WISH.indexOf(s), on = i < 0;
+    if (on) WISH.unshift(s); else WISH.splice(i, 1);
+    wishSave();
+    document.querySelectorAll('[data-wish="' + s + '"]').forEach(function (b) {
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
+      if (b.classList.contains("wish-pdp")) b.querySelector("span").textContent = t(on ? "wish_saved" : "wish_save");
+      else b.setAttribute("aria-label", t(on ? "wish_remove" : "wish_add"));
+      if (on && !calm) { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+    });
+    toast(t(on ? "wish_added" : "wish_removed"), on ? "peniHeart" : null);
+    if (current === "wish" && !on) { var y = window.scrollY; route(); window.scrollTo(0, y); }
+  }
+  function wishPage() {
+    var list = WISH.map(function (s) { return bySlug[s]; }).filter(Boolean);
+    var head = '<section class="wrap page-head kittied">' + kitty("peniBox", "head-kitty") + '<p class="eyebrow">' + esc(t("wish_eyebrow")) + "</p><h1>" + esc(t("wish_h")) + '</h1><p class="lead">' + esc(t(list.length ? "wish_lead" : "wish_empty")) + "</p></section>";
+    if (!list.length) return head + '<section class="section tight"><div class="wrap wish-empty">' + kitty("peniSleep", "empty-kitty") + '<div class="wish-tools"><a class="btn solid" href="#shop">' + esc(t("back_shop")) + '</a><a class="btn" href="#gift">' + esc(t("gf_link")) + "</a></div></div></section>";
+    var msg = inLang(shopLang(), function () { return t("wish_msg") + "\n" + list.map(function (p) { return "• " + p.n + " " + location.origin + "/#p-" + p.s; }).join("\n"); });
+    return head + '<section class="section tight"><div class="wrap"><div class="wish-tools"><a class="btn solid" target="_blank" rel="noopener" href="' + esc(waLink(msg)) + '">' + esc(t("wish_share")) + '</a><a class="btn" href="#note">' + esc(t("nt_link")) + '</a><button class="btn ghost" type="button" data-wish-clear>' + esc(t("wish_clear")) + "</button></div>" +
+      '<div class="grid">' + list.map(card).join("") + "</div></div></section>";
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-wish]");
+    if (b) { e.preventDefault(); wishToggle(b.getAttribute("data-wish")); return; }
+    b = e.target.closest("[data-wish-clear]");
+    if (b) {
+      // two taps, so a list is never cleared by accident
+      if (!b.classList.contains("sure")) {
+        b.classList.add("sure");
+        b.textContent = t("wish_clear2");
+        setTimeout(function () { if (b.isConnected) { b.classList.remove("sure"); b.textContent = t("wish_clear"); } }, 3000);
+        return;
+      }
+      WISH = [];
+      wishSave();
+      route();
+    }
+  });
+
+  /* back to the top: a little paw button once you have scrolled down a long page */
+  var TOP = document.createElement("button");
+  TOP.type = "button";
+  TOP.className = "to-top";
+  TOP.hidden = true;
+  TOP.setAttribute("data-t-label", "to_top");
+  TOP.setAttribute("aria-label", "Back to top");
+  TOP.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.body.appendChild(TOP);
+  TOP.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" }); });
+  window.addEventListener("scroll", function () { var hide = window.scrollY < 900 || current === "make"; if (TOP.hidden !== hide) TOP.hidden = hide; }, { passive: true });
+
+  /* ---------- Cute note maker (#note): write a note on Mumi & Peni paper, save it as a picture or add it to the order ---------- */
+  var NT_PAPERS = { tea: ["drink"], milk: ["peniMilk"], night: ["sleep", "peniSleep"], costume: ["shark", "peniBunny"], clover: ["peniSparkle"] };
+  var NT_LOOK = {
+    tea: { bg: ["#f6efe0", "#efe4cc"], card: "#fbf7ee", ink: "#24396a", dot: "#a9bfdb" },
+    milk: { bg: ["#fbd9e2", "#f6c4d1"], card: "#fff6f8", ink: "#7a3346", dot: "#ffffff" },
+    night: { bg: ["#1f2c55", "#34477d"], card: "#2b3b6b", ink: "#fdf6dc", dot: "#fff3c4" },
+    costume: { bg: ["#cfe0f2", "#f8d6e0"], card: "#fbf8f3", ink: "#24396a", dot: "#ffffff" },
+    clover: { bg: ["#dff3ea", "#c8eadb"], card: "#f7fcf9", ink: "#24563f", dot: "#9fd8bf" }
+  };
+  var STK = {
+    heart: '<svg viewBox="0 0 40 40"><path d="M20 35C8 26 3 19 3 12.5 3 7.5 7 4 11.5 4c3.4 0 6.5 2 8.5 5 2-3 5.1-5 8.5-5C33 4 37 7.5 37 12.5 37 19 32 26 20 35Z" fill="#f4a9ba" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/><path d="M10 11c1-2.5 3-3.6 5-3.4" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>',
+    star: '<svg viewBox="0 0 40 40"><path d="M20 3l4.9 10.6 11.6 1.3-8.6 7.9 2.4 11.4L20 28.4 9.7 34.2l2.4-11.4L3.5 14.9l11.6-1.3Z" fill="#f3d873" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+    clover: '<svg viewBox="0 0 40 40"><g fill="#8fd1b0" stroke="#24396a" stroke-width="2.3"><circle cx="14" cy="14" r="7"/><circle cx="26" cy="14" r="7"/><circle cx="14" cy="26" r="7"/><circle cx="26" cy="26" r="7"/></g><circle cx="20" cy="20" r="3" fill="#6cb894"/><path d="M24 30Q28 36 34 37" fill="none" stroke="#24396a" stroke-width="2.5" stroke-linecap="round"/></svg>',
+    bow: '<svg viewBox="0 0 40 40"><path d="M20 20C12 10 4 10 4 17s8 9 16 3Zm0 0c8-10 16-10 16-3s-8 9-16 3Z" fill="#c9b3e0" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/><path d="M18 22 12 34l4-1 2 4 3-13M22 22l6 12-4-1-2 4-3-13" fill="#c9b3e0" stroke="#24396a" stroke-width="2.3" stroke-linejoin="round"/><circle cx="20" cy="20" r="3.5" fill="#f4a9ba" stroke="#24396a" stroke-width="2.3"/></svg>',
+    paw: '<svg viewBox="0 0 40 40"><g fill="#f6c9d3" stroke="#24396a" stroke-width="2.3"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><circle cx="9" cy="17" r="4"/><circle cx="16" cy="10" r="4"/><circle cx="24" cy="10" r="4"/><circle cx="31" cy="17" r="4"/></g></svg>',
+    berry: '<svg viewBox="0 0 40 40"><path d="M20 36C10 30 6 22 8 15c1.5-5 6-6 12-6s10.5 1 12 6c2 7-2 15-12 21Z" fill="#e8546b" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/><path d="M12 9c2-5 6-4 8-1 2-3 6-4 8 1-4 2-12 2-16 0Z" fill="#7bb07d" stroke="#24396a" stroke-width="2.3" stroke-linejoin="round"/><g fill="#fff3c4"><circle cx="15" cy="18" r="1.4"/><circle cx="23" cy="17" r="1.4"/><circle cx="19" cy="24" r="1.4"/><circle cx="26" cy="24" r="1.4"/><circle cx="14" cy="26" r="1.4"/></g></svg>'
+  };
+  var NT = { to: "", from: "", msg: "", paper: "tea", st: ["heart", "star"], sent: false };
+  try {
+    var nt0 = JSON.parse(sessionStorage.getItem("minise_note") || "null");
+    if (nt0) {
+      NT.to = String(nt0.to || "").slice(0, 40); NT.from = String(nt0.from || "").slice(0, 40); NT.msg = String(nt0.msg || "").slice(0, 160);
+      if (NT_PAPERS[nt0.paper]) NT.paper = nt0.paper;
+      if (Array.isArray(nt0.st)) NT.st = nt0.st.filter(function (s) { return STK[s]; }).slice(0, 3);
+    }
+  } catch (e) { /* start fresh */ }
+  function ntSave() { try { sessionStorage.setItem("minise_note", JSON.stringify({ to: NT.to, from: NT.from, msg: NT.msg, paper: NT.paper, st: NT.st })); } catch (e) { /* ignore */ } }
+  function giftNote() { try { return sessionStorage.getItem("minise_giftnote") || ""; } catch (e) { return ""; } }
+  function ntCard() {
+    var cats = NT_PAPERS[NT.paper].map(function (p) { return kitty(p, "nt-cat"); }).join("");
+    var st = NT.st.map(function (s, i) { return '<span class="nt-st nt-st' + (i + 1) + '">' + STK[s] + "</span>"; }).join("");
+    return '<div class="nt-card nt-p-' + NT.paper + '" id="ntCard"><span class="nt-tape" aria-hidden="true"></span>' + st +
+      '<p class="nt-to">' + esc(t("nt_to")) + ': <b class="' + (NT.to ? "" : "nt-ph") + '">' + esc(NT.to || t("nt_to_ph")) + "</b></p>" +
+      '<p class="nt-msg' + (NT.msg ? "" : " nt-ph") + '">' + esc(NT.msg || t("nt_msg_ph")) + "</p>" +
+      '<p class="nt-from">' + esc(t("nt_from")) + ': <b class="' + (NT.from ? "" : "nt-ph") + '">' + esc(NT.from || t("nt_from_ph")) + "</b></p>" +
+      '<span class="nt-cats" aria-hidden="true">' + cats + "</span></div>";
+  }
+  function ntPapers() {
+    return Object.keys(NT_PAPERS).map(function (p) {
+      return '<button type="button" class="nt-paper nt-p-' + p + '" data-nt-paper="' + p + '" aria-pressed="' + (NT.paper === p) + '"><span class="nt-sw">' + kitty(NT_PAPERS[p][0], "nt-sw-k") + "</span><span>" + esc(t("nt_p_" + p)) + "</span></button>";
+    }).join("");
+  }
+  function ntStickers() {
+    return Object.keys(STK).map(function (s) {
+      return '<button type="button" class="nt-stk" data-nt-st="' + s + '" aria-pressed="' + (NT.st.indexOf(s) > -1) + '" aria-label="' + esc(t("nt_st_" + s)) + '">' + STK[s] + "</button>";
+    }).join("");
+  }
+  function notePage() {
+    NT.sent = false;
+    return '<section class="nt-hero"><div class="wrap"><div class="gf-head"><div><p class="eyebrow">' + esc(t("nt_eyebrow")) + "</p><h1>" + esc(t("nt_h")) + '</h1><p class="lead">' + esc(t("nt_lead")) + "</p></div></div>" +
+      '<div class="nt-grid"><div class="nt-preview"><div class="nt-env" id="ntEnv"><span class="nt-env-back" aria-hidden="true"></span><div id="ntCardBox">' + ntCard() + '</div><span class="nt-env-front" aria-hidden="true"></span><span class="nt-seal" aria-hidden="true">' + STK.heart + "</span></div>" +
+      '<div class="nt-peni">' + kitty("peniWave", "nt-peni-k") + '<p class="nt-say" id="ntSay" role="status">' + esc(t("nt_say")) + "</p></div></div>" +
+      '<form class="nt-form" id="ntForm" novalidate>' +
+      '<div class="field"><label for="ntTo">' + esc(t("nt_to")) + '</label><input type="text" id="ntTo" maxlength="40" autocomplete="off" placeholder="' + esc(t("nt_to_ph")) + '" value="' + esc(NT.to) + '"></div>' +
+      '<div class="field"><label for="ntMsg">' + esc(t("nt_msg")) + '</label><textarea id="ntMsg" maxlength="160" placeholder="' + esc(t("nt_msg_ph")) + '">' + esc(NT.msg) + '</textarea><span class="hint tn" id="ntCount">' + NT.msg.length + "/160</span></div>" +
+      '<div class="field"><label for="ntFrom">' + esc(t("nt_from")) + '</label><input type="text" id="ntFrom" maxlength="40" autocomplete="off" placeholder="' + esc(t("nt_from_ph")) + '" value="' + esc(NT.from) + '"></div>' +
+      '<div class="field"><span class="lbl">' + esc(t("nt_paper")) + '</span><div class="nt-papers" id="ntPapers">' + ntPapers() + "</div></div>" +
+      '<div class="field"><span class="lbl">' + esc(t("nt_stickers")) + '</span><div class="nt-stks" id="ntStks">' + ntStickers() + "</div></div>" +
+      '<p class="err" id="ntErr" hidden>' + esc(t("nt_empty")) + "</p>" +
+      '<div class="nt-actions"><button class="btn solid" type="button" data-nt-add>' + esc(t("nt_add")) + '</button><button class="btn" type="button" data-nt-save>' + esc(t("nt_save")) + '</button><button class="btn ghost" type="button" data-nt-copy>' + esc(t("nt_copy")) + "</button></div>" +
+      '<div id="ntDone"></div></form></div></div></section>';
+  }
+  function ntRefresh() {
+    var box = document.getElementById("ntCardBox");
+    if (box) box.innerHTML = ntCard();
+    var env = document.getElementById("ntEnv");
+    if (env) env.classList.remove("send");
+    ntSave();
+  }
+  function ntSay(text) {
+    var el = document.getElementById("ntSay");
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+  }
+  function ntText() { return (NT.to ? t("nt_to") + ": " + NT.to + "\n" : "") + NT.msg + (NT.from ? "\n" + t("nt_from") + ": " + NT.from : ""); }
+  function ntNeedMsg() {
+    if (NT.msg.trim()) return false;
+    document.getElementById("ntErr").hidden = false;
+    document.getElementById("ntMsg").focus();
+    return true;
+  }
+  // an SVG string as a picture the canvas can draw
+  function svgImage(svg, w, h) {
+    var s = svg.replace(/^<svg/, "<svg" + (svg.indexOf("xmlns=") < 0 ? ' xmlns="http://www.w3.org/2000/svg"' : "") + ' width="' + w + '" height="' + h + '"');
+    return new Promise(function (res) {
+      var im = new Image();
+      im.onload = function () { res(im); };
+      im.onerror = function () { res(null); };
+      im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+    });
+  }
+  function wrapLines(x, text, max) {
+    var parts = [];
+    if (window.Intl && Intl.Segmenter) {
+      var seg = new Intl.Segmenter(lang === "zh" ? "zh" : lang === "lo" ? "lo" : "en", { granularity: "word" });
+      Array.from(seg.segment(text)).forEach(function (s) {
+        if (!s.isWordLike && !/^\s+$/.test(s.segment) && parts.length && s.segment !== "\n") parts[parts.length - 1] += s.segment;
+        else parts.push(s.segment);
+      });
+    } else parts = text.split(/(\s+)/);
+    var lines = [], line = "";
+    parts.forEach(function (p) {
+      if (p === "\n") { lines.push(line); line = ""; return; }
+      var test = line + p;
+      if (x.measureText(test).width > max && line.trim()) { lines.push(line.trim()); line = p.replace(/^\s+/, ""); }
+      else line = test;
+    });
+    if (line.trim()) lines.push(line.trim());
+    return lines;
+  }
+  function ntPicture() {
+    var W = 1080, H = 1350, look = NT_LOOK[NT.paper];
+    var c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var x = c.getContext("2d");
+    var FONT = '"Patrick Hand", "Noto Sans Lao", "Noto Sans SC", "Comic Sans MS", sans-serif';
+    var ready = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('60px "Patrick Hand"'), document.fonts.load('60px "Noto Sans Lao"'), document.fonts.load('60px "Noto Sans SC"')]).catch(function () {}) : Promise.resolve();
+    return ready.then(function () {
+      var g = x.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, look.bg[0]); g.addColorStop(1, look.bg[1]);
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      x.fillStyle = look.dot;
+      for (var yy = 40; yy < H; yy += 70) for (var xx = (yy / 70) % 2 ? 40 : 75; xx < W; xx += 70) { x.globalAlpha = 0.55; x.beginPath(); x.arc(xx, yy, NT.paper === "night" ? 3 : 7, 0, Math.PI * 2); x.fill(); }
+      x.globalAlpha = 1;
+      // the note paper
+      x.save();
+      x.shadowColor = "rgba(20,30,60,0.25)"; x.shadowBlur = 40; x.shadowOffsetY = 18;
+      x.fillStyle = look.card;
+      x.beginPath(); x.roundRect ? x.roundRect(110, 150, 860, 1000, 40) : x.rect(110, 150, 860, 1000); x.fill();
+      x.restore();
+      x.lineWidth = 6; x.strokeStyle = "#24396a";
+      x.beginPath(); x.roundRect ? x.roundRect(110, 150, 860, 1000, 40) : x.rect(110, 150, 860, 1000); x.stroke();
+      // washi tape
+      x.save(); x.translate(540, 150); x.rotate(-0.05); x.fillStyle = "rgba(169,191,219,0.85)"; x.fillRect(-120, -32, 240, 64); x.restore();
+      x.fillStyle = look.ink;
+      x.font = "54px " + FONT; x.textAlign = "left"; x.textBaseline = "alphabetic";
+      x.fillText(t("nt_to") + ": " + (NT.to || t("nt_to_ph")), 300, 300);
+      var size = 84, lines;
+      do { x.font = size + "px " + FONT; lines = wrapLines(x, NT.msg || t("nt_msg_ph"), 680); size -= 6; } while (lines.length * size * 1.3 > 440 && size > 40);
+      size += 6;
+      x.textAlign = "center";
+      var top = 580 - (lines.length - 1) * size * 0.65;
+      lines.forEach(function (l, i) { x.fillText(l, 540, top + i * size * 1.3); });
+      x.textAlign = "left"; x.font = "54px " + FONT;
+      x.fillText(t("nt_from") + ": " + (NT.from || t("nt_from_ph")), 180, 930);
+      x.textAlign = "center"; x.font = "40px " + FONT; x.fillStyle = NT.paper === "night" ? "#fdf6dc" : "#24396a";
+      x.fillText("Minise Arte · minisearte.com", 540, 1250);
+      var cats = NT_PAPERS[NT.paper], jobs = cats.map(function (p) { return svgImage(window.MINISE_CAT(p), 300, 300); });
+      var stk = NT.st.map(function (s) { return svgImage(STK[s], 150, 150); });
+      return Promise.all(jobs.concat(stk)).then(function (ims) {
+        ims.slice(0, cats.length).forEach(function (im, i) { if (im) { if (cats.length === 1) x.drawImage(im, 650, 850, 280, 280); else x.drawImage(im, 530 + i * 200, 900, 220, 220); } });
+        var spots = [[128, 168, -0.3], [802, 190, 0.25], [130, 990, 0.2]];
+        ims.slice(cats.length).forEach(function (im, i) { if (im) { x.save(); x.translate(spots[i][0] + 75, spots[i][1] + 75); x.rotate(spots[i][2]); x.drawImage(im, -75, -75, 150, 150); x.restore(); } });
+        return new Promise(function (res) { c.toBlob(res, "image/png"); });
+      });
+    });
+  }
+  document.addEventListener("input", function (e) {
+    var id = e.target.id;
+    if (id !== "ntTo" && id !== "ntMsg" && id !== "ntFrom") return;
+    NT[id === "ntTo" ? "to" : id === "ntMsg" ? "msg" : "from"] = e.target.value;
+    if (id === "ntMsg") { document.getElementById("ntCount").textContent = e.target.value.length + "/160"; document.getElementById("ntErr").hidden = true; }
+    ntRefresh();
+  });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-nt-paper]");
+    if (b) {
+      NT.paper = b.getAttribute("data-nt-paper");
+      document.querySelectorAll("[data-nt-paper]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      ntRefresh();
+      ntSay(t("nt_p_" + NT.paper) + "! " + t("nt_say_paper"));
+      return;
+    }
+    b = e.target.closest("[data-nt-st]");
+    if (b) {
+      var s = b.getAttribute("data-nt-st"), i = NT.st.indexOf(s);
+      if (i > -1) NT.st.splice(i, 1);
+      else { if (NT.st.length >= 3) NT.st.shift(); NT.st.push(s); }
+      document.getElementById("ntStks").innerHTML = ntStickers();
+      ntRefresh();
+      return;
+    }
+    if (e.target.closest("[data-nt-copy]")) { if (!ntNeedMsg()) copyText(ntText()); return; }
+    b = e.target.closest("[data-nt-save]");
+    if (b) {
+      if (ntNeedMsg() || !window.MINISE_CAT) return;
+      b.disabled = true;
+      ntPicture().then(function (blob) {
+        b.disabled = false;
+        if (!blob) return;
+        var url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = "minise-note.png";
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { a.remove(); URL.revokeObjectURL(url); }, 4000);
+        toast(t("nt_saved"), "peniSparkle");
+      }).catch(function () { b.disabled = false; });
+      return;
+    }
+    if (e.target.closest("[data-nt-add]")) {
+      if (ntNeedMsg()) return;
+      var text = inLang(shopLang(), function () { return t("nt_order") + " (" + t("nt_p_" + NT.paper) + ")\n" + ntText(); });
+      try { sessionStorage.setItem("minise_giftnote", text); } catch (err) { /* ignore */ }
+      var env = document.getElementById("ntEnv");
+      if (env && !calm) { env.classList.remove("send"); void env.offsetWidth; env.classList.add("send"); }
+      ntSay(t("nt_say_sent"));
+      document.getElementById("ntDone").innerHTML = '<p class="notice nt-ok">' + esc(t("nt_added")) + '</p><div class="nt-actions">' +
+        (bag.length ? '<a class="btn solid" href="#checkout">' + esc(t("nt_go_bag")) + "</a>" : '<a class="btn solid" href="#gift">' + esc(t("gf_link")) + '</a><a class="btn" href="#shop">' + esc(t("back_shop")) + "</a>") + "</div>";
+    }
+  });
+
+  /* ---------- A little film: the Minise Arte story, told by Mumi & Peni (plays in the page, with subtitles) ---------- */
+  var FILM = [
+    { bg: "s", cats: [["peek", "l"], ["peniPeek", "r"]], title: ["fm_title1", "fm_title2"] },
+    { bg: "c", date: "tl1d", cats: [["paint", "c"]], props: "paint" },
+    { bg: "p", date: "tl2d", cats: [["heart", "c"]], props: "lockets" },
+    { bg: "b", date: "tl3d", cats: [["wave", "c"]], props: "letters" },
+    { bg: "w", date: "tl4d", cats: [["heart", "l"], ["peniPeek", "peek"]], props: "food" },
+    { bg: "m", cats: [["wave", "l"], ["peniWave", "r"]], props: "hearts" },
+    { bg: "p", date: "tl5d", cats: [["gift", "l"], ["peniGift", "r"]], props: "boxes" },
+    { bg: "b", date: "tl6d", cats: [["wave", "l"], ["peniYay", "r"]], props: "shop" },
+    { bg: "c", date: "tl7d", cats: [["walk", "walk"], ["peniHop", "r"]], props: "plane" },
+    { bg: "l", date: "tl8d", cats: [["peniSparkle", "c"]], props: "treasure" },
+    { bg: "s", cats: [["yay", "l"], ["peniYay", "r"]], props: "party", title: ["fm_end1", "fm_end2"], end: true }
+  ];
+  var FM = { i: 0, on: false, t: 0, started: false };
+  function fmProps(k) {
+    var bit = function (code, cls) { return '<span class="fm-bit ' + cls + '">' + charmImg(code) + "</span>"; };
+    var disc = function (sh, col, l, cls) { return '<span class="fm-disc ' + cls + '"><svg viewBox="-40 -38 80 76" aria-hidden="true">' + charmShape(sh, col, l) + "</svg></span>"; };
+    if (k === "paint") return '<span class="fm-frame"><span>' + charmImg("A7") + "</span></span>" + '<i class="fm-dot d1"></i><i class="fm-dot d2"></i><i class="fm-dot d3"></i>';
+    if (k === "lockets") return bit("C14", "b1") + bit("A18", "b2") + bit("C36", "b3");
+    if (k === "letters") return disc("circle", MYO_COLS[0], "M", "b1") + disc("heart", MYO_COLS[8], "A", "b2") + disc("circle", MYO_COLS[4], "P", "b3");
+    if (k === "food") return '<span class="fm-bowl"></span>' + bit("B14", "b1") + bit("B13", "b2");
+    if (k === "hearts") return [1, 2, 3, 4, 5].map(function (n) { return '<span class="fm-heart h' + n + '">' + HEART + "</span>"; }).join("");
+    if (k === "boxes") return '<span class="fm-box x1"></span><span class="fm-box x2"></span><span class="fm-box x3"></span>';
+    if (k === "shop") return '<span class="fm-awning"></span><span class="fm-sign">Minise Arte</span><span class="fm-open">OPEN</span>';
+    if (k === "plane") return '<span class="fm-cloud c1"></span><span class="fm-cloud c2"></span>' + bit("A20", "fm-plane");
+    if (k === "treasure") return bit("C33", "b1") + bit("C25", "b2") + bit("C37", "b3") + bit("A1", "b4");
+    if (k === "party") return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (n) { return '<i class="fm-conf f' + n + '"></i>'; }).join("");
+    return "";
+  }
+  function fmScene(i) {
+    var s = FILM[i];
+    return '<div class="fm-scene fm-bg-' + s.bg + '">' + (s.date ? '<span class="fm-date">' + esc(t(s.date)) + "</span>" : "") +
+      (s.title ? '<div class="fm-title"><span>' + esc(t(s.title[0])) + "</span><b>" + esc(t(s.title[1])) + "</b></div>" : "") +
+      '<div class="fm-props fm-pr-' + (s.props || "none") + '" aria-hidden="true">' + fmProps(s.props) + "</div>" +
+      s.cats.map(function (c, n) { return '<span class="fm-cat fm-c-' + c[1] + '" style="animation-delay:' + (0.2 + n * 0.35) + 's">' + (window.MINISE_CAT ? window.MINISE_CAT(c[0]) : "") + "</span>"; }).join("") +
+      '<span class="fm-floor" aria-hidden="true"></span></div>';
+  }
+  function filmHTML() {
+    var dots = FILM.map(function (s, i) { return '<button type="button" class="fm-dot-btn" data-fm-go="' + i + '" aria-label="' + (i + 1) + '"' + (i === FM.i ? ' aria-current="true"' : "") + "></button>"; }).join("");
+    return '<div class="film" id="film"><div class="fm-head"><p class="eyebrow">' + esc(t("fm_eyebrow")) + "</p><h2>" + esc(t("fm_h")) + "</h2></div>" +
+      '<div class="fm-screen"><div class="fm-stage" id="fmStage">' + fmScene(FM.i) + "</div>" +
+      (FM.started ? "" : '<button class="fm-big" type="button" data-fm="play" id="fmBig"><span class="fm-big-i" aria-hidden="true"></span><span>' + esc(t("fm_watch")) + "</span></button>") +
+      '<div class="fm-bar" aria-hidden="true"><span id="fmBar" style="width:' + (FM.i / (FILM.length - 1) * 100) + '%"></span></div></div>' +
+      '<p class="fm-sub" id="fmSub" aria-live="polite">' + esc(t("fm_" + FM.i)) + "</p>" +
+      '<div class="fm-ctl"><button class="btn solid" type="button" data-fm="toggle" id="fmToggle">' + esc(t(FM.on ? "fm_pause" : "fm_play")) + '</button><button class="btn ghost" type="button" data-fm="restart">' + esc(t("fm_again")) + '</button><span class="fm-dots">' + dots + "</span></div>" +
+      '<details class="fm-read"><summary>' + esc(t("fm_read")) + "</summary><ol>" + FILM.map(function (s, i) { return "<li>" + (s.date ? "<b>" + esc(t(s.date)) + "</b> " : "") + esc(t("fm_" + i)) + "</li>"; }).join("") + "</ol></details></div>";
+  }
+  function fmShow(i) {
+    var st = document.getElementById("fmStage");
+    if (!st) { FM.on = false; clearTimeout(FM.t); return; }
+    FM.i = i;
+    st.innerHTML = fmScene(i);
+    var sub = document.getElementById("fmSub");
+    sub.textContent = t("fm_" + i);
+    sub.classList.remove("pop"); void sub.offsetWidth; sub.classList.add("pop");
+    document.querySelectorAll("[data-fm-go]").forEach(function (d) { if (+d.getAttribute("data-fm-go") === i) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current"); });
+    var bar = document.getElementById("fmBar"), n = FILM.length - 1;
+    bar.style.transition = "none";
+    bar.style.width = (i / n * 100) + "%";
+    if (FM.on && !FILM[i].end) { void bar.offsetWidth; bar.style.transition = "width 5.6s linear"; bar.style.width = ((i + 1) / n * 100) + "%"; }
+  }
+  function fmButtons() { var b = document.getElementById("fmToggle"); if (b) b.textContent = t(FM.on ? "fm_pause" : "fm_play"); }
+  function fmTick() {
+    clearTimeout(FM.t);
+    if (!FM.on) return;
+    if (FILM[FM.i].end) { FM.on = false; fmButtons(); return; }
+    FM.t = setTimeout(function () {
+      if (!document.getElementById("fmStage")) { FM.on = false; return; }
+      fmShow(FM.i + 1);
+      fmTick();
+    }, 5600);
+  }
+  function fmPlay(from) {
+    FM.started = true;
+    var big = document.getElementById("fmBig");
+    if (big) big.remove();
+    if (typeof from === "number") FM.i = from;
+    else if (FILM[FM.i].end) FM.i = 0;
+    FM.on = true;
+    fmShow(FM.i);
+    fmTick();
+    fmButtons();
+  }
+  function fmPause() { FM.on = false; clearTimeout(FM.t); fmShow(FM.i); fmButtons(); }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-fm]");
+    if (b) {
+      var a = b.getAttribute("data-fm");
+      if (a === "play") fmPlay();
+      else if (a === "toggle") { if (FM.on) fmPause(); else fmPlay(); }
+      else if (a === "restart") fmPlay(0);
+      return;
+    }
+    b = e.target.closest("[data-fm-go]");
+    if (b) { if (FM.on) fmPlay(+b.getAttribute("data-fm-go")); else { FM.started = true; var big = document.getElementById("fmBig"); if (big) big.remove(); fmShow(+b.getAttribute("data-fm-go")); } }
+  });
+
   function footer() {
     return '<div class="wrap foot-wrap">' + kitty("shark", "foot-kitty") + kitty("peniBunnySleep", "foot-kitty2") + '<div class="foot-grid"><div class="foot-brand"><span class="foot-logo">Minise Arte</span><p>' + esc(t("footer_tag")) + "</p>" +
       '<p class="tn">' + WA.mainShow + " · " + WA.altShow + "</p></div>" +
       "<div><h4>" + esc(t("footer_shop")) + '</h4><ul><li><a href="#make">' + esc(t("nav_make")) + "</a></li>" + ["locket", "bracelet", "necklace", "set", "earrings", "accessory"].map(function (ty) {
         return '<li><a href="#shop-' + ty + '">' + esc(t("type_" + ty)) + "</a></li>";
       }).join("") + "</ul></div>" +
-      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#cats">' + esc(t("nav_cats")) + '</a></li><li><a href="#gift">' + esc(t("gf_link")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
+      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#cats">' + esc(t("nav_cats")) + '</a></li><li><a href="#gift">' + esc(t("gf_link")) + '</a></li><li><a href="#note">' + esc(t("nt_link")) + '</a></li><li><a href="#wish">' + esc(t("wish_eyebrow")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
       "<div><h4>" + esc(t("footer_follow")) + '</h4><ul><li><a href="' + FB + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></li><li><a href="https://www.instagram.com/minise.studio/" target="_blank" rel="noopener">@minise.studio</a></li><li><a href="https://www.instagram.com/minise.au/" target="_blank" rel="noopener">@minise.au</a></li><li><a href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a></li><li><a href="https://linktr.ee/Miniseofficial" target="_blank" rel="noopener">Linktree</a></li></ul></div></div>' +
       '<div class="foot-base"><span>© 2026 Minise Arte · ມິນິເຊ່ ອາຕ໌</span><span>' + esc(t("footer_copy")) + "</span></div></div>";
   }
@@ -1892,6 +2275,8 @@
     else if (h === "mumi" || h === "peni") html = catPage(h);
     else if (h === "cats") html = worldPage();
     else if (h === "gift") html = giftPage();
+    else if (h === "note") html = notePage();
+    else if (h === "wish") html = wishPage();
     else if (h === "checkout") html = checkout();
     else { h = "home"; html = home(); }
     if (h !== "checkout") CO.done = null;
@@ -1919,7 +2304,7 @@
 
   // the browser tab title and the page description follow the page you are on
   function setMeta(h) {
-    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), cats: t("wl_h"), gift: t("gf_h") };
+    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), cats: t("wl_h"), gift: t("gf_h"), note: t("nt_h"), wish: t("wish_h") };
     var title = "Minise Arte · " + t("footer_tag").replace(/\.$/, ""), desc = t("hero_lead");
     if (S) { title = S.p.n + " · Minise Arte"; desc = (describe(S.p, lang) || describe(S.p, "en") || desc).slice(0, 155); }
     else if (h.indexOf("shop") === 0 || h.indexOf("c-") === 0) title = shopTitle() + " · Minise Arte";
@@ -1928,6 +2313,7 @@
     if (h === "peni") desc = t("pni_lead");
     if (h === "cats") desc = t("wl_lead");
     if (h === "gift") desc = t("gf_lead");
+    if (h === "note") desc = t("nt_lead");
     if (h === "make") desc = t("mk_lead");
     document.title = title;
     var m = document.querySelector('meta[name="description"]');
@@ -1949,6 +2335,7 @@
     document.querySelectorAll(".announce li").forEach(function (li) { li.hidden = !li.textContent.trim(); });
     document.querySelectorAll("[data-t-label]").forEach(function (el) { el.setAttribute("aria-label", t(el.getAttribute("data-t-label"))); });
     document.getElementById("foot").innerHTML = footer();
+    wishCount();
     fitNav();
   }
 

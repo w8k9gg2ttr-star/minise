@@ -735,7 +735,8 @@
       '<div class="row2" id="addrRow2">' + field("coVill", t("vill"), '<input type="text" id="coVill" maxlength="60">') + field("coBranch", t("branch"), '<input type="text" id="coBranch" maxlength="80" placeholder="' + esc(t("branch_ph")) + '">') + "</div>" +
       field("coCountry", t("country"), '<input type="text" id="coCountry" maxlength="60" autocomplete="country-name">') +
       field("coAddr", t("addr_more"), '<textarea id="coAddr" maxlength="300"></textarea>') +
-      field("coNote", t("co_note"), '<textarea id="coNote" maxlength="500">' + esc(giftNote()) + "</textarea>") + '<p class="hint nt-co"><a class="link" href="#note">' + esc(t(giftNote() ? "nt_edit" : "nt_hint_co")) + " →</a></p>" +
+      noteCardHTML() +
+      field("coNote", t("co_note"), '<textarea id="coNote" maxlength="500"></textarea>') +
       "</fieldset>";
     if (photos) {
       html += '<fieldset class="co-step">' + kitty("peniHeart", "step-kitty") + stepHead(n++, t("st_photos")) +
@@ -813,6 +814,8 @@
     if (v === "d_abroad") { chk("coCountry", fieldVal("coCountry").length >= 2, t("req")); chk("coAddr", fieldVal("coAddr").length >= 8, t("req")); }
     else setErr("coCountry", "");
     if (needPhotos()) chk("coPhotos", CO.photos.length > 0, t("err_photos"));
+    var nc = document.getElementById("ncOn");
+    if (nc && nc.checked) chk("ncMsg", NT.msg.trim().length > 0, t("nc_need")); else setErr("ncMsg", "");
     chk("coSlip", !!CO.slipImg, t("err_slip"));
     return bad;
   }
@@ -850,7 +853,7 @@
       name: fieldVal("coName"), phone: readPhone(),
       contact_via: fieldVal("coVia"), contact_handle: fieldVal("coHandle"), discount_code: CO.code ? CO.code.code : "", website: fieldVal("coWeb"),
       delivery: delText(), delivery_type: fieldVal("coDel").replace("d_", ""),
-      address: addressText(), note: fieldVal("coNote"), ref: fieldVal("rcRef"),
+      address: addressText(), note: [ncText(), fieldVal("coNote")].filter(Boolean).join("\n\n"), ref: fieldVal("rcRef"),
       items: bag.map(function (it) {
         var p = bySlug[it.s];
         // the database works out the price itself from the product, choice and quantity
@@ -2132,13 +2135,65 @@
     if (e.target.closest("[data-nt-add]")) {
       if (ntNeedMsg()) return;
       var text = inLang(shopLang(), function () { return t("nt_order") + " (" + t("nt_p_" + NT.paper) + ")\n" + ntText(); });
-      try { sessionStorage.setItem("minise_giftnote", text); } catch (err) { /* ignore */ }
+      try { sessionStorage.setItem("minise_giftnote", text); sessionStorage.setItem("minise_notecard", "1"); } catch (err) { /* ignore */ }
       var env = document.getElementById("ntEnv");
       if (env && !calm) { env.classList.remove("send"); void env.offsetWidth; env.classList.add("send"); }
       ntSay(t("nt_say_sent"));
       document.getElementById("ntDone").innerHTML = '<p class="notice nt-ok">' + esc(t("nt_added")) + '</p><div class="nt-actions">' +
         (bag.length ? '<a class="btn solid" href="#checkout">' + esc(t("nt_go_bag")) + "</a>" : '<a class="btn solid" href="#gift">' + esc(t("gf_link")) + '</a><a class="btn" href="#shop">' + esc(t("back_shop")) + "</a>") + "</div>";
     }
+  });
+
+  /* checkout: an optional note card in the delivery step. It shares the note maker's words and paper. */
+  function ncIsOn() { try { var f = sessionStorage.getItem("minise_notecard"); return f === "1" || (f !== "0" && !!giftNote()); } catch (e) { return false; } }
+  function ncMini() {
+    return '<div class="nc-mini nt-p-' + NT.paper + '"><span class="nt-tape" aria-hidden="true"></span>' +
+      '<p class="nc-to">' + esc(t("nt_to")) + ': <b class="' + (NT.to ? "" : "nt-ph") + '">' + esc(NT.to || t("nt_to_ph")) + "</b></p>" +
+      '<p class="nc-msg' + (NT.msg ? "" : " nt-ph") + '">' + esc(NT.msg || t("nt_msg_ph")) + "</p>" +
+      '<p class="nc-from">' + esc(t("nt_from")) + ': <b class="' + (NT.from ? "" : "nt-ph") + '">' + esc(NT.from || t("nt_from_ph")) + "</b></p>" + kitty(NT_PAPERS[NT.paper][0], "nc-cat") + "</div>";
+  }
+  function noteCardHTML() {
+    var on = ncIsOn();
+    var papers = Object.keys(NT_PAPERS).map(function (p) {
+      return '<label class="nt-paper nc-paper nt-p-' + p + '"><input type="radio" name="ncPaper" value="' + p + '"' + (NT.paper === p ? " checked" : "") + '><span class="nt-sw">' + kitty(NT_PAPERS[p][0], "nt-sw-k") + "</span><span>" + esc(t("nt_p_" + p)) + "</span></label>";
+    }).join("");
+    return '<div class="nc-box' + (on ? " on" : "") + '" id="ncBox"><label class="nc-toggle"><input type="checkbox" id="ncOn"' + (on ? " checked" : "") + '><span class="nc-check" aria-hidden="true"></span>' +
+      '<span class="nc-txt"><b>' + esc(t("nc_h")) + "</b><small>" + esc(t("nc_sub")) + '</small></span><span class="nc-free">' + esc(t("nc_free")) + "</span>" + kitty("peniWave", "nc-k") + "</label>" +
+      '<div class="nc-body" id="ncBody"' + (on ? "" : " hidden") + '><div class="nc-grid"><div class="nc-fields">' +
+      field("ncTo", t("nt_to"), '<input type="text" id="ncTo" maxlength="40" autocomplete="off" placeholder="' + esc(t("nt_to_ph")) + '" value="' + esc(NT.to) + '">') +
+      field("ncMsg", t("nt_msg"), '<textarea id="ncMsg" maxlength="160" placeholder="' + esc(t("nt_msg_ph")) + '">' + esc(NT.msg) + "</textarea>", NT.msg.length + "/160") +
+      field("ncFrom", t("nt_from"), '<input type="text" id="ncFrom" maxlength="40" autocomplete="off" placeholder="' + esc(t("nt_from_ph")) + '" value="' + esc(NT.from) + '">') +
+      "</div>" + '<div class="nc-prev" id="ncPrev">' + ncMini() + "</div></div>" +
+      '<div class="field nc-paper-field"><span class="lbl">' + esc(t("nt_paper")) + '</span><div class="nc-papers" role="radiogroup">' + papers + "</div></div>" +
+      '<p class="hint nc-more"><a class="link" href="#note">' + esc(t("nc_more")) + " →</a></p></div></div>";
+  }
+  // what the team reads in the order (in English or Lao)
+  function ncText() {
+    var on = document.getElementById("ncOn");
+    if (!on || !on.checked || !NT.msg.trim()) return "";
+    return t("nc_order") + " (" + t("nt_p_" + NT.paper) + "):\n" + ntText();
+  }
+  document.addEventListener("change", function (e) {
+    if (e.target.id === "ncOn") {
+      var on = e.target.checked, box = document.getElementById("ncBox");
+      box.classList.toggle("on", on);
+      document.getElementById("ncBody").hidden = !on;
+      try { sessionStorage.setItem("minise_notecard", on ? "1" : "0"); if (!on) sessionStorage.removeItem("minise_giftnote"); } catch (err) { /* ignore */ }
+      if (!on) setErr("ncMsg", "");
+      else if (!calm) { var b = document.getElementById("ncBody"); b.classList.remove("open"); void b.offsetWidth; b.classList.add("open"); }
+    } else if (e.target.name === "ncPaper") {
+      NT.paper = e.target.value;
+      ntSave();
+      document.getElementById("ncPrev").innerHTML = ncMini();
+    }
+  });
+  document.addEventListener("input", function (e) {
+    var id = e.target.id;
+    if (id !== "ncTo" && id !== "ncMsg" && id !== "ncFrom") return;
+    NT[id === "ncTo" ? "to" : id === "ncMsg" ? "msg" : "from"] = e.target.value;
+    ntSave();
+    document.getElementById("ncPrev").innerHTML = ncMini();
+    if (id === "ncMsg") { var h = document.getElementById("ncMsgH"); if (h) h.textContent = e.target.value.length + "/160"; if (e.target.value.trim()) setErr("ncMsg", ""); }
   });
 
   /* ---------- The film: the Minise Arte story as a little cartoon. Scenes are drawn in SVG (park, booth, street, city, night),

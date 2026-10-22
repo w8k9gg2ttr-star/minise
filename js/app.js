@@ -2152,7 +2152,7 @@
   function duoHTML() {
     if (!GM.cards.length) gmNew();
     return '<section class="duo"><div class="wrap">' +
-      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><span class="duo-links"><a class="link" href="#mumi">' + esc(t("mumi_link")) + ' →</a><a class="link" href="#peni">' + esc(t("peni_link")) + ' →</a><a class="link" href="#story">' + esc(t("fm_watch")) + " →</a></span>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
+      '<div class="duo-head">' + kitty("wave", "duo-kitty") + '<div><p class="eyebrow">' + esc(t("duo_eyebrow")) + "</p><h2>" + esc(t("duo_h")) + '</h2><p class="lead">' + esc(t("duo_lead")) + '</p></div><span class="duo-links"><a class="link" href="#mumi">' + esc(t("mumi_link")) + ' →</a><a class="link" href="#peni">' + esc(t("peni_link")) + ' →</a><a class="link" href="#test">' + esc(t("ts_link")) + ' →</a><a class="link" href="#story">' + esc(t("fm_watch")) + " →</a></span>" + kitty("peniWave", "duo-kitty duo-kitty2") + "</div>" +
       storyHTML() + fortuneHTML() +
       gameHTML() + "</div></section>";
   }
@@ -2372,7 +2372,7 @@
       }).join("") + "</div>";
   }
   function qzHTML() {
-    return '<div class="qz"><div class="qz-head">' + kitty("peek", "qz-peek") + kitty("peniPeek", "qz-peek") + '<div><p class="eyebrow">' + esc(t("qz_eyebrow")) + "</p><h2>" + esc(t("qz_h")) + "</h2><p>" + esc(t("qz_p")) + '</p></div></div><div class="qz-body" id="qzBody">' + qzBody() + "</div></div>";
+    return '<div class="qz"><div class="qz-head">' + kitty("peek", "qz-peek") + kitty("peniPeek", "qz-peek") + '<div><p class="eyebrow">' + esc(t("qz_eyebrow")) + "</p><h2>" + esc(t("qz_h")) + "</h2><p>" + esc(t("qz_p")) + ' <a class="link" href="#test">' + esc(t("ts_full")) + ' →</a></p></div></div><div class="qz-body" id="qzBody">' + qzBody() + "</div></div>";
   }
   function qzRender() {
     var box = document.getElementById("qzBody");
@@ -2394,12 +2394,189 @@
     return '<section class="wl-hero"><div class="wrap"><div class="wl-head"><p class="eyebrow">' + esc(t("wl_eyebrow")) + "</p><h1>" + esc(t("wl_h")) + '</h1><p class="lead">' + esc(t("wl_lead")) + "</p></div>" +
       wlStage() + '<p class="wl-hint">' + esc(t("wl_tap")) + "</p></div></section>" +
       '<section class="section band"><div class="wrap">' + filmHTML() + "</div></section>" +
-      '<section class="section tight"><div class="wrap"><div class="wl-meets">' + meet + '</div><div class="wl-more">' + [["#gift", "gift", "gf_link"], ["#note", "peniWave", "nt_link"], ["#make", "peniBracelet", "nav_make"], ["#wish", "peniBox", "wish_h"]].map(function (m) { return '<a href="' + m[0] + '">' + kitty(m[1], "wl-more-k") + "<span>" + esc(t(m[2])) + "</span></a>"; }).join("") + "</div></div></section>" +
+      '<section class="section tight"><div class="wrap"><div class="wl-meets">' + meet + '</div><div class="wl-more">' + [["#test", "peniHeart", "ts_link"], ["#gift", "gift", "gf_link"], ["#note", "peniWave", "nt_link"], ["#make", "peniBracelet", "nav_make"], ["#wish", "peniBox", "wish_h"]].map(function (m) { return '<a href="' + m[0] + '">' + kitty(m[1], "wl-more-k") + "<span>" + esc(t(m[2])) + "</span></a>"; }).join("") + "</div></div></section>" +
       '<section class="section band"><div class="wrap">' + sgHTML() + "</div></section>" +
       '<section class="section"><div class="wrap">' + qzHTML() + "</div></section>" +
       '<section class="section band"><div class="wrap">' + storyHTML() + "</div></section>" +
       '<section class="section"><div class="wrap wl-play">' + fortuneHTML() + gameHTML() + "</div></section>";
   }
+
+  /* ---------- Which Minise cat are you? (#test): a 20-question personality test ----------
+     Five sides of you, four questions each, mixed in turn: energy, love language, head or heart, how easily you get
+     scared, and sleepiness. Every answer leans from Mumi (0: calm, modest, an INTJ planner) to Peni (3: playful,
+     cuddly, sleepy, easily startled, an INFJ softie). Answers stay in this tab only. */
+  var TS_DIMS = ["e", "a", "h", "b", "s"], TS_N = 20;
+  var TS_POSE = { e: ["drink", "peniYay"], a: ["wave", "peniHeart"], h: ["search", "peniHeart"], b: ["shark", "peniPeek"], s: ["paint", "peniSleep"] };
+  var TS_CHARMS = { p: ["C18", "B2", "A13"], pm: ["C18", "A23", "B11"], mp: ["C27", "B11", "A13"], m: ["C27", "C33", "A10"] };
+  var TS = { step: -1, ans: [], seed: 0, say: "", pose: ["wave", "peniWave"] };
+  try {
+    var ts0 = JSON.parse(sessionStorage.getItem("minise_test") || "null");
+    if (ts0 && Array.isArray(ts0.ans)) {
+      TS.ans = ts0.ans.slice(0, TS_N).map(function (v) { return v === 0 || v === 1 || v === 2 || v === 3 ? v : null; });
+      TS.step = typeof ts0.step === "number" ? Math.max(-1, Math.min(TS_N, ts0.step)) : -1;
+      TS.seed = +ts0.seed || 0;
+    }
+  } catch (e) { /* start fresh */ }
+  if (!TS.seed) TS.seed = 1 + Math.floor(Math.random() * 9973);
+  function tsSave() { try { sessionStorage.setItem("minise_test", JSON.stringify({ ans: TS.ans, step: TS.step, seed: TS.seed })); } catch (e) { /* ignore */ } }
+  function tsDim(i) { return TS_DIMS[i % 5]; }
+  // the four answers of a question in a shuffled order that stays the same for this visitor
+  function tsOrder(i) {
+    var a = [0, 1, 2, 3], s = (TS.seed * 31 + i * 97) % 2147483647;
+    for (var k = 3; k > 0; k--) { s = (s * 48271) % 2147483647; var j = s % (k + 1), x = a[k]; a[k] = a[j]; a[j] = x; }
+    return a;
+  }
+  // each side 0 (all Mumi) … 1 (all Peni), and the overall mix
+  function tsScores() {
+    var sc = {};
+    TS_DIMS.forEach(function (d, k) { var sum = 0, n = 0; for (var i = k; i < TS_N; i += 5) if (TS.ans[i] != null) { sum += TS.ans[i]; n++; } sc[d] = n ? sum / (n * 3) : 0.5; });
+    sc.all = TS_DIMS.reduce(function (s, d) { return s + sc[d]; }, 0) / TS_DIMS.length;
+    sc.type = sc.all >= 0.62 ? "p" : sc.all >= 0.5 ? "pm" : sc.all >= 0.38 ? "mp" : "m";
+    sc.peni = Math.round(sc.all * 100);
+    return sc;
+  }
+  function tsCats() {
+    return '<div class="ts-cats"><span class="ts-cat" id="tsCatM">' + kitty(TS.pose[0], "ts-k") + '</span><p class="ts-say" id="tsSay" role="status">' + esc(TS.say || t("ts_say0")) + '</p><span class="ts-cat" id="tsCatP">' + kitty(TS.pose[1], "ts-k") + "</span></div>";
+  }
+  function tsIntro() {
+    var done = TS.ans.filter(function (v) { return v != null; }).length;
+    var card = function (who, pose, traits, vibe) {
+      return '<div class="ts-who ts-who-' + who + '">' + kitty(pose, "ts-who-k") + "<div><h3>" + esc(t(who === "p" ? "peni_name" : "mid_name")) + ' <span class="ts-vibe">' + esc(t("ts_vibe", { t: vibe })) + "</span></h3><p>" + esc(t(traits)) + "</p></div></div>";
+    };
+    return '<div class="ts-intro"><p class="eyebrow">' + esc(t("ts_eyebrow")) + "</p><h1>" + esc(t("ts_h")) + '</h1><p class="lead">' + esc(t("ts_lead")) + "</p>" +
+      '<div class="ts-whos">' + card("p", "peniHeart", "ts_peni_traits", "INFJ") + card("m", "sparkle", "ts_mumi_traits", "INTJ") + "</div>" +
+      '<div class="ts-go">' + (done && done < TS_N ? '<button class="btn solid" type="button" data-ts-resume>' + esc(t("ts_continue", { n: Math.min(done + 1, TS_N) })) + '</button><button class="btn" type="button" data-ts-again>' + esc(t("ts_restart")) + "</button>"
+        : '<button class="btn solid big" type="button" data-ts-start>' + esc(t("ts_start")) + "</button>") + '</div><p class="hint">' + esc(t("ts_fun")) + "</p></div>";
+  }
+  function tsQuestion() {
+    var i = TS.step, d = tsDim(i), n = i + 1;
+    var ans = tsOrder(i).map(function (v) {
+      return '<button type="button" class="ts-a" data-ts-a="' + v + '" aria-pressed="' + (TS.ans[i] === v) + '">' + esc(t("ts_q" + n + "_" + "abcd".charAt(v))) + "</button>";
+    }).join("");
+    return '<div class="ts-card"><div class="ts-top">' + (i > 0 ? '<button class="ts-back" type="button" data-ts-back>← ' + esc(t("ts_back")) + "</button>" : "<span></span>") +
+      '<span class="tn">' + esc(t("ts_q", { n: n, t: TS_N })) + '</span><span class="ts-chip ts-chip-' + d + '">' + esc(t("ts_d_" + d)) + "</span></div>" +
+      '<div class="ts-bar" aria-hidden="true"><i style="width:' + (i / TS_N * 100).toFixed(1) + '%"></i></div>' +
+      '<h2 class="ts-q" id="tsQ" tabindex="-1">' + esc(t("ts_q" + n)) + '</h2><div class="ts-ans" role="group" aria-labelledby="tsQ">' + ans + "</div>" + tsCats() + "</div>";
+  }
+  function tsTraitRows(sc) {
+    return TS_DIMS.map(function (d) {
+      var p = Math.round(sc[d] * 100);
+      return '<div class="ts-tr"><b>' + esc(t("ts_d_" + d)) + '</b><span class="ts-tr-l">' + esc(t("ts_d_" + d + "0")) + '</span><span class="ts-tr-bar"><i style="left:' + (4 + p * 0.92).toFixed(1) + '%"></i></span><span class="ts-tr-r">' + esc(t("ts_d_" + d + "1")) + "</span></div>";
+    }).join("");
+  }
+  function tsResult() {
+    var sc = tsScores(), ty = sc.type, peniSide = ty === "p" || ty === "pm";
+    var big = { p: "peniHeart", pm: "peniSparkle", mp: "heart", m: "sparkle" }[ty];
+    var charms = TS_CHARMS[ty].filter(function (c) { return CH_BY[c]; });
+    return '<div class="ts-result ts-r-' + (peniSide ? "p" : "m") + '"><div class="ts-r-head">' + kitty(big, "ts-r-k") + '<div><p class="eyebrow">' + esc(t("ts_your")) + "</p><h1>" + esc(t("ts_r_" + ty + "_h")) + '</h1><p class="ts-vibe big">' + esc(t("ts_vibe", { t: peniSide ? "INFJ" : "INTJ" })) + "</p></div></div>" +
+      '<div class="ts-meter"><span class="tn">' + esc(t("mid_name")) + " " + (100 - sc.peni) + '%</span><span class="ts-meter-bar" aria-hidden="true"><i style="width:' + sc.peni + '%"></i></span><span class="tn">' + esc(t("peni_name")) + " " + sc.peni + "%</span></div>" +
+      '<p class="lead ts-desc">' + esc(t("ts_r_" + ty)) + "</p>" +
+      '<div class="ts-traits"><h3>' + esc(t("ts_traits")) + "</h3>" + tsTraitRows(sc) + "</div>" +
+      '<div class="ts-bestie">' + kitty(peniSide ? "wave" : "peniWave", "ts-bestie-k") + "<p>" + esc(t(peniSide ? "ts_bestie_p" : "ts_bestie_m")) + "</p></div>" +
+      (charms.length ? '<div class="ts-match"><h3>' + esc(t("ts_match")) + '</h3><div class="ts-charms">' + charms.map(function (c) { return '<span class="ts-charm">' + charmImg(c) + "<small>" + esc(charmName(c)) + "</small></span>"; }).join("") + '</div><button class="btn solid" type="button" data-ts-make>' + esc(t("ts_make")) + "</button></div>" : "") +
+      '<div class="ts-actions"><button class="btn" type="button" data-ts-save>' + esc(t("ts_save")) + '</button><button class="btn" type="button" data-ts-copy>' + esc(t("ts_copy")) + '</button><button class="btn ghost" type="button" data-ts-again>' + esc(t("ts_again")) + "</button></div>" +
+      '<p class="hint">' + esc(t("ts_fun")) + "</p></div>";
+  }
+  function testPage() { return '<section class="section tight ts-sec"><div class="wrap ts-wrap" id="tsBox">' + tsBody() + "</div></section>"; }
+  function tsBody() { return TS.step < 0 ? tsIntro() : TS.step >= TS_N ? tsResult() : tsQuestion(); }
+  function tsRender(focusQ) {
+    var box = document.getElementById("tsBox");
+    if (!box) return;
+    box.innerHTML = tsBody();
+    if (!calm) { box.classList.remove("turn"); void box.offsetWidth; box.classList.add("turn"); }
+    var top = box.getBoundingClientRect().top;
+    if (top < 60 || top > window.innerHeight * 0.5) box.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" });
+    var q = document.getElementById("tsQ");
+    if (q && focusQ) q.focus({ preventScroll: true });
+  }
+  // the result as a picture to keep or share (1080 × 1350)
+  function tsPicture() {
+    var sc = tsScores(), ty = sc.type, peniSide = ty === "p" || ty === "pm";
+    var W = 1080, H = 1350, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var x = c.getContext("2d"), FONT = '"Patrick Hand", "Noto Sans Lao", "Noto Sans SC", "Comic Sans MS", sans-serif';
+    var bg = peniSide ? ["#fde3ea", "#f6c9d6"] : ["#dfe9f6", "#c3d4e9"], ink = "#24396a";
+    var ready = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('60px "Patrick Hand"'), document.fonts.load('60px "Noto Sans Lao"'), document.fonts.load('60px "Noto Sans SC"')]).catch(function () {}) : Promise.resolve();
+    return ready.then(function () {
+      var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, bg[0]); g.addColorStop(1, bg[1]);
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      x.fillStyle = "rgba(255,255,255,0.55)";
+      for (var yy = 40; yy < H; yy += 70) for (var xx = (yy / 70) % 2 ? 40 : 75; xx < W; xx += 70) { x.beginPath(); x.arc(xx, yy, 6, 0, Math.PI * 2); x.fill(); }
+      x.save(); x.shadowColor = "rgba(20,30,60,0.22)"; x.shadowBlur = 40; x.shadowOffsetY = 16; x.fillStyle = "#fbf8f1";
+      x.beginPath(); x.roundRect ? x.roundRect(80, 90, 920, 1170, 44) : x.rect(80, 90, 920, 1170); x.fill(); x.restore();
+      x.lineWidth = 6; x.strokeStyle = ink; x.beginPath(); x.roundRect ? x.roundRect(80, 90, 920, 1170, 44) : x.rect(80, 90, 920, 1170); x.stroke();
+      x.fillStyle = ink; x.textAlign = "center";
+      x.font = "40px " + FONT; x.fillText(t("ts_your"), 540, 180);
+      var title = t("ts_r_" + ty + "_h"), size = 86;
+      do { x.font = size + "px " + FONT; size -= 4; } while (x.measureText(title).width > 820 && size > 44);
+      x.fillText(title, 540, 270);
+      x.font = "44px " + FONT; x.fillStyle = "#51618a"; x.fillText(t("ts_vibe", { t: peniSide ? "INFJ" : "INTJ" }), 540, 330);
+      // the mix
+      var mx = 200, mw = 680, my = 692;
+      x.fillStyle = "#c3d4e9"; x.beginPath(); x.roundRect ? x.roundRect(mx, my, mw, 34, 17) : x.rect(mx, my, mw, 34); x.fill();
+      x.fillStyle = "#f4a9ba"; x.beginPath(); x.roundRect ? x.roundRect(mx + mw * (1 - sc.all), my, mw * sc.all, 34, 17) : x.rect(mx + mw * (1 - sc.all), my, mw * sc.all, 34); x.fill();
+      x.lineWidth = 4; x.strokeStyle = ink; x.beginPath(); x.roundRect ? x.roundRect(mx, my, mw, 34, 17) : x.rect(mx, my, mw, 34); x.stroke();
+      x.fillStyle = ink; x.font = "40px " + FONT; x.textAlign = "left"; x.fillText(t("mid_name") + " " + (100 - sc.peni) + "%", mx, my - 16);
+      x.textAlign = "right"; x.fillText(t("peni_name") + " " + sc.peni + "%", mx + mw, my - 16);
+      // five sides: the name, then the two ends with a dot where you are
+      TS_DIMS.forEach(function (d, k) {
+        var y = 790 + k * 86;
+        x.textAlign = "left"; x.font = "32px " + FONT; x.fillStyle = ink; x.fillText(t("ts_d_" + d), 150, y);
+        x.font = "28px " + FONT; x.fillStyle = "#51618a"; x.textAlign = "right"; x.fillText(t("ts_d_" + d + "0"), 380, y + 40);
+        x.textAlign = "left"; x.fillText(t("ts_d_" + d + "1"), 700, y + 40);
+        x.strokeStyle = "#a9bfdb"; x.lineWidth = 8; x.lineCap = "round"; x.beginPath(); x.moveTo(400, y + 30); x.lineTo(680, y + 30); x.stroke();
+        x.fillStyle = ink; x.beginPath(); x.arc(400 + 280 * sc[d], y + 30, 13, 0, Math.PI * 2); x.fill();
+      });
+      x.textAlign = "center"; x.font = "36px " + FONT; x.fillStyle = ink; x.fillText(t("ts_link") + " · minisearte.com", 540, 1225);
+      var cat = window.MINISE_CAT ? { p: "peniHeart", pm: "peniSparkle", mp: "heart", m: "sparkle" }[ty] : null;
+      return cat ? svgImage(window.MINISE_CAT(cat), 330, 330) : null;
+    }).then(function (im) {
+      if (im) x.drawImage(im, 390, 345, 300, 300);
+      return new Promise(function (res) { c.toBlob(res, "image/png"); });
+    });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-ts-a]");
+    if (b && TS.step >= 0 && TS.step < TS_N) {
+      var v = +b.getAttribute("data-ts-a"), d = tsDim(TS.step), k = TS.step % 3 + 1;
+      TS.ans[TS.step] = v;
+      TS.say = t(v >= 2 ? "ts_rx_p" + k : "ts_rx_m" + k);
+      TS.pose = v >= 2 ? ["wave", TS_POSE[d][1]] : [TS_POSE[d][0], "peniWave"];
+      TS.step++;
+      tsSave();
+      tsRender(true);
+      return;
+    }
+    if (e.target.closest("[data-ts-start]")) { TS.ans = []; TS.step = 0; TS.say = ""; TS.pose = ["wave", "peniWave"]; tsSave(); tsRender(true); return; }
+    if (e.target.closest("[data-ts-resume]")) { var done = TS.ans.filter(function (x) { return x != null; }).length; TS.step = Math.min(done, TS_N); tsSave(); tsRender(true); return; }
+    if (e.target.closest("[data-ts-back]")) { TS.step = Math.max(0, TS.step - 1); TS.say = ""; tsSave(); tsRender(true); return; }
+    if (e.target.closest("[data-ts-again]")) { TS.ans = []; TS.step = -1; TS.say = ""; TS.pose = ["wave", "peniWave"]; TS.seed = 1 + Math.floor(Math.random() * 9973); tsSave(); tsRender(); return; }
+    if (e.target.closest("[data-ts-make]")) {
+      MK.ch = TS_CHARMS[tsScores().type].filter(function (c) { return CH_BY[c]; }).slice(0, MYO_MAX);
+      MK.say = t("ts_from_test");
+      mkSave();
+      location.hash = "#make";
+      return;
+    }
+    if (e.target.closest("[data-ts-copy]")) {
+      var sc = tsScores();
+      copyText(t("ts_share", { r: t("ts_r_" + sc.type + "_h"), pct: t("ts_pct", { p: sc.peni, m: 100 - sc.peni }) }) + " https://minisearte.com/#test");
+      return;
+    }
+    b = e.target.closest("[data-ts-save]");
+    if (b) {
+      b.disabled = true;
+      tsPicture().then(function (blob) {
+        b.disabled = false;
+        if (!blob) return;
+        var url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = "minise-cat-test.png";
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { a.remove(); URL.revokeObjectURL(url); }, 4000);
+        toast(t("ts_saved"), "peniSparkle");
+      }).catch(function () { b.disabled = false; });
+    }
+  });
 
   /* Gift finder (#gift): four little questions, then Mumi & Peni open a gift box with matching pieces
      from the catalogue (scored by type, tags, initials and price). */
@@ -3084,7 +3261,7 @@
       "<div><h4>" + esc(t("footer_shop")) + '</h4><ul><li><a href="#make">' + esc(t("nav_make")) + "</a></li><li><a href=\"#italian\">" + esc(t("nav_italian")) + "</a></li>" + ["locket", "bracelet", "necklace", "set", "earrings", "accessory"].map(function (ty) {
         return '<li><a href="#shop-' + ty + '">' + esc(t("type_" + ty)) + "</a></li>";
       }).join("") + "</ul></div>" +
-      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#cats">' + esc(t("nav_cats")) + '</a></li><li><a href="#gift">' + esc(t("gf_link")) + '</a></li><li><a href="#note">' + esc(t("nt_link")) + '</a></li><li><a href="#wish">' + esc(t("wish_eyebrow")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
+      "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#cats">' + esc(t("nav_cats")) + '</a></li><li><a href="#test">' + esc(t("ts_link")) + '</a></li><li><a href="#gift">' + esc(t("gf_link")) + '</a></li><li><a href="#note">' + esc(t("nt_link")) + '</a></li><li><a href="#wish">' + esc(t("wish_eyebrow")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
       "<div><h4>" + esc(t("footer_follow")) + '</h4><ul><li><a href="' + FB + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + IG + '" target="_blank" rel="noopener">@minise.arte</a></li><li><a href="https://www.instagram.com/minise.studio/" target="_blank" rel="noopener">@minise.studio</a></li><li><a href="https://www.instagram.com/minise.au/" target="_blank" rel="noopener">@minise.au</a></li><li><a href="https://miniseau.com" target="_blank" rel="noopener">miniseau.com</a></li><li><a href="https://linktr.ee/Miniseofficial" target="_blank" rel="noopener">Linktree</a></li></ul></div></div>' +
       '<div class="foot-base"><span>© 2026 Minise Arte · ມິນິເຊ່ ອາຕ໌</span><span>' + esc(t("footer_copy")) + "</span></div></div>";
   }
@@ -3114,6 +3291,7 @@
     else if (h === "terms") html = legalPage("tm", 10, "paint");
     else if (h === "mumi" || h === "peni") html = catPage(h);
     else if (h === "cats") html = worldPage();
+    else if (h === "test") html = testPage();
     else if (h === "gift") html = giftPage();
     else if (h === "note") html = notePage();
     else if (h === "wish") html = wishPage();
@@ -3145,7 +3323,7 @@
 
   // the browser tab title and the page description follow the page you are on
   function setMeta(h) {
-    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), italian: t("it_h"), cats: t("wl_h"), gift: t("gf_h"), note: t("nt_h"), wish: t("wish_h") };
+    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), italian: t("it_h"), cats: t("wl_h"), test: t("ts_h"), gift: t("gf_h"), note: t("nt_h"), wish: t("wish_h") };
     var title = "Minise Arte · " + t("footer_tag").replace(/\.$/, ""), desc = t("hero_lead");
     if (S) { title = S.p.n + " · Minise Arte"; desc = (describe(S.p, lang) || describe(S.p, "en") || desc).slice(0, 155); }
     else if (h.indexOf("shop") === 0 || h.indexOf("c-") === 0) title = shopTitle() + " · Minise Arte";
@@ -3153,6 +3331,7 @@
     if (h === "mumi") desc = t("mumi_lead");
     if (h === "peni") desc = t("pni_lead");
     if (h === "cats") desc = t("wl_lead");
+    if (h === "test") desc = t("ts_lead");
     if (h === "gift") desc = t("gf_lead");
     if (h === "note") desc = t("nt_lead");
     if (h === "make") desc = t("mk_lead");

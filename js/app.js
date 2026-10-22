@@ -1495,7 +1495,7 @@
     MK.ch.forEach(function (code, i) {
       var pt = chainAt(MK_SLOTS[i]);
       rings += '<path d="M' + pt[0].toFixed(1) + " " + pt[1].toFixed(1) + " l0 12\" stroke=\"#8a93a3\" stroke-width=\"3\"/><circle cx=\"" + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="4.5" fill="none" stroke="#8a93a3" stroke-width="2.5"/>';
-      hang += '<span class="mk-hang" style="left:' + (pt[0] / 360 * 100).toFixed(2) + "%;top:" + ((pt[1] + 5) / 230 * 100).toFixed(2) + '%">' + charmImg(code) + "</span>";
+      hang += '<span class="mk-hang" style="left:' + (pt[0] / 360 * 100).toFixed(2) + "%;top:" + ((pt[1] + 1) / 230 * 100).toFixed(2) + '%">' + charmImg(code) + "</span>";
     });
     var chain = "M24 50 C96 176 264 176 336 50";
     return '<svg class="mk-chain" viewBox="0 0 360 230" aria-hidden="true">' +

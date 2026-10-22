@@ -556,3 +556,11 @@ html[lang="lo"] .legend { letter-spacing: 0; text-transform: none; font-size: 0.
 .ch-pic { display: grid; justify-items: center; gap: 2px; }
 .ch-pic span { display: block; width: 56px; height: 56px; border-radius: 10px; border: 2px solid var(--line, #c9cfdc); background-repeat: no-repeat; }
 .ch-pic b { font-size: 0.85rem; }
+
+/* the note card from an order, ready to print */
+.nc-print { display: grid; gap: 10px; justify-items: start; }
+.nc-print-img { width: min(100%, 320px); height: auto; border-radius: 10px; border: 1px solid var(--line); box-shadow: 0 10px 24px -16px rgba(20, 30, 60, 0.5); }
+.nc-printout img { display: block; width: 100mm; height: auto; margin: 0 auto; }
+/* customer photos carry the number the order details use ("Photos: #1 #2") */
+.photo-grid a { position: relative; display: block; }
+.photo-grid .ph-n { position: absolute; left: 6px; top: 6px; padding: 0 7px; border-radius: 999px; background: rgba(20, 30, 60, 0.82); color: #fff; font-size: 0.85rem; line-height: 1.6; }

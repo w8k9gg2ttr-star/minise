@@ -158,6 +158,12 @@
     sec_items: ["Items", "ລາຍການສິນຄ້າ"],
     sec_details: ["Details", "ລາຍລະອຽດ"],
     sec_note: ["Note", "ໝາຍເຫດ"],
+    sec_card: ["Note card · ready to print", "ບັດໂນ້ດ · ພ້ອມພິມ"],
+    nc_badge: ["✉ note card to print", "✉ ມີບັດໂນ້ດຕ້ອງພິມ"],
+    nc_print: ["Print the card", "ພິມບັດ"],
+    nc_download: ["Download picture", "ດາວໂຫຼດຮູບ"],
+    nc_drawing: ["Drawing the card…", "ກຳລັງແຕ້ມບັດ…"],
+    nc_hint: ["Prints 10 × 12.5 cm. The picture is 1080 × 1350, the same card the customer saw.", "ພິມຂະໜາດ 10 × 12.5 cm. ຮູບ 1080 × 1350 ຄືກັບບັດທີ່ລູກຄ້າເຫັນ"],
     sec_history: ["History", "ປະຫວັດ"],
     sec_order: ["Order", "ອໍເດີ"],
     sec_money: ["Money", "ການເງິນ"],
@@ -724,7 +730,7 @@
       var T = window.MINISE_T || {};
       LAO_KEYS.forEach(function (k) { if (T[k] && T[k][0] && T[k][1]) laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       LAO_PROV.forEach(function (x) { laoBase[x[0].toLowerCase()] = x[1]; });
-      Object.keys(T).forEach(function (k) { if (/^(bc|sh|isz|ip)_/.test(k) || k === "letter" || k === "charm" || k === "shape" || k === "it_size" || k === "it_wrist") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
+      Object.keys(T).forEach(function (k) { if (/^(bc|sh|isz|ip)_/.test(k) || k === "letter" || k === "charm" || k === "shape" || k === "it_size" || k === "it_wrist" || k === "ph_label") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       ((window.MINISE_CHARMS || {}).list || []).forEach(function (c) { laoBase[c[4].toLowerCase()] = c[5]; });
       ((window.MINISE_ITALIAN || {}).list || []).forEach(function (c) { laoBase[c[2].toLowerCase()] = c[3]; });
       laoBase["district"] = "ເມືອງ";
@@ -788,6 +794,10 @@
       }
       var c = list[code], tr = c && trays[code.charAt(0).toLowerCase()];
       if (!tr) return "";
+      if (tr.studio) {
+        var inTray = C.list.filter(function (x) { return x[0].charAt(0) === code.charAt(0); }), k = inTray.indexOf(c), rr = Math.ceil(inTray.length / tr.cols);
+        return '<span class="ch-pic" title="' + esc(c[4]) + '"><span style="background-image:url(' + tr.studio + ");background-size:" + tr.cols * 100 + "% auto;background-position:" + (k % tr.cols / (tr.cols - 1) * 100).toFixed(2) + "% " + (rr > 1 ? (Math.floor(k / tr.cols) / (rr - 1) * 100).toFixed(2) : 0) + '%"></span><b>' + code + "</b></span>";
+      }
       var sz = c[3], l = Math.max(0, Math.min(tr.w - sz, c[1] - sz / 2)), tp = Math.max(0, Math.min(tr.h - sz, c[2] - sz / 2));
       return '<span class="ch-pic" title="' + esc(c[4]) + '"><span style="background-image:url(' + tr.img + ");background-size:" + (tr.w / sz * 100).toFixed(2) + "% auto;background-position:" + (l / (tr.w - sz) * 100).toFixed(2) + "% " + (tp / (tr.h - sz) * 100).toFixed(2) + '%"></span><b>' + code + "</b></span>";
     }).join("") + "</span>";
@@ -1226,9 +1236,9 @@
     });
   }
   // customer photos live in a private folder: ask for links that work for one hour
-  function photoGrid(urls) {
+  function custPhotoGrid(urls) {
     return '<div class="photo-grid">' + urls.map(function (u, i) {
-      return '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + esc(a("sec_photos", { n: i + 1 })) + '" loading="lazy"></a>';
+      return '<a href="' + esc(u) + '" target="_blank" rel="noopener"><img src="' + esc(u) + '" alt="' + esc(a("sec_photos", { n: i + 1 })) + '" loading="lazy"><span class="ph-n">#' + (i + 1) + "</span></a>";
     }).join("") + '</div><p class="hint">' + esc(a("photos_hint")) + "</p>";
   }
   function showPhotos(id) {
@@ -1244,11 +1254,65 @@
       PHOTOS[id] = urls;
       setTimeout(function () { delete PHOTOS[id]; }, 55 * 60 * 1000);
       var b = document.getElementById("photoBox");
-      if (b) b.innerHTML = photoGrid(urls);
+      if (b) b.innerHTML = custPhotoGrid(urls);
     }).catch(function () {
       var b = document.getElementById("photoBox");
       if (b) b.innerHTML = '<p class="alert warn">' + esc(a("photos_fail")) + "</p>";
     });
+  }
+  /* the note card in an order note ("Note card (Lucky clover):" then the card's lines), read back so the admin can
+     draw the very card the customer made (js/notecard.js) */
+  var NCARD = {};
+  function noteCardOf(o) {
+    var T = window.MINISE_T || {}, N = window.MINISE_NOTE;
+    if (!N || !o || !o.note) return null;
+    var heads = (T.nc_order || ["Note card"]).slice(0, 3), lines = String(o.note).split("\n");
+    for (var i = 0; i < lines.length; i++) {
+      var m = /^(.+?) \((.+)\):\s*$/.exec(lines[i]);
+      if (!m || heads.indexOf(m[1]) < 0) continue;
+      var paper = Object.keys(N.PAPERS).filter(function (p) { return (T["nt_p_" + p] || []).indexOf(m[2]) > -1; })[0] || "tea";
+      var body = [];
+      for (var j = i + 1; j < lines.length && lines[j].trim() !== ""; j++) body.push(lines[j]);
+      var names = {};
+      Object.keys(N.STK).forEach(function (k) { (T["nt_st_" + k] || []).forEach(function (nm) { names[nm] = k; }); });
+      var st = [];
+      if (body.length > 1) {
+        var bits = body[body.length - 1].split(" · ");
+        if (bits.every(function (b) { return names[b]; })) { st = bits.map(function (b) { return names[b]; }); body.pop(); }
+      }
+      var toL = T.nt_to || ["To"], fromL = T.nt_from || ["From"];
+      var card = { paper: paper, st: st, to: "", from: "", toLabel: toL[0], fromLabel: fromL[0] };
+      var lab = function (line, labels) { for (var k = 0; k < labels.length; k++) if (line.indexOf(labels[k] + ": ") === 0) return [labels[k], line.slice(labels[k].length + 2)]; return null; };
+      var hit = body.length > 1 ? lab(body[0], toL) : null;
+      if (hit) { card.toLabel = hit[0]; card.to = hit[1]; body.shift(); }
+      hit = body.length > 1 ? lab(body[body.length - 1], fromL) : null;
+      if (hit) { card.fromLabel = hit[0]; card.from = hit[1]; body.pop(); }
+      card.msg = body.join("\n").trim();
+      card.lang = /[຀-໿]/.test(card.msg) ? "lo" : /[㐀-鿿]/.test(card.msg) ? "zh" : "en";
+      return card.msg ? card : null;
+    }
+    return null;
+  }
+  function noteCardBox(o) {
+    var url = NCARD[o.id];
+    return url ? '<img class="nc-print-img" src="' + url + '" alt="' + esc(a("sec_card")) + '"><div class="grp"><button class="btn sm" type="button" data-ncprint="' + esc(o.id) + '">' + icon("printer") + esc(a("nc_print")) + '</button><a class="btn ghost sm" download="note-card-' + esc(o.id) + '.png" href="' + url + '">' + icon("download") + esc(a("nc_download")) + '</a></div><p class="hint">' + esc(a("nc_hint")) + "</p>"
+      : '<p class="hint">' + esc(a("nc_drawing")) + "</p>";
+  }
+  function showNoteCard(o) {
+    var card = noteCardOf(o);
+    if (!card || NCARD[o.id]) return;
+    window.MINISE_NOTE.draw(card).then(function (c) {
+      NCARD[o.id] = c.toDataURL("image/png");
+      var b = document.getElementById("ncBox");
+      if (b && b.getAttribute("data-id") === o.id) b.innerHTML = noteCardBox(o);
+    });
+  }
+  function printNoteCard(id) {
+    var area = document.getElementById("printArea");
+    if (!NCARD[id]) return;
+    area.innerHTML = '<div class="nc-printout"><img src="' + NCARD[id] + '" alt=""></div>';
+    var im = area.querySelector("img"), fire = function () { setTimeout(function () { window.print(); }, 50); };
+    if (im.complete) fire(); else im.onload = fire;
   }
   function saveOrdersToFolder() {
     if (!dir) return Promise.resolve();
@@ -1569,7 +1633,7 @@
           return '<tr class="click' + (SEL[o.id] ? " sel" : "") + '" data-open="' + esc(o.id) + '"><td class="cb"><input type="checkbox" data-sel="' + esc(o.id) + '"' + (SEL[o.id] ? " checked" : "") + ' aria-label="' + esc(o.id) + '"></td>' +
             '<td><span class="oid">' + esc(o.id) + "</span><small>" + esc(fmtDate(o.date)) + " · " + esc(a("m_" + o.method)) + (o.web ? " · " + esc(a("web_badge")) : "") + "</small></td>" +
             "<td><b>" + esc(o.name || "—") + "</b><small>" + esc(o.phone) + "</small></td>" +
-            "<td>" + esc(first) + "<small>" + esc(sub) + "</small>" + (o.items.length === 1 ? loLine(laoItem(o.items[0])) : "") + (o.photos.length ? '<small class="ph-badge">' + esc(a("photos_badge", { n: o.photos.length })) + "</small>" : "") + "</td>" +
+            "<td>" + esc(first) + "<small>" + esc(sub) + "</small>" + (o.items.length === 1 ? loLine(laoItem(o.items[0])) : "") + (o.photos.length ? '<small class="ph-badge">' + esc(a("photos_badge", { n: o.photos.length })) + "</small>" : "") + (noteCardOf(o) ? '<small class="ph-badge">' + esc(a("nc_badge")) + "</small>" : "") + "</td>" +
             '<td class="num"><b>' + esc(money(orderTotal(o))) + "</b>" + (hasUnknown(o) ? "<small>" + esc(a("to_price")) + "</small>" : "") + "</td>" +
             "<td>" + payPill(o.pay) + "</td><td>" + stPill(o.stage) + "</td><td>" + duePill(o) + "</td></tr>";
         }).join("") + "</tbody></table>";
@@ -1653,12 +1717,14 @@
       (hasUnknown(o) ? '<p class="hint">' + esc(a("plus_unknown")) + "</p>" : "") + "</div></section>" +
       '<section class="dr-sec"><h3>' + esc(a("sec_details")) + '</h3><dl class="kv"><dt>' + esc(a("f_channel")) + "</dt><dd>" + esc(a("m_" + o.method)) + "</dd><dt>" + esc(a("f_due")) + "</dt><dd>" + esc(o.due ? fmtDate(o.due) : "—") + "</dd><dt>" + esc(a("f_tracking")) + "</dt><dd>" + esc(o.tracking || "—") + "</dd>" + (o.ref ? "<dt>" + esc(a("f_ref")) + "</dt><dd>" + esc(o.ref) + "</dd>" : "") + "<dt>" + esc(a("f_created")) + "</dt><dd>" + esc(fmtWhen(o.created)) + "</dd></dl></section>" +
       (o.slip ? '<section class="dr-sec"><h3>' + esc(a("sec_slip")) + '</h3><div id="slipBox">' + (SLIPS[o.id] ? '<img class="slip-img" src="' + SLIPS[o.id] + '" alt="' + esc(a("sec_slip")) + '">' : '<button class="btn ghost sm" type="button" data-viewslip="' + esc(o.id) + '">' + icon("money") + esc(a("slip_view")) + "</button>") + "</div></section>" : "") +
-      (o.photos.length ? '<section class="dr-sec"><h3>' + esc(a("sec_photos", { n: o.photos.length })) + '</h3><div id="photoBox">' + (PHOTOS[o.id] ? photoGrid(PHOTOS[o.id]) : '<button class="btn ghost sm" type="button" data-viewphotos="' + esc(o.id) + '">' + icon("image") + esc(a("photos_view")) + "</button>") + "</div></section>" : "") +
+      (o.photos.length ? '<section class="dr-sec"><h3>' + esc(a("sec_photos", { n: o.photos.length })) + '</h3><div id="photoBox">' + (PHOTOS[o.id] ? custPhotoGrid(PHOTOS[o.id]) : '<button class="btn ghost sm" type="button" data-viewphotos="' + esc(o.id) + '">' + icon("image") + esc(a("photos_view")) + "</button>") + "</div></section>" : "") +
+      (noteCardOf(o) ? '<section class="dr-sec"><h3>' + esc(a("sec_card")) + '</h3><div class="nc-print" id="ncBox" data-id="' + esc(o.id) + '">' + noteCardBox(o) + "</div></section>" : "") +
       (o.note ? '<section class="dr-sec"><h3>' + esc(a("sec_note")) + '</h3><p class="note-box">' + esc(o.note) + "</p></section>" : "") +
       (hist ? '<section class="dr-sec"><h3>' + esc(a("sec_history")) + '</h3><ul class="hist">' + hist + "</ul></section>" : "") +
       "</div>";
     if (DR.ask) { var ti = document.getElementById("trackIn"); if (ti) ti.focus(); }
     if (ONLINE && o.photos.length && !PHOTOS[o.id] && !PHOTOS_BUSY[o.id]) showPhotos(o.id);
+    showNoteCard(o);
   }
   function drawerAction(act) {
     var o = orderById(DR.id); if (!o) return;
@@ -2651,6 +2717,7 @@
     if (e.target.closest("#mfaOff")) { mfaOff(); return; }
     if ((el = e.target.closest("[data-viewslip]"))) { showSlip(el.getAttribute("data-viewslip")); return; }
     if ((el = e.target.closest("[data-viewphotos]"))) { showPhotos(el.getAttribute("data-viewphotos")); return; }
+    if ((el = e.target.closest("[data-ncprint]"))) { printNoteCard(el.getAttribute("data-ncprint")); return; }
     if (e.target.closest("[data-closedlg]")) { closeDialog(); return; }
     if (e.target.closest("[data-closedr]") || e.target.id === "scrim") { closeDrawer(); return; }
     if ((el = e.target.closest("[data-period]"))) { setPreset(el.getAttribute("data-period")); render(); return; }

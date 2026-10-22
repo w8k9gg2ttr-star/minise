@@ -829,7 +829,9 @@ html[lang="lo"] .mumi-copy h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem); 
 .mk-hang:nth-of-type(2) { animation-delay: -0.9s; }
 .mk-hang:nth-of-type(3) { animation-delay: -1.7s; }
 @keyframes mkSwing { 0%, 100% { transform: translateX(-50%) rotate(-5deg); } 50% { transform: translateX(-50%) rotate(5deg); } }
-.mk-hang .ch-img { display: block; width: 100%; aspect-ratio: 1; border-radius: 50%; border: 3px solid #b3b9c4; box-shadow: 0 6px 12px -6px rgba(20, 30, 60, 0.55); }
+/* the studio pictures are on white: multiplied onto the card, the white disappears and the charm hangs on its own */
+.mk-hang { mix-blend-mode: multiply; }
+.mk-hang .ch-img { display: block; width: 100%; aspect-ratio: 1; transform: scale(1.18); transform-origin: 50% 8%; }
 .mk-peni { position: relative; display: flex; align-items: flex-end; gap: 10px; margin-top: 10px; }
 .mk-peni-kitty { flex: none; width: clamp(78px, 9vw, 104px); margin-bottom: -4px; }
 .mk-say { position: relative; flex: 1; min-width: 0; margin-bottom: 18px; padding: 8px 13px; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; font-size: 1.05rem; line-height: 1.3; }
@@ -1651,3 +1653,33 @@ html[lang="lo"] .gf-head h1 { font-size: clamp(2rem, 1.4rem + 3vw, 3.2rem); }
   .it-lock div { justify-items: center; }
 }
 @media (max-width: 900px) { .it-stage { max-width: 470px; margin-inline: auto; } }
+
+/* ---------- customer photos: product page, bag and checkout ---------- */
+.ph-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-tile { position: relative; display: grid; place-items: center; width: 84px; height: 84px; flex: none; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--card); overflow: hidden; }
+.ph-tile img { width: 100%; height: 100%; object-fit: cover; }
+.ph-tile button { position: absolute; right: 4px; top: 4px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: rgba(36, 57, 106, 0.88); color: #fff; font-size: 0.85rem; }
+.ph-add { border-style: dashed; background: var(--paper); color: var(--ink); cursor: pointer; padding: 6px; text-align: center; font-size: 0.92rem; line-height: 1.2; }
+.ph-add:hover { background: var(--sky); }
+.ph-add:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+.ph-field .ph-row { margin-top: 4px; }
+.line-ph { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.line .line-ph-img { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 6px; object-fit: cover; }
+.ph-blocks { display: grid; gap: 12px; }
+.ph-block { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: start; padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); }
+.ph-block > img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; }
+.ph-block-m { display: grid; gap: 8px; min-width: 0; }
+.ph-block-h b { font-weight: 400; font-size: 1.1rem; }
+.ph-block-h span { color: var(--ink-2); }
+.ph-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.ph-slot { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.ph-slot-t { display: flex; gap: 6px; align-items: center; font-size: 0.95rem; line-height: 1.2; }
+.ph-slot-t b { display: inline-grid; place-items: center; min-width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--ink); color: var(--on-btn); font-weight: 400; font-size: 0.8rem; }
+@media (max-width: 420px) { .ph-tile { width: 74px; height: 74px; } .ph-block { grid-template-columns: 1fr; } .ph-block > img { display: none; } .ph-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* the checkout note card shows its stickers where the printed card has them */
+.nc-st { position: absolute; z-index: 2; width: 17%; filter: drop-shadow(0 2px 3px rgba(20, 30, 60, 0.25)); pointer-events: none; }
+.nc-st svg { display: block; width: 100%; height: auto; }
+.nc-st1 { left: 2%; top: 2%; transform: rotate(-17deg); }
+.nc-st2 { left: 80%; top: 4%; transform: rotate(14deg); }
+.nc-st3 { left: 2%; top: 81%; transform: rotate(11deg); }
+.nc-mini .nc-to { padding-left: 16%; }

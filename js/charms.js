@@ -1,12 +1,14 @@
 /* Minise Arte · the charms customers can add to a Make-your-own bracelet.
    Each charm is a square cut from one of the three tray photos in images/charms/:
    [code, centre x, centre y, square size (photo pixels), English, Lao, Chinese].
-   The code (A1, B12 …) is what the team uses to find the charm in the tray. */
+   The code (A1, B12 …) is what the team uses to find the charm in the tray.
+   "studio" is the same charms cut out of the photo and lit on a white backdrop, one per 160 × 160 square,
+   "cols" to a row, in the order of the list below; the shop shows those. */
 window.MINISE_CHARMS = {
   trays: [
-    { id: "a", img: "images/charms/tray-a.jpg", w: 1086, h: 400, name: ["Lucky & cute", "ນຳໂຊກ ແລະ ນ່າຮັກ", "幸运可爱"] },
-    { id: "b", img: "images/charms/tray-b.jpg", w: 795, h: 680, name: ["Pets", "ສັດລ້ຽງ", "宠物"] },
-    { id: "c", img: "images/charms/tray-c.jpg", w: 1040, h: 420, name: ["Hearts, words & crystals", "ຫົວໃຈ, ຂໍ້ຄວາມ ແລະ ຄຣິສຕັນ", "爱心、文字与水晶"] }
+    { id: "a", img: "images/charms/tray-a.jpg", studio: "images/charms/studio-a.jpg", cols: 8, w: 1086, h: 400, name: ["Lucky & cute", "ນຳໂຊກ ແລະ ນ່າຮັກ", "幸运可爱"] },
+    { id: "b", img: "images/charms/tray-b.jpg", studio: "images/charms/studio-b.jpg", cols: 8, w: 795, h: 680, name: ["Pets", "ສັດລ້ຽງ", "宠物"] },
+    { id: "c", img: "images/charms/tray-c.jpg", studio: "images/charms/studio-c.jpg", cols: 8, w: 1040, h: 420, name: ["Hearts, words & crystals", "ຫົວໃຈ, ຂໍ້ຄວາມ ແລະ ຄຣິສຕັນ", "爱心、文字与水晶"] }
   ],
   list: [
     ["A1", 86, 124, 130, "Four-leaf clover", "ໂຄລເວີ 4 ໃບ", "四叶草"],
@@ -110,10 +112,11 @@ window.MINISE_CHARMS = {
 };
 
 /* The Italian charm links customers can add to an Italian charm bracelet (#italian).
-   images/charms/italian.jpg holds each charm straightened in its own 200 × 200 square, 5 to a row, in this order:
+   images/charms/italian-studio.jpg holds each charm straightened, cut out and lit on white in its own 200 × 200 square,
+   5 to a row, in this order:
    [code, takes two links (1) or one (0), English, Lao, Chinese]. */
 window.MINISE_ITALIAN = {
-  img: "images/charms/italian.jpg", w: 1000, h: 600, cell: 200, cols: 5,
+  img: "images/charms/italian-studio.jpg", w: 1000, h: 600, cell: 200, cols: 5,
   list: [
     ["I1", 0, "Blue crystal heart", "ຫົວໃຈຄຣິສຕັນ ສີຟ້າ", "蓝色水晶心"],
     ["I2", 0, "Pink crystal heart", "ຫົວໃຈຄຣິສຕັນ ສີບົວ", "粉色水晶心"],

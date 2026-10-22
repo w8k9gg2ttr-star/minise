@@ -432,7 +432,7 @@
   function product(slug) {
     var p = bySlug[slug];
     if (!p) return '<section class="wrap page-head">' + kitty("search", "empty-kitty") + "<h1>" + esc(t("not_found")) + '</h1><p><a class="btn" href="#shop">' + esc(t("back_shop")) + "</a></p></section>";
-    S = { p: p, img: 0, opt: 0, addN: 0, qty: 1, col: "" };
+    S = { p: p, img: 0, opt: 0, addN: 0, qty: 1, col: "", phs: [] };
     var thumbs = p.img.length > 1 ? '<div class="thumbs">' + p.img.map(function (src, i) {
       return '<button type="button" data-thumb="' + i + '" aria-pressed="' + (i === 0) + '" aria-label="' + esc(t("photo_n", { n: i + 1 })) + '">' + img(src, "") + "</button>";
     }).join("") + "</div>" : "";
@@ -449,7 +449,7 @@
       return '<label class="opt"><input type="radio" name="col" value="' + c + '"' + (i === 0 ? " checked" : "") + "><span>" + esc(t(c)) + "</span></label>";
     }).join("") + "</div></div>" : "";
     if (p.c.length > 1 && !optIsColour) S.col = p.c[0];
-    var photo = p.ph ? '<p class="notice">📷 ' + esc(t("photos_later")) + "</p>" : "";
+    var photo = p.ph ? '<div class="field ph-field"><span class="lbl">📷 ' + esc(t("photos")) + '</span><span class="hint">' + esc(t("photos_pdp_h", { n: PH_ITEM })) + '</span><div class="ph-row" id="pdPhotos">' + pdPhotosHTML() + "</div></div>" : "";
     var related = P.filter(function (x) { return x !== p && x.t[0] === p.t[0]; })
       .sort(function (a, b) {
         var sa = a.g.some(function (g) { return p.g.indexOf(g) > -1; }) ? 1 : 0, sb = b.g.some(function (g) { return p.g.indexOf(g) > -1; }) ? 1 : 0;
@@ -488,12 +488,12 @@
     var ini = document.getElementById("ini");
     var note = document.getElementById("pnote");
     return {
-      s: p.s, opt: S.opt, addN: S.addN, qty: S.qty, col: S.col,
+      s: p.s, opt: S.opt, addN: S.addN, qty: S.qty, col: S.col, phs: p.ph ? S.phs.slice() : undefined,
       ini: ini ? ini.value.trim().toUpperCase() : "",
       note: note ? note.value.trim() : ""
     };
   }
-  function lineDetails(p, it) {
+  function lineDetails(p, it, nums) {
     var d = [];
     if (p.o.length > 1 || (p.o.length === 1 && p.o[0].en)) d.push(optName(p.o[it.opt]));
     if (it.myo && it.shape) d.push(t("shape") + ": " + t("sh_" + it.shape));
@@ -501,7 +501,8 @@
     if (it.ini) d.push((it.myo ? t("letter") : t("initials")) + ": " + it.ini);
     if (p.add && it.addN && !it.myo) d.push(optName(p.add) + " × " + it.addN);
     if (it.myo && it.ch) it.ch.forEach(function (c) { d.push(t("charm") + " " + c + ": " + charmName(c)); });
-    if (it.it) d.push.apply(d, itDetailLines(it, +p.free_pic || 0));
+    if (it.it) d.push.apply(d, itDetailLines(it, +p.free_pic || 0, nums));
+    else if (nums && nums.some(Boolean)) d.push(t("ph_label") + ": " + nums.filter(Boolean).map(function (n) { return "#" + n; }).join(" "));
     if (it.note) d.push("“" + it.note + "”");
     return d;
   }
@@ -544,6 +545,7 @@
       var d = lineDetails(p, it);
       return '<div class="line">' + img(p.img[0], p.n) + '<div class="info"><b>' + esc(p.n) + "</b>" +
         (d.length ? "<small>" + esc(d.join(" · ")) + "</small>" : "") +
+        (editable && p.ph ? (function () { var ph = itemPhotos(it).filter(Boolean); return ph.length ? '<span class="line-ph">' + ph.map(function (id) { return phImg(id, "line-ph-img"); }).join("") + "</span>" : ""; })() : "") +
         '<div class="row">' + (editable ?
           '<div class="stepper"><button type="button" data-bagstep="' + idx + '" data-d="-1" aria-label="' + esc(t("less")) + '">−</button><output>' + it.qty + '</output><button type="button" data-bagstep="' + idx + '" data-d="1" aria-label="' + esc(t("more")) + '">+</button></div>'
           : '<span class="tn">× ' + it.qty + "</span>") +
@@ -607,7 +609,126 @@
   ];
   var VIAS = ["whatsapp", "phone", "facebook", "instagram"];
   var DELS = ["d_pick", "d_anou", "d_mix", "d_houng", "d_abroad"];
-  var CO = { slipImg: null, slipUrl: "", photos: [], sending: false, done: null, code: null };
+  /* ---------- customer photos ----------
+     Photos for a piece wait in this browser (IndexedDB) until the order is sent, then go to Minise's private storage.
+     A bag item keeps their ids: it.phs for a piece, link.ph for each picture charm or locket of an Italian bracelet. */
+  var PH_MAX = 12, PH_ITEM = 6, PH_MEM = {}, PH_URL = {}, PHDB = null;
+  function phDb() {
+    if (!PHDB) PHDB = new Promise(function (res) {
+      try {
+        var r = indexedDB.open("minise-photos", 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore("p"); };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = r.onblocked = function () { res(null); };
+      } catch (e) { res(null); }
+    });
+    return PHDB;
+  }
+  function phStore(mode, fn) {
+    return phDb().then(function (db) {
+      if (!db) return null;
+      return new Promise(function (res) {
+        try {
+          var tx = db.transaction("p", mode), q = fn(tx.objectStore("p"));
+          tx.oncomplete = function () { res(q && q.result); };
+          tx.onerror = tx.onabort = function () { res(null); };
+        } catch (e) { res(null); }
+      });
+    });
+  }
+  // a chosen file → a 1600 px JPEG kept here; resolves with its id (or null when it isn't a picture)
+  function phAdd(file) {
+    return readImageFile(file).then(function (r) {
+      if (!r) return null;
+      return new Promise(function (res) { shrink(r.img, 1600).toBlob(res, "image/jpeg", 0.86); }).then(function (blob) {
+        if (!blob) return null;
+        var id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        PH_MEM[id] = blob; PH_URL[id] = URL.createObjectURL(blob);
+        return phStore("readwrite", function (s) { return s.put(blob, id); }).then(function () { return id; });
+      });
+    });
+  }
+  function phAddAll(files, room) {
+    var ids = [];
+    return Array.prototype.slice.call(files || [], 0, Math.max(0, room)).reduce(function (p, f) {
+      return p.then(function () { return phAdd(f).then(function (id) { if (id) ids.push(id); }); });
+    }, Promise.resolve()).then(function () { return ids; });
+  }
+  function phBlob(id) {
+    if (PH_MEM[id]) return Promise.resolve(PH_MEM[id]);
+    return phStore("readonly", function (s) { return s.get(id); }).then(function (b) {
+      if (b) { PH_MEM[id] = b; PH_URL[id] = URL.createObjectURL(b); }
+      return b || null;
+    });
+  }
+  function phImg(id, cls) { return '<img class="' + (cls || "ph-img") + '" data-ph="' + id + '"' + (PH_URL[id] ? ' src="' + PH_URL[id] + '"' : "") + ' alt="">'; }
+  function phTile(id, rm) { return '<span class="ph-tile">' + phImg(id) + '<button type="button" ' + rm + ' aria-label="' + esc(t("remove")) + '">✕</button></span>'; }
+  function phAddTile(attr, multi) { return '<label class="ph-tile ph-add"><span>' + esc(t("photos_add_s")) + '</span><input type="file" accept="image/*"' + (multi ? " multiple" : "") + ' class="sr" ' + attr + "></label>"; }
+  // the photo ids a bag item holds, in the order they are numbered for the shop ("" = a picture charm still waiting)
+  function itemPhotos(it) {
+    if (it.it) return (it.links || []).filter(function (l) { return l.k === "pic" || l.k === "lock"; }).map(function (l) { return l.ph || ""; });
+    return (it.phs || []).slice();
+  }
+  function usedPhotoIds() {
+    var ids = [];
+    bag.forEach(function (it) { itemPhotos(it).forEach(function (id) { if (id) ids.push(id); }); });
+    if (IT) IT.links.forEach(function (l) { if (l.ph) ids.push(l.ph); });
+    if (S && S.phs) ids = ids.concat(S.phs);
+    return ids;
+  }
+  // after a reload the photos come back from storage; the ones nothing uses any more are deleted
+  function phWake() {
+    var ids = usedPhotoIds().filter(function (id) { return !PH_URL[id]; });
+    return Promise.all(ids.map(phBlob)).then(function () {
+      document.querySelectorAll("img[data-ph]").forEach(function (im) { var u = PH_URL[im.getAttribute("data-ph")]; if (u && !im.getAttribute("src")) im.src = u; });
+      if (ids.length && current === "italian") itUpdate(true);
+      return phStore("readonly", function (s) { return s.getAllKeys(); });
+    }).then(function (keys) {
+      var keep = usedPhotoIds();
+      (keys || []).forEach(function (k) { if (keep.indexOf(k) < 0) { phStore("readwrite", function (s) { return s.delete(k); }); if (PH_URL[k]) { URL.revokeObjectURL(PH_URL[k]); delete PH_URL[k]; delete PH_MEM[k]; } } });
+    }).catch(function () { /* photos are optional until checkout */ });
+  }
+  // product page: photos picked before adding to the bag
+  function pdPhotosHTML() {
+    return S.phs.map(function (id, i) { return phTile(id, 'data-ph-pdrm="' + i + '"'); }).join("") + (S.phs.length < PH_ITEM ? phAddTile("data-ph-pd", true) : "");
+  }
+  // checkout: one block per piece that needs photos; an Italian bracelet asks for one per picture charm and locket
+  function phStepHTML() {
+    return bag.map(function (it, idx) {
+      var p = bySlug[it.s];
+      if (!p || !p.ph) return "";
+      var body;
+      if (it.it) {
+        var k = 0;
+        body = '<div class="ph-slots">' + (it.links || []).map(function (l, li) {
+          if (l.k !== "pic" && l.k !== "lock") return "";
+          k++;
+          var lab = l.k === "lock" ? t("ip_lock") : t("ip_pic") + " · " + t("sh_" + l.sh);
+          return '<div class="ph-slot"><span class="ph-slot-t"><b class="tn">' + k + "</b>" + esc(lab) + "</span>" +
+            (l.ph ? phTile(l.ph, 'data-ph-slotrm="' + idx + ":" + li + '"') : phAddTile('data-ph-slot="' + idx + ":" + li + '"', false)) + "</div>";
+        }).join("") + "</div>";
+      } else {
+        var phs = it.phs || [];
+        body = '<div class="ph-row">' + phs.map(function (id, j) { return phTile(id, 'data-ph-itemrm="' + idx + ":" + j + '"'); }).join("") +
+          (phs.length < PH_ITEM ? phAddTile('data-ph-item="' + idx + '"', true) : "") + "</div>";
+      }
+      return '<div class="ph-block" id="coPh' + idx + 'F">' + img(p.img[0], p.n) + '<div class="ph-block-m"><p class="ph-block-h"><b>' + esc(p.n) + "</b>" +
+        (it.qty > 1 ? ' <span class="tn">× ' + it.qty + "</span>" : "") + "</p>" + body + '<span class="err" id="coPh' + idx + 'E" hidden></span></div></div>';
+    }).join("");
+  }
+  function phStepRefresh() { var b = document.getElementById("coPhotos"); if (b) b.innerHTML = phStepHTML(); }
+  // the photos in upload order (1.jpg, 2.jpg …) and, for each bag item, the numbers its photos get
+  function photoPlan() {
+    var list = [], nums = {};
+    bag.forEach(function (it, idx) {
+      var p = bySlug[it.s];
+      if (!p || !p.ph) return;
+      nums[idx] = itemPhotos(it).map(function (id) { if (!id || list.length >= PH_MAX) return 0; list.push(id); return list.length; });
+    });
+    return { list: list, nums: nums };
+  }
+
+  var CO = { slipImg: null, slipUrl: "", sending: false, done: null, code: null };
   // discount code: the database checks it and works out the discount again when the order is saved
   try { CO.code = JSON.parse(sessionStorage.getItem("minise_code") || "null"); } catch (e) { CO.code = null; }
   function setCode(c) {
@@ -747,8 +868,7 @@
       "</fieldset>";
     if (photos) {
       html += '<fieldset class="co-step">' + kitty("peniHeart", "step-kitty") + stepHead(n++, t("st_photos")) +
-        '<p class="hint">' + esc(t("photos_need")) + '</p><div class="field" id="coPhotosF"><label class="file-drop" for="coPhotos">' + esc(t("photos_add")) +
-        '<input type="file" id="coPhotos" accept="image/*" multiple class="sr"></label><div class="previews" id="coPhotosPrev">' + photoPreviews() + '</div><span class="err" id="coPhotosE" hidden></span></div></fieldset>';
+        '<p class="hint">' + esc(t("photos_need")) + '</p><div class="ph-blocks" id="coPhotos">' + phStepHTML() + '</div><span class="err" id="coPhotosE" hidden></span></fieldset>';
     }
     html += '<fieldset class="co-step">' + kitty("phone", "step-kitty") + stepHead(n++, t("st_pay")) + codeField() +
       '<div class="paybox"><div class="pay-qr"><img src="' + esc(QR) + '" alt="LAO QR" width="220" height="220"><p class="hint">' + esc(t("acct")) + ": <b>" + esc(ACCOUNT) + "</b></p></div>" +
@@ -766,11 +886,6 @@
       "</form>" +
       '<aside class="co-side"><div class="panel"><h2>' + esc(t("summary")) + "</h2>" + bagLines(false) + checkoutTotals() + "</div></aside></div></section>";
     return html;
-  }
-  function photoPreviews() {
-    return CO.photos.map(function (f, i) {
-      return '<span class="pv"><img src="' + f.url + '" alt=""><button type="button" data-unphoto="' + i + '" aria-label="' + esc(t("remove")) + '">✕</button></span>';
-    }).join("");
   }
   function refreshCheckout() {
     var del = document.getElementById("coDel");
@@ -820,7 +935,17 @@
     } else ["coProv", "coDist", "coBranch"].forEach(function (id) { setErr(id, ""); });
     if (v === "d_abroad") { chk("coCountry", fieldVal("coCountry").length >= 2, t("req")); chk("coAddr", fieldVal("coAddr").length >= 8, t("req")); }
     else setErr("coCountry", "");
-    if (needPhotos()) chk("coPhotos", CO.photos.length > 0, t("err_photos"));
+    if (needPhotos()) {
+      var phTot = 0;
+      bag.forEach(function (it, idx) {
+        var p = bySlug[it.s];
+        if (!p || !p.ph) return;
+        var list = itemPhotos(it);
+        phTot += list.filter(Boolean).length;
+        chk("coPh" + idx, it.it ? list.every(Boolean) : list.length > 0, t(it.it ? "photos_slot_need" : "photos_item_need"));
+      });
+      chk("coPhotos", phTot <= PH_MAX, t("photos_max", { n: PH_MAX }));
+    }
     var nc = document.getElementById("ncOn");
     if (nc && nc.checked) chk("ncMsg", NT.msg.trim().length > 0, t("nc_need")); else setErr("ncMsg", "");
     chk("coSlip", !!CO.slipImg, t("err_slip"));
@@ -839,32 +964,31 @@
   // customer photos go to private storage that only Minise can open. The database hands out a
   // one-hour upload key with each paid order, so nobody can upload without ordering first.
   function uploadPhotos(id, key) {
-    var list = CO.photos.slice(0, 6);
-    return Promise.all(list.map(function (f, i) {
-      return new Promise(function (res, rej) {
-        shrink(f.img, 1600).toBlob(function (blob) {
-          if (!blob) return rej(new Error("photo"));
-          var h = { apikey: SBC.key, "Content-Type": "image/jpeg", "x-upsert": "false" };
-          if (/^eyJ/.test(SBC.key)) h.Authorization = "Bearer " + SBC.key;
-          fetch(API + "/storage/v1/object/order-photos/" + id + "/" + key + "/" + (i + 1) + ".jpg", { method: "POST", headers: h, body: blob })
-            .then(function (r) { if (!r.ok && r.status !== 409) throw new Error("upload " + r.status); res(); }, rej);
-        }, "image/jpeg", 0.85);
+    var list = photoPlan().list;
+    return Promise.all(list.map(function (pid, i) {
+      return phBlob(pid).then(function (blob) {
+        if (!blob) throw new Error("photo");
+        var h = { apikey: SBC.key, "Content-Type": "image/jpeg", "x-upsert": "false" };
+        if (/^eyJ/.test(SBC.key)) h.Authorization = "Bearer " + SBC.key;
+        return fetch(API + "/storage/v1/object/order-photos/" + id + "/" + key + "/" + (i + 1) + ".jpg", { method: "POST", headers: h, body: blob })
+          .then(function (r) { if (!r.ok && r.status !== 409) throw new Error("upload " + r.status); });
       });
     })).then(function () { return rpc("order_photos_added", { p_id: id, p_key: key, p_count: list.length }); })
       .then(function (r) { if (!r || !r.ok) throw new Error("photos"); });
   }
   // what the shop receives: English or Lao (a Chinese page sends English, so the team can read it)
   function orderPayload() {
+    var plan = photoPlan(), card = ncCard();
     return inLang(shopLang(), function () { return {
       id: currentOrderNo(), date: todayLocal(), lang: lang, method: "rc",
       name: fieldVal("coName"), phone: readPhone(),
       contact_via: fieldVal("coVia"), contact_handle: fieldVal("coHandle"), discount_code: CO.code ? CO.code.code : "", website: fieldVal("coWeb"),
       delivery: delText(), delivery_type: fieldVal("coDel").replace("d_", ""),
-      address: addressText(), note: [ncText(), fieldVal("coNote")].filter(Boolean).join("\n\n"), ref: fieldVal("rcRef"),
-      items: bag.map(function (it) {
+      address: addressText(), note: [ncText(card), fieldVal("coNote")].filter(Boolean).join("\n\n"), ref: fieldVal("rcRef"),
+      items: bag.map(function (it, idx) {
         var p = bySlug[it.s];
         // the database works out the price itself from the product, choice and quantity
-        var o = { s: it.s, opt: it.opt || 0, addN: it.addN || 0, qty: it.qty, details: lineDetails(p, it).join(", ") };
+        var o = { s: it.s, opt: it.opt || 0, addN: it.addN || 0, qty: it.qty, details: lineDetails(p, it, plan.nums[idx]).join(", ") };
         if (it.parts) o.parts = it.parts;
         return o;
       })
@@ -902,13 +1026,15 @@
       if (typeof res.discount === "number") snap.discount = res.discount;
       slipImg = CO.slipImg;
       // the order is safely saved now; if the photos fail we ask for them on WhatsApp instead
-      var photos = CO.photos.length && res.photo_key ? uploadPhotos(res.id, res.photo_key).catch(function () { snap.photosFailed = true; }) :
-        Promise.resolve(CO.photos.length ? (snap.photosFailed = true) : 0);
+      var nPh = photoPlan().list.length;
+      var photos = nPh && res.photo_key ? uploadPhotos(res.id, res.photo_key).catch(function () { snap.photosFailed = true; }) :
+        Promise.resolve(nPh ? (snap.photosFailed = true) : 0);
       return photos.then(function () { return drawReceipt(snap); }).then(function (c) {
         snap.receipt = c.toDataURL("image/png");
-        CO.done = snap; CO.slipImg = null; CO.slipUrl = ""; CO.photos = []; CO.sending = false; setCode(null);
+        CO.done = snap; CO.slipImg = null; CO.slipUrl = ""; CO.sending = false; setCode(null);
         orderNo = ""; try { sessionStorage.removeItem("minise_order_no"); } catch (e) { /* ignore */ }
         bag = []; saveBag();
+        phWake();
         route();
         window.scrollTo(0, 0);
       });
@@ -1297,7 +1423,12 @@
   var MYO_SHAPES = ["circle", "heart"];
   var CH = window.MINISE_CHARMS || { trays: [], list: [] }, CH_BY = {}, TRAY_BY = {};
   CH.trays.forEach(function (tr) { TRAY_BY[tr.id] = tr; });
-  CH.list.forEach(function (c) { CH_BY[c[0]] = c; });
+  var CH_IDX = {};
+  CH.list.forEach(function (c) {
+    CH_BY[c[0]] = c;
+    var tr = TRAY_BY[c[0].charAt(0).toLowerCase()];
+    if (tr) { tr.n = tr.n || 0; CH_IDX[c[0]] = tr.n++; }
+  });
   var MK = { shape: "circle", col: "pink", ini: "", ch: [], tray: "a", note: "", say: "" };
   try {
     var mk0 = JSON.parse(sessionStorage.getItem("minise_make") || "null");
@@ -1312,10 +1443,14 @@
   } catch (e) { /* start fresh */ }
   function mkSave() { try { sessionStorage.setItem("minise_make", JSON.stringify({ shape: MK.shape, col: MK.col, ini: MK.ini, ch: MK.ch, tray: MK.tray, note: MK.note })); } catch (e) { /* ignore */ } }
   function charmName(code) { var c = CH_BY[code]; return c ? c[4 + LI[lang]] : code; }
-  // a square cut of the tray photo, scaled so the charm fills the box
+  // the charm's studio picture (cut out, on white), or a square cut of the tray photo
   function charmStyle(code) {
     var c = CH_BY[code], tr = c && TRAY_BY[c[0].charAt(0).toLowerCase()];
     if (!tr) return "";
+    if (tr.studio) {
+      var i = CH_IDX[code], cols = tr.cols, rows = Math.ceil(tr.n / cols), col = i % cols, row = Math.floor(i / cols);
+      return "background-image:url(" + tr.studio + ");background-size:" + cols * 100 + "% auto;background-position:" + (col / (cols - 1) * 100).toFixed(2) + "% " + (rows > 1 ? (row / (rows - 1) * 100).toFixed(2) : 0) + "%";
+    }
     var sz = c[3], l = Math.max(0, Math.min(tr.w - sz, c[1] - sz / 2)), tp = Math.max(0, Math.min(tr.h - sz, c[2] - sz / 2));
     return "background-image:url(" + tr.img + ");background-size:" + (tr.w / sz * 100).toFixed(2) + "% auto;background-position:" + (l / (tr.w - sz) * 100).toFixed(2) + "% " + (tp / (tr.h - sz) * 100).toFixed(2) + "%";
   }
@@ -1360,7 +1495,7 @@
     MK.ch.forEach(function (code, i) {
       var pt = chainAt(MK_SLOTS[i]);
       rings += '<path d="M' + pt[0].toFixed(1) + " " + pt[1].toFixed(1) + " l0 12\" stroke=\"#8a93a3\" stroke-width=\"3\"/><circle cx=\"" + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="4.5" fill="none" stroke="#8a93a3" stroke-width="2.5"/>';
-      hang += '<span class="mk-hang" style="left:' + (pt[0] / 360 * 100).toFixed(2) + "%;top:" + ((pt[1] + 11) / 230 * 100).toFixed(2) + '%">' + charmImg(code) + "</span>";
+      hang += '<span class="mk-hang" style="left:' + (pt[0] / 360 * 100).toFixed(2) + "%;top:" + ((pt[1] + 5) / 230 * 100).toFixed(2) + '%">' + charmImg(code) + "</span>";
     });
     var chain = "M24 50 C96 176 264 176 336 50";
     return '<svg class="mk-chain" viewBox="0 0 360 230" aria-hidden="true">' +
@@ -1511,7 +1646,6 @@
   var ITC = window.MINISE_ITALIAN || { img: "", w: 1, h: 1, cell: 200, cols: 5, list: [] }, ITC_BY = {};
   ITC.list.forEach(function (c, i) { ITC_BY[c[0]] = { c: c, i: i }; });
   var IT = { size: "w", metal: 0, wrist: "", links: [], inis: [], note: "", tab: "pic", say: ["is_hi"], pose: "wave", last: 0, seq: 1 };
-  var IT_PH = {}; // link id → { img, url, thumb }: chosen photos stay in this tab and go on to checkout
   function itClean(s, max) { return String(s || "").replace(/[“”"<>\u0000-\u001f]/g, "").slice(0, max); }
   function itOk(l) {
     return !!l && ((l.k === "pic" && (l.sh === "heart" || l.sh === "square")) || l.k === "eng" || l.k === "long" || l.k === "lock" || (l.k === "charm" && !!ITC_BY[l.c]));
@@ -1526,6 +1660,7 @@
       IT.links = (it0.links || []).filter(itOk).slice(0, 30).map(function (l) {
         var o = { k: l.k };
         if (l.k === "pic") { o.sh = l.sh; if (l.free && !itFree0) { o.free = 1; itFree0 = true; } }
+        if ((l.k === "pic" || l.k === "lock") && /^p[a-z0-9]{6,20}$/.test(l.ph || "")) o.ph = l.ph;
         if (l.k === "eng" || l.k === "long") o.txt = itClean(l.txt, l.k === "eng" ? IT_ENG : IT_LONG);
         if (l.k === "charm") o.c = l.c;
         return o;
@@ -1541,7 +1676,7 @@
   function itSave() {
     try {
       sessionStorage.setItem("minise_italian", JSON.stringify({ size: IT.size, metal: IT.metal, wrist: IT.wrist, inis: IT.inis, note: IT.note, tab: IT.tab,
-        links: IT.links.map(function (l) { return { k: l.k, sh: l.sh, txt: l.txt, c: l.c, free: l.free }; }) }));
+        links: IT.links.map(function (l) { return { k: l.k, sh: l.sh, txt: l.txt, c: l.c, free: l.free, ph: l.ph }; }) }));
     } catch (e) { /* ignore */ }
   }
   function itById(id) { return IT.links.filter(function (l) { return l.id === id; })[0]; }
@@ -1590,9 +1725,9 @@
   }
   // a picture charm: the photo under glass in a black heart or square frame
   function itPicFace(l) {
-    var ph = IT_PH[l.id], heart = l.sh === "heart", clip = heart ? "itCHt" : "itCSq";
+    var ph = l.ph && PH_URL[l.ph], heart = l.sh === "heart", clip = heart ? "itCHt" : "itCSq";
     var frame = heart ? '<path d="' + HEART + '" transform="translate(0 1.5) scale(.5)" fill="#1f2433"/>' : '<rect x="-16" y="-15" width="32" height="30" rx="2.5" fill="#1f2433"/>';
-    var pic = ph ? '<image href="' + ph.thumb + '" x="-16" y="-15" width="32" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clip + ')"/>'
+    var pic = ph ? '<image href="' + ph + '" x="-16" y="-15" width="32" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clip + ')"/>'
       : '<g clip-path="url(#' + clip + ')"><rect x="-16" y="-15" width="32" height="30" fill="url(#itPh)"/><circle cx="5.5" cy="-5" r="3" fill="#fff" opacity=".9"/><path d="M-16 13 L-6 1 L0 7 L5 2.5 L16 13 Z" fill="#51618a" opacity=".55"/></g>';
     return frame + pic;
   }
@@ -1614,7 +1749,7 @@
     var o = ITC_BY[code];
     if (!o) return "";
     var C = ITC.cell, cx = (o.i % ITC.cols) * C + C / 2, cy = Math.floor(o.i / ITC.cols) * C + C / 2, two = w > IT_W;
-    var vw = two ? 184 : 150, vh = two ? 88 : 143;
+    var vw = two ? 176 : 140, vh = two ? 84 : 134;
     return '<svg x="' + (-w / 2) + '" y="' + (-IT_H / 2) + '" width="' + w + '" height="' + IT_H + '" viewBox="' + (cx - vw / 2) + " " + (cy - vh / 2) + " " + vw + " " + vh + '" preserveAspectRatio="xMidYMid slice"><image href="' + ITC.img + '" width="' + ITC.w + '" height="' + ITC.h + '"/></svg>' +
       '<rect x="' + (-w / 2) + '" y="' + (-IT_H / 2) + '" width="' + w + '" height="' + IT_H + '" rx="3" fill="none" stroke="#858d99"/>';
   }
@@ -1670,11 +1805,11 @@
   function itFreeHTML() {
     var f = itFreeLink();
     return ["heart", "square"].map(function (sh) {
-      return '<label class="mk-shape it-shape"><input type="radio" name="itFree" value="' + sh + '"' + (f && f.sh === sh ? " checked" : "") + ">" + itSvg({ k: "pic", sh: sh, id: f ? f.id : 0 }) + "<span>" + esc(t("sh_" + sh)) + "</span></label>";
+      return '<label class="mk-shape it-shape"><input type="radio" name="itFree" value="' + sh + '"' + (f && f.sh === sh ? " checked" : "") + ">" + itSvg({ k: "pic", sh: sh, ph: f ? f.ph : "" }) + "<span>" + esc(t("sh_" + sh)) + "</span></label>";
     }).join("");
   }
   function itPhotoBtn(l, cls) {
-    return '<label class="' + (cls || "link it-ph") + '">' + esc(t(IT_PH[l.id] ? "it_photo_change" : "it_photo")) + '<input type="file" accept="image/*" class="sr" data-it-ph="' + l.id + '"></label>';
+    return '<label class="' + (cls || "link it-ph") + '">' + esc(t(l.ph ? "it_photo_change" : "it_photo")) + '<input type="file" accept="image/*" class="sr" data-it-ph="' + l.id + '"></label>';
   }
   function itTabsHTML() {
     return IT_TABS.map(function (k) { return '<button type="button" class="mk-tab" data-it-tab="' + k + '" aria-pressed="' + (IT.tab === k) + '">' + esc(t("it_t_" + k)) + "</button>"; }).join("");
@@ -1709,7 +1844,7 @@
         return '<label><input type="radio" name="itSh' + l.id + '" value="' + sh + '" data-it-sh="' + l.id + '"' + (l.sh === sh ? " checked" : "") + "><span>" + esc(t("sh_" + sh)) + "</span></label>";
       }).join("") + "</span>" + itPhotoBtn(l) + "</div>";
       else if (l.k === "eng" || l.k === "long") extra = '<div class="it-row-x"><input type="text" class="it-txt" id="itTxt' + l.id + '" data-it-txt="' + l.id + '" maxlength="' + (l.k === "eng" ? IT_ENG : IT_LONG) + '" value="' + esc(l.txt || "") + '" aria-label="' + esc(t("ip_" + l.k)) + '" placeholder="' + esc(t(l.k === "long" ? "it_long_ph" : "it_eng_ph")) + '"><span class="err" id="itTxt' + l.id + 'E" hidden></span></div>';
-      else if (l.k === "lock") extra = '<p class="hint">' + esc(t("it_lock_photo")) + "</p>";
+      else if (l.k === "lock") extra = '<div class="it-row-x">' + itPhotoBtn(l) + '<span class="hint">' + esc(t("it_lock_photo")) + "</span></div>";
       return '<li class="it-row' + (l.id === IT.last ? " it-new" : "") + '"><span class="it-pos tn">' + (i + 1) + "</span>" + itSvg(l) +
         '<div class="it-row-m"><p class="it-row-t"><b>' + esc(label) + '</b><span class="tn">' + esc(isFree ? t("it_free") : "+" + money(+pr.parts[l.k] || 0)) + "</span></p>" + extra + "</div>" +
         '<div class="it-row-b"><button type="button" data-it-mv="' + l.id + '" data-d="-1" aria-label="' + esc(t("it_up")) + '"' + (i === 0 ? " disabled" : "") + ">↑</button>" +
@@ -1742,13 +1877,14 @@
       '<p class="grand"><span>' + esc(t("total")) + "</span><b>" + esc(money(itTotal())) + "</b></p></div>" + btn + '<p class="it-care">' + esc(t("it_care")) + "</p>";
   }
   // what the shop reads (order details and the WhatsApp message): one line per link, in order
-  function itDetailLines(it, free) {
-    var d = [t("it_size") + ": " + t("isz_" + it.size)];
+  function itDetailLines(it, free, nums) {
+    var d = [t("it_size") + ": " + t("isz_" + it.size)], slot = 0;
+    var num = function () { var n = nums ? nums[slot] : 0; slot++; return n ? " #" + n : ""; };
     if (it.wrist) d.push(t("it_wrist") + ": " + it.wrist + " cm");
     (it.links || []).forEach(function (l) {
-      if (l.k === "pic") { var f = free > 0; if (f) free--; d.push(t(f ? "ip_freepic" : "ip_pic") + ": " + t("sh_" + l.sh)); }
+      if (l.k === "pic") { var f = free > 0; if (f) free--; d.push(t(f ? "ip_freepic" : "ip_pic") + ": " + t("sh_" + l.sh) + num()); }
       else if (l.k === "eng" || l.k === "long") d.push(t("ip_" + l.k) + ": “" + (l.txt || "").trim() + "”");
-      else if (l.k === "lock") d.push(t("ip_lock"));
+      else if (l.k === "lock") d.push(t("ip_lock") + num());
       else if (l.k === "charm") d.push(t("charm") + " " + l.c + ": " + itCharmName(l.c));
     });
     (it.inis || []).forEach(function (L) { d.push(t("ip_ini") + ": " + L); });
@@ -1851,12 +1987,7 @@
     if (itUsed() > IT_N[IT.size]) { itSay("it_too_many", { n: IT_N[IT.size] }, "search"); return; }
     if (!itPrices().live) return;
     bag.push({ s: ITB, opt: IT.metal, addN: 0, qty: 1, it: 1, size: IT.size, wrist: IT.wrist, parts: itParts(), inis: IT.inis.slice(), note: IT.note.trim(),
-      links: IT.links.map(function (l) { return { k: l.k, sh: l.sh, txt: (l.txt || "").trim() || undefined, c: l.c }; }) });
-    // photos chosen here are waiting at checkout
-    IT.links.forEach(function (l) {
-      var ph = IT_PH[l.id];
-      if (ph && CO.photos.length < 6 && !CO.photos.some(function (x) { return x.url === ph.url; })) CO.photos.push({ img: ph.img, url: ph.url });
-    });
+      links: IT.links.map(function (l) { return { k: l.k, sh: l.sh, txt: (l.txt || "").trim() || undefined, c: l.c, ph: l.ph }; }) });
     saveBag();
     toast(t("added"), "gift");
     itSay("is_added", null, "yay");
@@ -1871,10 +2002,10 @@
     else if (el.hasAttribute("data-it-ph")) {
       var id = +el.getAttribute("data-it-ph"), file = el.files && el.files[0];
       el.value = "";
-      readImageFile(file).then(function (r) {
-        if (!r || !itById(id)) return;
-        r.thumb = shrink(r.img, 240).toDataURL("image/jpeg", 0.85);
-        IT_PH[id] = r;
+      phAdd(file).then(function (pid) {
+        var l = itById(id);
+        if (!pid || !l) return;
+        l.ph = pid;
         IT.last = id;
         itSay("is_photo", null, "heart");
         itUpdate(true);
@@ -1974,7 +2105,6 @@
       var rid = +b.getAttribute("data-it-rm"), l = itById(rid);
       if (!l || l.free) return;
       IT.links.splice(IT.links.indexOf(l), 1);
-      delete IT_PH[rid];
       itSay("is_off", null, "wave");
       itUpdate(true);
       return;
@@ -2428,22 +2558,8 @@
   window.addEventListener("scroll", function () { var hide = window.scrollY < 900 || current === "make" || current === "italian"; if (TOP.hidden !== hide) TOP.hidden = hide; }, { passive: true });
 
   /* ---------- Cute note maker (#note): write a note on Mumi & Peni paper, save it as a picture or add it to the order ---------- */
-  var NT_PAPERS = { tea: ["drink"], milk: ["peniMilk"], night: ["sleep", "peniSleep"], costume: ["shark", "peniBunny"], clover: ["peniSparkle"] };
-  var NT_LOOK = {
-    tea: { bg: ["#f6efe0", "#efe4cc"], card: "#fbf7ee", ink: "#24396a", dot: "#a9bfdb" },
-    milk: { bg: ["#fbd9e2", "#f6c4d1"], card: "#fff6f8", ink: "#7a3346", dot: "#ffffff" },
-    night: { bg: ["#1f2c55", "#34477d"], card: "#2b3b6b", ink: "#fdf6dc", dot: "#fff3c4" },
-    costume: { bg: ["#cfe0f2", "#f8d6e0"], card: "#fbf8f3", ink: "#24396a", dot: "#ffffff" },
-    clover: { bg: ["#dff3ea", "#c8eadb"], card: "#f7fcf9", ink: "#24563f", dot: "#9fd8bf" }
-  };
-  var STK = {
-    heart: '<svg viewBox="0 0 40 40"><path d="M20 35C8 26 3 19 3 12.5 3 7.5 7 4 11.5 4c3.4 0 6.5 2 8.5 5 2-3 5.1-5 8.5-5C33 4 37 7.5 37 12.5 37 19 32 26 20 35Z" fill="#f4a9ba" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/><path d="M10 11c1-2.5 3-3.6 5-3.4" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>',
-    star: '<svg viewBox="0 0 40 40"><path d="M20 3l4.9 10.6 11.6 1.3-8.6 7.9 2.4 11.4L20 28.4 9.7 34.2l2.4-11.4L3.5 14.9l11.6-1.3Z" fill="#f3d873" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/></svg>',
-    clover: '<svg viewBox="0 0 40 40"><g fill="#8fd1b0" stroke="#24396a" stroke-width="2.3"><circle cx="14" cy="14" r="7"/><circle cx="26" cy="14" r="7"/><circle cx="14" cy="26" r="7"/><circle cx="26" cy="26" r="7"/></g><circle cx="20" cy="20" r="3" fill="#6cb894"/><path d="M24 30Q28 36 34 37" fill="none" stroke="#24396a" stroke-width="2.5" stroke-linecap="round"/></svg>',
-    bow: '<svg viewBox="0 0 40 40"><path d="M20 20C12 10 4 10 4 17s8 9 16 3Zm0 0c8-10 16-10 16-3s-8 9-16 3Z" fill="#c9b3e0" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/><path d="M18 22 12 34l4-1 2 4 3-13M22 22l6 12-4-1-2 4-3-13" fill="#c9b3e0" stroke="#24396a" stroke-width="2.3" stroke-linejoin="round"/><circle cx="20" cy="20" r="3.5" fill="#f4a9ba" stroke="#24396a" stroke-width="2.3"/></svg>',
-    paw: '<svg viewBox="0 0 40 40"><g fill="#f6c9d3" stroke="#24396a" stroke-width="2.3"><ellipse cx="20" cy="26" rx="9" ry="7.5"/><circle cx="9" cy="17" r="4"/><circle cx="16" cy="10" r="4"/><circle cx="24" cy="10" r="4"/><circle cx="31" cy="17" r="4"/></g></svg>',
-    berry: '<svg viewBox="0 0 40 40"><path d="M20 36C10 30 6 22 8 15c1.5-5 6-6 12-6s10.5 1 12 6c2 7-2 15-12 21Z" fill="#e8546b" stroke="#24396a" stroke-width="2.5" stroke-linejoin="round"/><path d="M12 9c2-5 6-4 8-1 2-3 6-4 8 1-4 2-12 2-16 0Z" fill="#7bb07d" stroke="#24396a" stroke-width="2.3" stroke-linejoin="round"/><g fill="#fff3c4"><circle cx="15" cy="18" r="1.4"/><circle cx="23" cy="17" r="1.4"/><circle cx="19" cy="24" r="1.4"/><circle cx="26" cy="24" r="1.4"/><circle cx="14" cy="26" r="1.4"/></g></svg>'
-  };
+  var NOTE = window.MINISE_NOTE || { PAPERS: { tea: ["drink"] }, LOOK: {}, STK: {} };
+  var NT_PAPERS = NOTE.PAPERS, NT_LOOK = NOTE.LOOK, STK = NOTE.STK;
   var NT = { to: "", from: "", msg: "", paper: "tea", st: ["heart", "star"], sent: false };
   try {
     var nt0 = JSON.parse(sessionStorage.getItem("minise_note") || "null");
@@ -2539,51 +2655,8 @@
     return lines;
   }
   function ntPicture() {
-    var W = 1080, H = 1350, look = NT_LOOK[NT.paper];
-    var c = document.createElement("canvas");
-    c.width = W; c.height = H;
-    var x = c.getContext("2d");
-    var FONT = '"Patrick Hand", "Noto Sans Lao", "Noto Sans SC", "Comic Sans MS", sans-serif';
-    var ready = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('60px "Patrick Hand"'), document.fonts.load('60px "Noto Sans Lao"'), document.fonts.load('60px "Noto Sans SC"')]).catch(function () {}) : Promise.resolve();
-    return ready.then(function () {
-      var g = x.createLinearGradient(0, 0, W, H);
-      g.addColorStop(0, look.bg[0]); g.addColorStop(1, look.bg[1]);
-      x.fillStyle = g; x.fillRect(0, 0, W, H);
-      x.fillStyle = look.dot;
-      for (var yy = 40; yy < H; yy += 70) for (var xx = (yy / 70) % 2 ? 40 : 75; xx < W; xx += 70) { x.globalAlpha = 0.55; x.beginPath(); x.arc(xx, yy, NT.paper === "night" ? 3 : 7, 0, Math.PI * 2); x.fill(); }
-      x.globalAlpha = 1;
-      // the note paper
-      x.save();
-      x.shadowColor = "rgba(20,30,60,0.25)"; x.shadowBlur = 40; x.shadowOffsetY = 18;
-      x.fillStyle = look.card;
-      x.beginPath(); x.roundRect ? x.roundRect(110, 150, 860, 1000, 40) : x.rect(110, 150, 860, 1000); x.fill();
-      x.restore();
-      x.lineWidth = 6; x.strokeStyle = "#24396a";
-      x.beginPath(); x.roundRect ? x.roundRect(110, 150, 860, 1000, 40) : x.rect(110, 150, 860, 1000); x.stroke();
-      // washi tape
-      x.save(); x.translate(540, 150); x.rotate(-0.05); x.fillStyle = "rgba(169,191,219,0.85)"; x.fillRect(-120, -32, 240, 64); x.restore();
-      x.fillStyle = look.ink;
-      x.font = "54px " + FONT; x.textAlign = "left"; x.textBaseline = "alphabetic";
-      x.fillText(t("nt_to") + ": " + (NT.to || t("nt_to_ph")), 300, 300);
-      var size = 84, lines;
-      do { x.font = size + "px " + FONT; lines = wrapLines(x, NT.msg || t("nt_msg_ph"), 680); size -= 6; } while (lines.length * size * 1.3 > 440 && size > 40);
-      size += 6;
-      x.textAlign = "center";
-      var top = 580 - (lines.length - 1) * size * 0.65;
-      lines.forEach(function (l, i) { x.fillText(l, 540, top + i * size * 1.3); });
-      x.textAlign = "left"; x.font = "54px " + FONT;
-      x.fillText(t("nt_from") + ": " + (NT.from || t("nt_from_ph")), 180, 930);
-      x.textAlign = "center"; x.font = "40px " + FONT; x.fillStyle = NT.paper === "night" ? "#fdf6dc" : "#24396a";
-      x.fillText("Minise Arte · minisearte.com", 540, 1250);
-      var cats = NT_PAPERS[NT.paper], jobs = cats.map(function (p) { return svgImage(window.MINISE_CAT(p), 300, 300); });
-      var stk = NT.st.map(function (s) { return svgImage(STK[s], 150, 150); });
-      return Promise.all(jobs.concat(stk)).then(function (ims) {
-        ims.slice(0, cats.length).forEach(function (im, i) { if (im) { if (cats.length === 1) x.drawImage(im, 650, 850, 280, 280); else x.drawImage(im, 530 + i * 200, 900, 220, 220); } });
-        var spots = [[128, 168, -0.3], [802, 190, 0.25], [130, 990, 0.2]];
-        ims.slice(cats.length).forEach(function (im, i) { if (im) { x.save(); x.translate(spots[i][0] + 75, spots[i][1] + 75); x.rotate(spots[i][2]); x.drawImage(im, -75, -75, 150, 150); x.restore(); } });
-        return new Promise(function (res) { c.toBlob(res, "image/png"); });
-      });
-    });
+    return NOTE.draw({ paper: NT.paper, to: NT.to || t("nt_to_ph"), msg: NT.msg || t("nt_msg_ph"), from: NT.from || t("nt_from_ph"), st: NT.st, toLabel: t("nt_to"), fromLabel: t("nt_from"), lang: lang })
+      .then(function (c) { return new Promise(function (res) { c.toBlob(res, "image/png"); }); });
   }
   document.addEventListener("input", function (e) {
     var id = e.target.id;
@@ -2641,7 +2714,7 @@
   /* checkout: an optional note card in the delivery step. It shares the note maker's words and paper. */
   function ncIsOn() { try { var f = sessionStorage.getItem("minise_notecard"); return f === "1" || (f !== "0" && !!giftNote()); } catch (e) { return false; } }
   function ncMini() {
-    return '<div class="nc-mini nt-p-' + NT.paper + '"><span class="nt-tape" aria-hidden="true"></span>' +
+    return '<div class="nc-mini nt-p-' + NT.paper + '"><span class="nt-tape" aria-hidden="true"></span>' + NT.st.map(function (s, i) { return '<span class="nc-st nc-st' + (i + 1) + '" aria-hidden="true">' + STK[s] + "</span>"; }).join("") +
       '<p class="nc-to">' + esc(t("nt_to")) + ': <b class="' + (NT.to ? "" : "nt-ph") + '">' + esc(NT.to || t("nt_to_ph")) + "</b></p>" +
       '<p class="nc-msg' + (NT.msg ? "" : " nt-ph") + '">' + esc(NT.msg || t("nt_msg_ph")) + "</p>" +
       '<p class="nc-from">' + esc(t("nt_from")) + ': <b class="' + (NT.from ? "" : "nt-ph") + '">' + esc(NT.from || t("nt_from_ph")) + "</b></p>" + kitty(NT_PAPERS[NT.paper][0], "nc-cat") + "</div>";
@@ -2662,10 +2735,17 @@
       '<p class="hint nc-more"><a class="link" href="#note">' + esc(t("nc_more")) + " →</a></p></div></div>";
   }
   // what the team reads in the order (in English or Lao)
-  function ncText() {
+  // the card exactly as it will be printed: its words in the customer's language, and its stickers.
+  // The admin reads this back from the order note and draws the card (js/notecard.js).
+  function ncCard() {
     var on = document.getElementById("ncOn");
-    if (!on || !on.checked || !NT.msg.trim()) return "";
-    return t("nc_order") + " (" + t("nt_p_" + NT.paper) + "):\n" + ntText();
+    if (!on || !on.checked || !NT.msg.trim()) return null;
+    return { paper: NT.paper, st: NT.st.slice(), text: (NT.to.trim() ? t("nt_to") + ": " + NT.to.trim() + "\n" : "") + NT.msg.trim().replace(/\n\s*\n+/g, "\n") + (NT.from.trim() ? "\n" + t("nt_from") + ": " + NT.from.trim() : "") };
+  }
+  // what the team reads in the order (the heading in English or Lao)
+  function ncText(card) {
+    if (!card) return "";
+    return t("nc_order") + " (" + t("nt_p_" + card.paper) + "):\n" + card.text + (card.st.length ? "\n" + card.st.map(function (s) { return t("nt_st_" + s); }).join(" · ") : "");
   }
   document.addEventListener("change", function (e) {
     if (e.target.id === "ncOn") {
@@ -3162,9 +3242,19 @@
       return;
     }
     if ((el = e.target.closest("[data-copy]"))) { copyText(el.getAttribute("data-copy")); return; }
-    if ((el = e.target.closest("[data-unphoto]"))) {
-      CO.photos.splice(+el.getAttribute("data-unphoto"), 1);
-      var pp = document.getElementById("coPhotosPrev"); if (pp) pp.innerHTML = photoPreviews();
+    if ((el = e.target.closest("[data-ph-pdrm]")) && S) {
+      S.phs.splice(+el.getAttribute("data-ph-pdrm"), 1);
+      document.getElementById("pdPhotos").innerHTML = pdPhotosHTML();
+      return;
+    }
+    if ((el = e.target.closest("[data-ph-itemrm]"))) {
+      var pi = el.getAttribute("data-ph-itemrm").split(":"), pit = bag[+pi[0]];
+      if (pit && pit.phs) { pit.phs.splice(+pi[1], 1); saveBag(); phStepRefresh(); }
+      return;
+    }
+    if ((el = e.target.closest("[data-ph-slotrm]"))) {
+      var ps = el.getAttribute("data-ph-slotrm").split(":"), sit = bag[+ps[0]], sl = sit && sit.links && sit.links[+ps[1]];
+      if (sl) { delete sl.ph; saveBag(); phStepRefresh(); }
       return;
     }
     if (e.target.closest("#coCodeApply")) { applyCode(); return; }
@@ -3209,14 +3299,18 @@
       });
       return;
     }
-    if (id === "coPhotos") {
-      var files = Array.prototype.slice.call(e.target.files || [], 0, Math.max(0, 6 - CO.photos.length));
-      e.target.value = "";
-      Promise.all(files.map(readImageFile)).then(function (list) {
-        list.forEach(function (r) { if (r && CO.photos.length < 6) CO.photos.push(r); });
-        var pp = document.getElementById("coPhotosPrev"); if (pp) pp.innerHTML = photoPreviews();
-        if (CO.photos.length) setErr("coPhotos", "");
-      });
+    var el = e.target, files = el.files;
+    if (el.hasAttribute("data-ph-pd") && S) {
+      phAddAll(files, PH_ITEM - S.phs.length).then(function (ids) { S.phs = S.phs.concat(ids).slice(0, PH_ITEM); var pr = document.getElementById("pdPhotos"); if (pr) pr.innerHTML = pdPhotosHTML(); });
+      el.value = "";
+    } else if (el.hasAttribute("data-ph-item")) {
+      var idx = +el.getAttribute("data-ph-item"), it = bag[idx];
+      if (it) phAddAll(files, PH_ITEM - (it.phs || []).length).then(function (ids) { it.phs = (it.phs || []).concat(ids).slice(0, PH_ITEM); saveBag(); phStepRefresh(); if (ids.length) setErr("coPh" + idx, ""); });
+      el.value = "";
+    } else if (el.hasAttribute("data-ph-slot")) {
+      var sp = el.getAttribute("data-ph-slot").split(":"), sit = bag[+sp[0]], sl = sit && sit.links && sit.links[+sp[1]];
+      if (sl) phAddAll(files, 1).then(function (ids) { if (ids[0]) { sl.ph = ids[0]; saveBag(); phStepRefresh(); } });
+      el.value = "";
     }
   });
 
@@ -3229,10 +3323,11 @@
         document.getElementById("ini").focus();
         return;
       }
-      var key = JSON.stringify([sel.s, sel.opt, sel.addN, sel.col, sel.ini, sel.note]);
-      var found = bag.find(function (it) { return JSON.stringify([it.s, it.opt, it.addN, it.col, it.ini, it.note]) === key; });
+      var key = JSON.stringify([sel.s, sel.opt, sel.addN, sel.col, sel.ini, sel.note, sel.phs || []]);
+      var found = bag.find(function (it) { return JSON.stringify([it.s, it.opt, it.addN, it.col, it.ini, it.note, it.phs || []]) === key; });
       if (found) found.qty = Math.min(20, found.qty + sel.qty); else bag.push(sel);
       saveBag();
+      if (S.phs.length) { S.phs = []; var pr = document.getElementById("pdPhotos"); if (pr) pr.innerHTML = pdPhotosHTML(); }
       toast(t("added"), "gift");
       openBag();
     } else if (e.target.id === "coForm") {
@@ -3371,4 +3466,5 @@
   route();
   cookieNote();
   fetchLive();
+  phWake();
 })();

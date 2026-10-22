@@ -331,6 +331,16 @@
     e_need_type: ["Choose at least one category.", "ເລືອກຢ່າງໜ້ອຍ 1 ໝວດ"],
     e_need_photo: ["Add at least one photo.", "ເພີ່ມຮູບຢ່າງໜ້ອຍ 1 ຮູບ"],
     e_bad_price: ["Every price row needs a price in kip.", "ທຸກແຖວລາຄາຕ້ອງມີລາຄາເປັນກີບ"],
+    e_parts: ["Builder prices (link by link)", "ລາຄາແຕ່ລະຂໍ້ (ອອກແບບເອງ)"],
+    e_parts_hint: ["Customers build this bracelet on minisearte.com/#italian. Each kind of link adds its price to the bracelet price above (Silver or Gold).", "ລູກຄ້າອອກແບບສາຍແຂນນີ້ຢູ່ minisearte.com/#italian. ແຕ່ລະຂໍ້ຈະບວກລາຄາເພີ່ມຈາກລາຄາສາຍແຂນຂ້າງເທິງ (ເງິນ ຫຼື ທອງ)"],
+    pt_pic: ["Picture charm (heart or square)", "ຈີ້ຮູບ (ຫົວໃຈ ຫຼື ສີ່ຫຼ່ຽມ)"],
+    pt_eng: ["Laser engraved square", "ຈີ້ສະຫຼັກເລເຊີ ສີ່ຫຼ່ຽມ"],
+    pt_long: ["Long engraved (two links)", "ຈີ້ສະຫຼັກແບບຍາວ (2 ຂໍ້)"],
+    pt_ini: ["Initial charm (hanging)", "ຈີ້ຕົວອັກສອນ (ຫ້ອຍ)"],
+    pt_lock: ["Locket", "ລັອກເກັດ"],
+    pt_charm: ["Charm from the tray", "ຈີ້ຈາກຖາດ"],
+    pt_free: ["Free picture charms", "ຈີ້ຮູບຟຣີ (ຈຳນວນ)"],
+    e_bad_part: ["Every builder price needs a price in kip.", "ລາຄາແຕ່ລະຂໍ້ຕ້ອງມີລາຄາເປັນກີບ"],
     in_stock: ["In stock", "ມີສິນຄ້າ"],
     in_shop: ["Shown in shop", "ສະແດງໃນຮ້ານ"],
     f_all: ["All", "ທັງໝົດ"],
@@ -682,6 +692,7 @@
   function locale() { return lang === "lo" ? "lo-LA" : "en-GB"; }
   function fmtDate(iso) { if (!iso) return ""; try { return new Date(iso + "T00:00:00").toLocaleDateString(locale(), { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return iso; } }
   function fmtWhen(isoTime) { try { return new Date(isoTime).toLocaleString(locale(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch (e) { return isoTime; } }
+  var PARTS = ["pic", "eng", "long", "ini", "lock", "charm"];
   function num(v) { var n = parseInt(String(v == null ? "" : v).replace(/[^\d]/g, ""), 10); return isNaN(n) ? 0 : n; }
   function slugify(s) { return String(s).toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "product"; }
   function uniqueSlug(base, except) { var s = base, i = 2; while (products.some(function (p) { return p.s === s && p !== except; })) s = base + "-" + i++; return s; }
@@ -713,8 +724,9 @@
       var T = window.MINISE_T || {};
       LAO_KEYS.forEach(function (k) { if (T[k] && T[k][0] && T[k][1]) laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       LAO_PROV.forEach(function (x) { laoBase[x[0].toLowerCase()] = x[1]; });
-      Object.keys(T).forEach(function (k) { if (/^(bc|sh)_/.test(k) || k === "letter" || k === "charm" || k === "shape") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
+      Object.keys(T).forEach(function (k) { if (/^(bc|sh|isz|ip)_/.test(k) || k === "letter" || k === "charm" || k === "shape" || k === "it_size" || k === "it_wrist") laoBase[T[k][0].toLowerCase()] = T[k][1]; });
       ((window.MINISE_CHARMS || {}).list || []).forEach(function (c) { laoBase[c[4].toLowerCase()] = c[5]; });
+      ((window.MINISE_ITALIAN || {}).list || []).forEach(function (c) { laoBase[c[2].toLowerCase()] = c[3]; });
       laoBase["district"] = "ເມືອງ";
       products.forEach(function (q) {
         (q.o || []).forEach(function (o) { var k = String(o.en || "").toLowerCase(); if (k && o.lo && !laoBase[k]) laoBase[k] = o.lo; });
@@ -737,7 +749,7 @@
       if (hit) { changed = true; return hit; }
       var x = /^(.*?)\s*×\s*(\d+)$/.exec(k);
       if (x && m[x[1].toLowerCase()]) { changed = true; return m[x[1].toLowerCase()] + " × " + x[2]; }
-      var y = /^(.*?)\s+([A-C]\d{1,2})$/.exec(k);
+      var y = /^(.*?)\s+([A-CI]\d{1,2})$/.exec(k);
       if (y && m[y[1].toLowerCase()]) { changed = true; return m[y[1].toLowerCase()] + " " + y[2]; }
       return k;
     };
@@ -758,14 +770,22 @@
   }
   // Make-your-own bracelets: show the charms the customer picked ("Charm A3: …") cut from the tray photos
   function charmRow(details) {
-    var C = window.MINISE_CHARMS, codes = [], m, re = /Charm ([A-C]\d{1,2}):/g;
+    var C = window.MINISE_CHARMS, I = window.MINISE_ITALIAN || { list: [] }, codes = [], m, re = /Charm ([A-CI]\d{1,2}):/g;
     if (!C || !details) return "";
     while ((m = re.exec(details))) codes.push(m[1]);
     if (!codes.length) return "";
-    var trays = {}, list = {};
+    var trays = {}, list = {}, it = {};
     C.trays.forEach(function (tr) { trays[tr.id] = tr; });
     C.list.forEach(function (c) { list[c[0]] = c; });
+    I.list.forEach(function (c, i) { it[c[0]] = i; });
+    var rows = Math.ceil(I.list.length / (I.cols || 1));
     return '<span class="ch-row">' + codes.map(function (code) {
+      if (code.charAt(0) === "I") {
+        var i = it[code];
+        if (i == null) return "";
+        var col = i % I.cols, row = Math.floor(i / I.cols);
+        return '<span class="ch-pic" title="' + esc(I.list[i][2]) + '"><span style="background-image:url(' + I.img + ");background-size:" + I.cols * 100 + "% auto;background-position:" + (col / (I.cols - 1) * 100).toFixed(2) + "% " + (rows > 1 ? (row / (rows - 1) * 100).toFixed(2) : 0) + '%"></span><b>' + code + "</b></span>";
+      }
       var c = list[code], tr = c && trays[code.charAt(0).toLowerCase()];
       if (!tr) return "";
       var sz = c[3], l = Math.max(0, Math.min(tr.w - sz, c[1] - sz / 2)), tp = Math.max(0, Math.min(tr.h - sz, c[2] - sz / 2));
@@ -1927,6 +1947,9 @@
         '<div><button class="btn ghost sm" type="button" id="addOpt">' + icon("plus") + esc(a("e_add_price")) + '</button></div><div class="checks">' + chk("from", "1", p.from, a("e_from")) + "</div>" +
         (p.last || p.other ? '<p class="hint">' + esc(a("ask")) + ": " + esc(p.last ? money(p.last) + " (" + p.lastYear + ")" : p.other) + "</p>" : "") +
         '<div class="field"><span class="lbl">' + esc(a("e_addon")) + '</span><span class="hint">' + esc(a("e_addon_hint")) + '</span><div class="optrow"><input type="text" id="e_add_en" placeholder="' + esc(a("e_label_en")) + '" value="' + esc(p.add ? p.add.en : "") + '" aria-label="' + esc(a("e_label_en")) + '"><input type="text" id="e_add_lo" placeholder="' + esc(a("e_label_lo")) + '" value="' + esc(p.add ? p.add.lo : "") + '" aria-label="' + esc(a("e_label_lo")) + '"><input type="text" id="e_add_price" inputmode="numeric" placeholder="' + esc(a("e_kip")) + '" value="' + (p.add ? Number(p.add.price).toLocaleString("en-US") : "") + '" aria-label="' + esc(a("e_kip")) + '"><span></span></div></div>') +
+      (p.parts ? sec(a("e_parts"), '<p class="hint">' + esc(a("e_parts_hint")) + '</p><div class="grid3">' + PARTS.map(function (k) {
+        return '<div class="field"><label for="e_pt_' + k + '">' + esc(a("pt_" + k)) + '</label><input type="text" id="e_pt_' + k + '" inputmode="numeric" value="' + (p.parts[k] ? Number(p.parts[k]).toLocaleString("en-US") : "") + '"></div>';
+      }).join("") + '<div class="field"><label for="e_pt_free">' + esc(a("pt_free")) + '</label><input type="text" id="e_pt_free" inputmode="numeric" value="' + (+p.free_pic || 0) + '"></div></div>') : "") +
       sec(a("e_custom"), '<div class="grid3"><div class="field"><label for="e_li_min">' + esc(a("e_li_min")) + '</label><input type="text" id="e_li_min" inputmode="numeric" value="' + (p.li ? p.li[0] : "") + '"></div>' +
         '<div class="field"><label for="e_li_max">' + esc(a("e_li_max")) + '</label><input type="text" id="e_li_max" inputmode="numeric" value="' + (p.li ? p.li[1] : "") + '"></div></div><p class="hint">' + esc(a("e_li_hint")) + "</p>" +
         '<div class="field"><span class="lbl">' + esc(a("e_colours")) + '</span><div class="checks">' + chk("col", "silver", p.c.indexOf("silver") > -1, a("silver")) + chk("col", "gold", p.c.indexOf("gold") > -1, a("gold")) + "</div></div>" +
@@ -1961,6 +1984,12 @@
     p.from = !!f.querySelector('input[name="from"]:checked');
     var addP = num(document.getElementById("e_add_price").value);
     p.add = addP ? { en: document.getElementById("e_add_en").value.trim() || "Extra charm", lo: document.getElementById("e_add_lo").value.trim() || "Charm ເພີ່ມ", price: addP } : null;
+    if (p.parts) {
+      var badPart = false;
+      PARTS.forEach(function (k) { var v = num(document.getElementById("e_pt_" + k).value); if (!v) badPart = true; p.parts[k] = v; });
+      if (badPart) errs.push(a("e_bad_part"));
+      p.free_pic = Math.min(num(document.getElementById("e_pt_free").value), 6);
+    }
     var lmin = num(document.getElementById("e_li_min").value), lmax = num(document.getElementById("e_li_max").value);
     p.li = lmin || lmax ? [lmin || lmax, Math.max(lmin, lmax)] : null;
     p.c = vals("col");

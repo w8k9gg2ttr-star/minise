@@ -108,3 +108,25 @@ window.MINISE_CHARMS = {
     ["C40", 152, 297, 114, "Cassette tape", "ເທບຄາສເຊັດ", "磁带"]
   ]
 };
+
+/* The Italian charm links customers can add to an Italian charm bracelet (#italian).
+   images/charms/italian.jpg holds each charm straightened in its own 200 × 200 square, 5 to a row, in this order:
+   [code, takes two links (1) or one (0), English, Lao, Chinese]. */
+window.MINISE_ITALIAN = {
+  img: "images/charms/italian.jpg", w: 1000, h: 600, cell: 200, cols: 5,
+  list: [
+    ["I1", 0, "Blue crystal heart", "ຫົວໃຈຄຣິສຕັນ ສີຟ້າ", "蓝色水晶心"],
+    ["I2", 0, "Pink crystal heart", "ຫົວໃຈຄຣິສຕັນ ສີບົວ", "粉色水晶心"],
+    ["I3", 0, "Clear crystal", "ຄຣິສຕັນໃສ", "透明水晶"],
+    ["I4", 0, "Pink butterfly", "ຜີເສື້ອ ສີບົວ", "粉色蝴蝶"],
+    ["I5", 0, "Lilac butterfly", "ຜີເສື້ອ ສີມ່ວງອ່ອນ", "淡紫色蝴蝶"],
+    ["I6", 0, "Blue butterfly", "ຜີເສື້ອ ສີຟ້າ", "蓝色蝴蝶"],
+    ["I7", 0, "Birthday cake", "ເຄັກວັນເກີດ", "生日蛋糕"],
+    ["I8", 0, "Gold football", "ໝາກບານ ສີທອງ", "金色足球"],
+    ["I9", 0, "Silver football", "ໝາກບານ ສີເງິນ", "银色足球"],
+    ["I10", 0, "Golden dolphin", "ປາໂລມາ ສີທອງ", "金色海豚"],
+    ["I11", 0, "Gift box", "ກ່ອງຂອງຂວັນ", "礼物盒"],
+    ["I12", 1, "Silver heart double link", "ຫົວໃຈເງິນ ແບບ 2 ຂໍ້", "银色爱心双节"],
+    ["I13", 0, "I love you", "I love you", "我爱你"]
+  ]
+};

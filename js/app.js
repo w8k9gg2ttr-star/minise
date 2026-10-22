@@ -149,7 +149,7 @@
     return b.slice(0, 2).join("");
   }
   function card(p) {
-    return '<div class="card-wrap"><a class="card" href="' + (p.s === MYO ? "#make" : "#p-" + p.s) + '">' +
+    return '<div class="card-wrap"><a class="card" href="' + (p.s === MYO ? "#make" : p.s === ITB ? "#italian" : "#p-" + p.s) + '">' +
       '<div class="pimg">' + img(p.img[0], p.n, "a") + (p.img[1] ? img(p.img[1], "", "b") : "") +
       '<div class="badges">' + badges(p) + "</div>" + kitty(p.s.length % 2 ? "peniPaw" : "paw", "card-paw") + "</div>" +
       '<div class="pmeta"><span class="ptype">' + esc(typeLabel(p)) + '</span><span class="pname">' + esc(p.n) + "</span>" + priceHTML(p) + "</div></a>" + wishBtn(p.s) + "</div>";
@@ -420,9 +420,14 @@
     if (p.li) bits.push("Personalise it with " + (p.li[0] === p.li[1] ? p.li[0] : p.li[0] + "–" + p.li[1]) + " initial" + (p.li[1] > 1 ? "s" : "") + ".");
     return bits.join(" ");
   }
-  function unitPrice(p, opt, addN) {
+  function unitPrice(p, opt, addN, parts) {
     if (!p.o.length) return null;
-    return p.o[opt].price + (p.add ? addN * p.add.price : 0);
+    return (p.o[opt] || p.o[0]).price + (p.add ? addN * p.add.price : 0) + (p.parts ? partsCost(p.parts, +p.free_pic || 0, parts) : 0);
+  }
+  // each kind of link has its price in "parts"; the first picture charm(s) can be free
+  function partsCost(prices, free, list) {
+    if (!prices || !list) return 0;
+    return list.reduce(function (s, k) { if (k === "pic" && free > 0) { free--; return s; } return s + (+prices[k] || 0); }, 0);
   }
   function product(slug) {
     var p = bySlug[slug];
@@ -458,7 +463,8 @@
       '<form class="pform" id="pform" novalidate>' + opts + col + ini + addon + photo +
       '<div class="field"><label for="pnote">' + esc(t("note")) + '</label><textarea id="pnote" placeholder="' + esc(t("note_ph")) + '"></textarea></div>' +
       '<div class="field"><span class="lbl">' + esc(t("qty")) + '</span><div class="stepper"><button type="button" data-step="qty" data-d="-1" aria-label="' + esc(t("less")) + '">−</button><output id="qty">1</output><button type="button" data-step="qty" data-d="1" aria-label="' + esc(t("more")) + '">+</button></div></div>' +
-      '<div class="actions">' + (p.so ? '<p class="notice">' + esc(t("so_note")) + '</p><button class="btn wide" type="submit" disabled>' + esc(t("so_btn")) : '<button class="btn wide" type="submit">' + esc(t("add"))) + '</button><a class="btn ghost wide" id="askWa" target="_blank" rel="noopener" href="#">' + esc(t("wa_this")) + "</a></div></form>" + '<p class="nt-pdp"><a class="link" href="#note">' + esc(t("nt_pdp")) + " →</a></p>" +
+      '<div class="actions">' + (p.so ? '<p class="notice">' + esc(t("so_note")) + '</p><button class="btn wide" type="submit" disabled>' + esc(t("so_btn")) : '<button class="btn wide" type="submit">' + esc(t("add"))) + '</button><a class="btn ghost wide" id="askWa" target="_blank" rel="noopener" href="#">' + esc(t("wa_this")) + "</a></div></form>" + (p.g.indexOf("italian") > -1 ? '<a class="it-pdp" href="#italian">' + kitty("sparkle", "it-pdp-k") + "<span class=\"it-pdp-t\"><b>" + esc(t("it_pdp")) + "</b><small>" + esc(t("it_pdp_sub")) + "</small></span><span aria-hidden=\"true\">→</span></a>" : "") +
+      '<p class="nt-pdp"><a class="link" href="#note">' + esc(t("nt_pdp")) + " →</a></p>" +
       '<div class="desc"><h2>' + esc(t("about")) + "</h2><p>" + esc(describe(p, lang) || describe(p, "en")) + "</p>" +
       (otherLang ? "<details><summary>" + esc(t("in_lao")) + "</summary><p>" + esc(otherLang) + "</p></details>" : "") + "</div>" +
       (p.ig.length ? '<p class="igproof">' + esc(t("ig_proof", { n: p.pc, d: fmtDate(p.lp) })) + ' <a class="link" href="' + igPost(p.ig[0]) + '" target="_blank" rel="noopener">' + esc(t("ig_view")) + " →</a></p>" : "") +
@@ -495,6 +501,7 @@
     if (it.ini) d.push((it.myo ? t("letter") : t("initials")) + ": " + it.ini);
     if (p.add && it.addN && !it.myo) d.push(optName(p.add) + " × " + it.addN);
     if (it.myo && it.ch) it.ch.forEach(function (c) { d.push(t("charm") + " " + c + ": " + charmName(c)); });
+    if (it.it) d.push.apply(d, itDetailLines(it, +p.free_pic || 0));
     if (it.note) d.push("“" + it.note + "”");
     return d;
   }
@@ -526,14 +533,14 @@
   function bagTotals() {
     var sum = 0, unknown = 0;
     bag.forEach(function (it) {
-      var p = bySlug[it.s], u = unitPrice(p, it.opt, it.addN || 0);
+      var p = bySlug[it.s], u = unitPrice(p, it.opt, it.addN || 0, it.parts);
       if (u == null) unknown += it.qty; else sum += u * it.qty;
     });
     return { sum: sum, unknown: unknown };
   }
   function bagLines(editable) {
     return bag.map(function (it, idx) {
-      var p = bySlug[it.s], u = unitPrice(p, it.opt, it.addN || 0);
+      var p = bySlug[it.s], u = unitPrice(p, it.opt, it.addN || 0, it.parts);
       var d = lineDetails(p, it);
       return '<div class="line">' + img(p.img[0], p.n) + '<div class="info"><b>' + esc(p.n) + "</b>" +
         (d.length ? "<small>" + esc(d.join(" · ")) + "</small>" : "") +
@@ -857,7 +864,9 @@
       items: bag.map(function (it) {
         var p = bySlug[it.s];
         // the database works out the price itself from the product, choice and quantity
-        return { s: it.s, opt: it.opt || 0, addN: it.addN || 0, qty: it.qty, details: lineDetails(p, it).join(", ") };
+        var o = { s: it.s, opt: it.opt || 0, addN: it.addN || 0, qty: it.qty, details: lineDetails(p, it).join(", ") };
+        if (it.parts) o.parts = it.parts;
+        return o;
       })
     }; });
   }
@@ -927,7 +936,7 @@
     if (!d.unpaid) lines.push(t("rc_no") + ": " + d.id);
     d.bag.forEach(function (it, i) {
       var p = bySlug[it.s]; if (!p) return;
-      var u = unitPrice(p, it.opt, it.addN || 0), det = lineDetails(p, it);
+      var u = unitPrice(p, it.opt, it.addN || 0, it.parts), det = lineDetails(p, it);
       lines.push((i + 1) + ". " + p.n + " × " + it.qty + (det.length ? " (" + det.join(", ") + ")" : "") + " — " + (u == null ? t("msg_confirm") : money(u * it.qty)));
     });
     if (d.unpaid) return lines.join("\n");
@@ -982,7 +991,7 @@
       // measure item rows first so the canvas gets the right height
       probe.font = "400 26px " + sans;
       var rows = d.bag.filter(function (it) { return bySlug[it.s]; }).map(function (it) {
-        var p = bySlug[it.s], u = unitPrice(p, it.opt, it.addN || 0);
+        var p = bySlug[it.s], u = unitPrice(p, it.opt, it.addN || 0, it.parts);
         var det = lineDetails(p, it).join(" · ");
         probe.font = "400 30px " + sans;
         var nameLines = wrapLines(probe, p.n + "  × " + it.qty, inner - 260);
@@ -1490,6 +1499,491 @@
     }
     if (e.target.closest("[data-mk-add]")) mkAdd();
   });
+  /* Italian charm bracelet (#italian): the size and silver or gold, then link by link: picture charms (heart or square,
+     the first one free), laser-engraved squares, long engraved links, lockets, charms from the tray photo (js/charms.js)
+     and initials that hang from the bracelet. It is one product in the catalogue; its "parts" hold the price of each kind
+     of link, which the admin edits and the database checks again when the order is sent. */
+  var ITB = "custom-italian-charm-bracelet";
+  var IT_N = { w: 18, m: 21 }, IT_INI = 3, IT_PHOTOS = 6, IT_ENG = 12, IT_LONG = 26, IT_W = 44, IT_H = 42;
+  var IT_BASE = [265000, 285000], IT_PARTS = { pic: 65000, eng: 65000, long: 70000, ini: 40000, lock: 150000, charm: 50000 };
+  var IT_TABS = ["pic", "eng", "ini", "lock", "charm"];
+  var IT_SCRIPT = "'Snell Roundhand', 'Apple Chancery', 'Segoe Script', 'Brush Script MT', 'Noto Sans Lao', 'Noto Sans SC', cursive";
+  var ITC = window.MINISE_ITALIAN || { img: "", w: 1, h: 1, cell: 200, cols: 5, list: [] }, ITC_BY = {};
+  ITC.list.forEach(function (c, i) { ITC_BY[c[0]] = { c: c, i: i }; });
+  var IT = { size: "w", metal: 0, wrist: "", links: [], inis: [], note: "", tab: "pic", say: ["is_hi"], pose: "wave", last: 0, seq: 1 };
+  var IT_PH = {}; // link id → { img, url, thumb }: chosen photos stay in this tab and go on to checkout
+  function itClean(s, max) { return String(s || "").replace(/[“”"<>\u0000-\u001f]/g, "").slice(0, max); }
+  function itOk(l) {
+    return !!l && ((l.k === "pic" && (l.sh === "heart" || l.sh === "square")) || l.k === "eng" || l.k === "long" || l.k === "lock" || (l.k === "charm" && !!ITC_BY[l.c]));
+  }
+  try {
+    var it0 = JSON.parse(sessionStorage.getItem("minise_italian") || "null");
+    if (it0) {
+      if (IT_N[it0.size]) IT.size = it0.size;
+      IT.metal = it0.metal === 1 ? 1 : 0;
+      if (/^\d{2}(\.\d)?$/.test(it0.wrist || "")) IT.wrist = it0.wrist;
+      var itFree0 = false;
+      IT.links = (it0.links || []).filter(itOk).slice(0, 30).map(function (l) {
+        var o = { k: l.k };
+        if (l.k === "pic") { o.sh = l.sh; if (l.free && !itFree0) { o.free = 1; itFree0 = true; } }
+        if (l.k === "eng" || l.k === "long") o.txt = itClean(l.txt, l.k === "eng" ? IT_ENG : IT_LONG);
+        if (l.k === "charm") o.c = l.c;
+        return o;
+      });
+      IT.inis = (it0.inis || []).filter(function (L) { return /^[A-Z]$/.test(L); }).slice(0, IT_INI);
+      IT.note = String(it0.note || "").slice(0, 300);
+      if (IT_TABS.indexOf(it0.tab) > -1) IT.tab = it0.tab;
+    }
+  } catch (e) { /* start fresh */ }
+  // the free picture charm is always on the bracelet
+  if (!IT.links.some(function (l) { return l.free; })) IT.links.unshift({ k: "pic", sh: "square", free: 1 });
+  IT.links.forEach(function (l) { l.id = IT.seq++; });
+  function itSave() {
+    try {
+      sessionStorage.setItem("minise_italian", JSON.stringify({ size: IT.size, metal: IT.metal, wrist: IT.wrist, inis: IT.inis, note: IT.note, tab: IT.tab,
+        links: IT.links.map(function (l) { return { k: l.k, sh: l.sh, txt: l.txt, c: l.c, free: l.free }; }) }));
+    } catch (e) { /* ignore */ }
+  }
+  function itById(id) { return IT.links.filter(function (l) { return l.id === id; })[0]; }
+  function itSlots(l) { return l.k === "long" || (l.k === "charm" && ITC_BY[l.c] && ITC_BY[l.c].c[1]) ? 2 : 1; }
+  function itUsed() { return IT.links.reduce(function (s, l) { return s + itSlots(l); }, 0); }
+  function itPhotoCount() { return IT.links.filter(function (l) { return l.k === "pic" || l.k === "lock"; }).length; }
+  function itParts() { return IT.links.map(function (l) { return l.k; }).concat(IT.inis.map(function () { return "ini"; })); }
+  function itCharmName(code) { var o = ITC_BY[code]; return o ? o.c[2 + LI[lang]] : code; }
+  // the prices come from the catalogue; until the product is in the online catalogue, orders go by WhatsApp
+  function itPrices() {
+    var p = bySlug[ITB];
+    var live = !!(p && p.o.length && p.parts && !p.so && !p.hid);
+    return {
+      metals: live ? p.o.map(function (o) { return [optName(o), o.price]; }) : [[t("silver"), IT_BASE[0]], [t("gold"), IT_BASE[1]]],
+      parts: live ? p.parts : IT_PARTS, free: live ? +p.free_pic || 0 : 1, live: live
+    };
+  }
+  function itTotal() {
+    var pr = itPrices(), m = pr.metals[IT.metal] || pr.metals[0];
+    return m[1] + partsCost(pr.parts, pr.free, itParts());
+  }
+  function itMetal() { return IT.metal === 1 ? "g" : "s"; }
+
+  // shared gradients and clip shapes for every link drawn on the page (each link is drawn around 0,0)
+  function itDefs() {
+    var grad = function (id, a, b, c, d) { return '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + a + '"/><stop offset=".46" stop-color="' + b + '"/><stop offset=".56" stop-color="' + c + '"/><stop offset="1" stop-color="' + d + '"/></linearGradient>'; };
+    var dome = function (id, a, b, c) { return '<radialGradient id="' + id + '" cx=".38" cy=".32" r=".78"><stop offset="0" stop-color="' + a + '"/><stop offset=".5" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>'; };
+    return '<svg class="it-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>' +
+      grad("itMs", "#fbfcfd", "#d4d9e0", "#bec5ce", "#eef1f4") + grad("itMg", "#fff2c2", "#e4bf64", "#cfa143", "#f7de94") +
+      dome("itDs", "#ffffff", "#d7dbe1", "#959daa") + dome("itDg", "#fff6d4", "#e3bd60", "#a77d28") +
+      '<linearGradient id="itPh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c3d4e9"/><stop offset="1" stop-color="#f3d8cf"/></linearGradient>' +
+      '<clipPath id="itCSq"><rect x="-14.5" y="-13.5" width="29" height="27" rx="1.5"/></clipPath>' +
+      '<clipPath id="itCHt"><path d="' + HEART + '" transform="translate(0 1.5) scale(.45)"/></clipPath>' +
+      "</defs></svg>";
+  }
+  function itLink(l, m) {
+    var w = itSlots(l) * IT_W, h = IT_H, x0 = -w / 2, y0 = -h / 2;
+    var edge = m === "g" ? "#a17a2a" : "#89919d", ink = m === "g" ? "#6a4f14" : "#4f5662";
+    if (l.k === "charm") return itCharmFace(l.c, w);
+    var s = '<rect x="' + x0 + '" y="' + y0 + '" width="' + w + '" height="' + h + '" rx="3" fill="url(#itM' + m + ')" stroke="' + edge + '"/>' +
+      '<path d="M' + (x0 + 1.5) + " " + (y0 + 4.5) + "h" + (w - 3) + "M" + (x0 + 1.5) + " " + (-y0 - 4.5) + "h" + (w - 3) + '" stroke="' + edge + '" stroke-width=".8" opacity=".6"/>';
+    if (l.k === "plain") return s + '<g fill="' + ink + '" opacity=".38" font-family="Arial, Helvetica, sans-serif" font-size="5" letter-spacing=".4" text-anchor="middle"><text y="-1">STAINLESS</text><text y="6">STEEL</text></g>';
+    if (l.k === "pic") return s + itPicFace(l);
+    if (l.k === "lock") return s + '<ellipse cy="1" rx="14" ry="14.5" fill="url(#itD' + m + ')" stroke="' + edge + '"/><path d="' + HEART + '" transform="translate(0 2) scale(.19)" fill="none" stroke="' + edge + '" stroke-width="6"/><rect x="-4.5" y="-16" width="9" height="3.4" rx="1.5" fill="' + edge + '"/>';
+    return s + itEngrave(l, w, ink);
+  }
+  // a picture charm: the photo under glass in a black heart or square frame
+  function itPicFace(l) {
+    var ph = IT_PH[l.id], heart = l.sh === "heart", clip = heart ? "itCHt" : "itCSq";
+    var frame = heart ? '<path d="' + HEART + '" transform="translate(0 1.5) scale(.5)" fill="#1f2433"/>' : '<rect x="-16" y="-15" width="32" height="30" rx="2.5" fill="#1f2433"/>';
+    var pic = ph ? '<image href="' + ph.thumb + '" x="-16" y="-15" width="32" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clip + ')"/>'
+      : '<g clip-path="url(#' + clip + ')"><rect x="-16" y="-15" width="32" height="30" fill="url(#itPh)"/><circle cx="5.5" cy="-5" r="3" fill="#fff" opacity=".9"/><path d="M-16 13 L-6 1 L0 7 L5 2.5 L16 13 Z" fill="#51618a" opacity=".55"/></g>';
+    return frame + pic;
+  }
+  function itLines(s, n) {
+    if (s.length <= n) return [s];
+    var mid = s.length / 2, cut = -1;
+    for (var i = 1; i < s.length - 1; i++) if (s.charAt(i) === " " && (cut < 0 || Math.abs(i - mid) < Math.abs(cut - mid))) cut = i;
+    return cut > 0 ? [s.slice(0, cut), s.slice(cut + 1)] : [s];
+  }
+  function itEngrave(l, w, ink) {
+    var txt = (l.txt || "").trim(), lines = itLines(txt || (l.k === "long" ? t("it_long_ph") : "Aa"), l.k === "long" ? 15 : 6);
+    var longest = Math.max.apply(null, lines.map(function (x) { return x.length; }));
+    var fs = Math.min(lines.length > 1 ? 9 : 12, (w - 8) / Math.max(1, longest * 0.47));
+    return '<g font-family="' + IT_SCRIPT + '" font-size="' + fs.toFixed(1) + '" fill="' + ink + '" text-anchor="middle"' + (txt ? "" : ' opacity=".35"') + ">" +
+      lines.map(function (x, i) { return '<text y="' + ((i - (lines.length - 1) / 2) * fs * 1.1 + fs * 0.32).toFixed(1) + '">' + esc(x) + "</text>"; }).join("") + "</g>";
+  }
+  // a charm from the tray: its own photo, straightened, fills the link
+  function itCharmFace(code, w) {
+    var o = ITC_BY[code];
+    if (!o) return "";
+    var C = ITC.cell, cx = (o.i % ITC.cols) * C + C / 2, cy = Math.floor(o.i / ITC.cols) * C + C / 2, two = w > IT_W;
+    var vw = two ? 184 : 150, vh = two ? 88 : 143;
+    return '<svg x="' + (-w / 2) + '" y="' + (-IT_H / 2) + '" width="' + w + '" height="' + IT_H + '" viewBox="' + (cx - vw / 2) + " " + (cy - vh / 2) + " " + vw + " " + vh + '" preserveAspectRatio="xMidYMid slice"><image href="' + ITC.img + '" width="' + ITC.w + '" height="' + ITC.h + '"/></svg>' +
+      '<rect x="' + (-w / 2) + '" y="' + (-IT_H / 2) + '" width="' + w + '" height="' + IT_H + '" rx="3" fill="none" stroke="#858d99"/>';
+  }
+  function itThumb(code) {
+    var o = ITC_BY[code];
+    if (!o) return "";
+    var rows = Math.ceil(ITC.list.length / ITC.cols), col = o.i % ITC.cols, row = Math.floor(o.i / ITC.cols);
+    return '<span class="it-thumb" style="background-image:url(' + ITC.img + ");background-size:" + ITC.cols * 100 + "% auto;background-position:" + (col / (ITC.cols - 1) * 100).toFixed(2) + "% " + (rows > 1 ? (row / (rows - 1) * 100).toFixed(2) : 0) + '%"></span>';
+  }
+  function itSvg(l, m) { return '<svg class="it-link" viewBox="' + (itSlots(l) > 1 ? "-46 -23 92 46" : "-24 -23 48 46") + '" aria-hidden="true">' + itLink(l, m || itMetal()) + "</svg>"; }
+
+  // the bracelet laid flat in a ring: the chosen links sit at the front, the initials hang below them
+  function itPreview() {
+    var N = IT_N[IT.size], used = itUsed(), slots = Math.max(N, used), m = itMetal();
+    var D = 360 / slots, R = slots * IT_W / (2 * Math.PI) + 1, cx = 200, cy = 192;
+    var run = [], at = 0, plain = [];
+    IT.links.forEach(function (l) { var s = itSlots(l); run.push([l, at + (s - 1) / 2]); at += s; });
+    for (var j = at; j < slots; j++) plain.push([{ k: "plain" }, j]);
+    var mid = (at - 1) / 2;
+    var place = function (pair) {
+      var th = 90 + (mid - pair[1]) * D, r = th * Math.PI / 180;
+      var rot = Math.sin(r) > -0.01 ? th - 90 : th + 90;
+      return '<g transform="translate(' + (cx + R * Math.cos(r)).toFixed(1) + " " + (cy + R * Math.sin(r)).toFixed(1) + ") rotate(" + rot.toFixed(1) + ')"><g' + (pair[0].id && pair[0].id === IT.last ? ' class="it-pop"' : "") + ">" + itLink(pair[0], m) + "</g></g>";
+    };
+    var k = IT.inis.length;
+    var dangles = IT.inis.map(function (L, i) {
+      var th = 90 + ((k - 1) / 2 - i) * D, r = th * Math.PI / 180, rr = R + IT_H / 2 - 2;
+      return '<g transform="translate(' + (cx + rr * Math.cos(r)).toFixed(1) + " " + (cy + rr * Math.sin(r)).toFixed(1) + ')"><g class="it-dangle" style="animation-delay:-' + (i * 0.7).toFixed(1) + 's">' +
+        '<circle cy="4" r="4" fill="none" stroke="' + (m === "g" ? "#a17a2a" : "#89919d") + '" stroke-width="2"/><g font-family="Georgia, \'Times New Roman\', serif" font-weight="700" font-size="31" text-anchor="middle"><text x="1.5" y="37" fill="rgba(20,30,60,.2)">' + L + '</text><text y="35" fill="url(#itM' + m + ')" stroke="' + (m === "g" ? "#7d5d17" : "#5f6774") + '" stroke-width="1.1">' + L + "</text></g></g></g>";
+    }).join("");
+    var pr = itPrices(), metal = (pr.metals[IT.metal] || pr.metals[0])[0];
+    return '<svg class="it-ring" viewBox="0 0 400 430" aria-hidden="true">' +
+      '<circle cx="' + cx + '" cy="' + (cy + 5) + '" r="' + R.toFixed(1) + '" fill="none" stroke="rgba(20,30,60,.14)" stroke-width="' + (IT_H + 6) + '"/>' +
+      plain.map(place).join("") + run.map(place).join("") + dangles +
+      '<text class="it-ring-a" x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle">' + esc(t("isz_" + IT.size) + " · " + metal) + "</text>" +
+      '<text class="it-ring-b' + (used > N ? " over" : "") + '" x="' + cx + '" y="' + (cy + 20) + '" text-anchor="middle">' + esc(t("it_links", { n: used, max: N })) + "</text></svg>";
+  }
+
+  function itSizeHTML() {
+    return ["w", "m"].map(function (s) {
+      return '<label class="it-opt"><input type="radio" name="itSize" value="' + s + '"' + (IT.size === s ? " checked" : "") + '>' +
+        '<svg viewBox="-24 -24 48 48" aria-hidden="true"><circle r="' + (s === "w" ? 13 : 17) + '" fill="none" stroke="#9aa2ad" stroke-width="6" stroke-dasharray="' + (s === "w" ? "3.6 .9" : "4.2 .9") + '"/></svg>' +
+        '<span class="it-opt-t"><b>' + esc(t("isz_" + s)) + "</b><small>" + esc(t("isz_" + s + "_sub", { n: IT_N[s] })) + "</small></span></label>";
+    }).join("");
+  }
+  function itMetalHTML() {
+    return itPrices().metals.map(function (mt, i) {
+      return '<label class="it-opt"><input type="radio" name="itMetal" value="' + i + '"' + (IT.metal === i ? " checked" : "") + ">" + itSvg({ k: "plain" }, i === 1 ? "g" : "s") +
+        '<span class="it-opt-t"><b>' + esc(mt[0]) + '</b><small class="tn">' + esc(money(mt[1])) + "</small></span></label>";
+    }).join("");
+  }
+  function itFreeLink() { return IT.links.filter(function (l) { return l.free; })[0]; }
+  function itFreeHTML() {
+    var f = itFreeLink();
+    return ["heart", "square"].map(function (sh) {
+      return '<label class="mk-shape it-shape"><input type="radio" name="itFree" value="' + sh + '"' + (f && f.sh === sh ? " checked" : "") + ">" + itSvg({ k: "pic", sh: sh, id: f ? f.id : 0 }) + "<span>" + esc(t("sh_" + sh)) + "</span></label>";
+    }).join("");
+  }
+  function itPhotoBtn(l, cls) {
+    return '<label class="' + (cls || "link it-ph") + '">' + esc(t(IT_PH[l.id] ? "it_photo_change" : "it_photo")) + '<input type="file" accept="image/*" class="sr" data-it-ph="' + l.id + '"></label>';
+  }
+  function itTabsHTML() {
+    return IT_TABS.map(function (k) { return '<button type="button" class="mk-tab" data-it-tab="' + k + '" aria-pressed="' + (IT.tab === k) + '">' + esc(t("it_t_" + k)) + "</button>"; }).join("");
+  }
+  function itEngRow(k, max, price) {
+    return '<div class="it-eng"><span id="itPv_' + k + '">' + itSvg({ k: k, txt: "" }) + '</span><div class="field"><label for="itIn_' + k + '">' + esc(t("it_eng_" + k)) + ' <span class="tn it-plus">+' + esc(price) + "</span></label>" +
+      '<div class="it-eng-in"><input type="text" id="itIn_' + k + '" maxlength="' + max + '" autocomplete="off" placeholder="' + esc(t(k === "long" ? "it_long_ph" : "it_eng_ph")) + '"><button type="button" class="btn solid" data-it-add="' + k + '">' + esc(t("it_add")) + "</button></div>" +
+      '<span class="hint tn" id="itInH_' + k + '">0/' + max + '</span><span class="err" id="itInE_' + k + '" hidden>' + esc(t("it_need_txt")) + "</span></div></div>";
+  }
+  function itPanel() {
+    var pr = itPrices(), P = function (k) { return money(+pr.parts[k] || 0); };
+    if (IT.tab === "pic") return '<p class="hint">' + esc(t("it_pic_h", { p: P("pic") })) + '</p><div class="it-adds">' +
+      ["heart", "square"].map(function (sh) { return '<button type="button" class="it-add" data-it-add="pic" data-sh="' + sh + '">' + itSvg({ k: "pic", sh: sh }) + "<span>" + esc(t("it_add_" + sh)) + '</span><small class="tn">+' + esc(P("pic")) + "</small></button>"; }).join("") + "</div>";
+    if (IT.tab === "eng") return '<div class="it-engs">' + itEngRow("eng", IT_ENG, P("eng")) + itEngRow("long", IT_LONG, P("long")) + "</div>";
+    if (IT.tab === "ini") return '<p class="hint">' + esc(t("it_ini_h", { p: P("ini"), n: IT_INI })) + '</p><div class="it-ls">' +
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(function (L) { return '<button type="button" class="it-l" data-it-add="ini" data-l="' + L + '" aria-label="' + esc(t("ip_ini") + " " + L) + '">' + L + "</button>"; }).join("") + "</div>";
+    if (IT.tab === "lock") return '<div class="it-lock">' + itSvg({ k: "lock" }) + "<div><p>" + esc(t("it_lock_h")) + '</p><button type="button" class="btn solid" data-it-add="lock">' + esc(t("it_add_lock")) + ' <span class="tn">+' + esc(P("lock")) + "</span></button></div></div>";
+    return '<p class="hint">' + esc(t("it_charm_h", { p: P("charm") })) + '</p><div class="mk-chs it-chs">' + ITC.list.map(function (c) {
+      var n = IT.links.filter(function (l) { return l.c === c[0]; }).length;
+      return '<button type="button" class="mk-ch it-ch" data-it-add="charm" data-c="' + c[0] + '"' + (n ? ' data-n="' + n + '"' : "") + ">" + itThumb(c[0]) + '<span class="ch-name">' + esc(itCharmName(c[0])) + '</span><span class="ch-code tn">' + c[0] + "</span></button>";
+    }).join("") + "</div>";
+  }
+  // the links in order, left to right as we make them
+  function itListHTML() {
+    var pr = itPrices(), free = pr.free, last = IT.links.length - 1;
+    return IT.links.map(function (l, i) {
+      var isFree = l.k === "pic" && free > 0;
+      if (isFree) free--;
+      var label = l.k === "charm" ? itCharmName(l.c) + " · " + l.c : t("ip_" + l.k) + (l.k === "pic" ? " · " + t("sh_" + l.sh) : "");
+      var extra = "";
+      if (l.k === "pic") extra = '<div class="it-row-x"><span class="it-sh">' + ["heart", "square"].map(function (sh) {
+        return '<label><input type="radio" name="itSh' + l.id + '" value="' + sh + '" data-it-sh="' + l.id + '"' + (l.sh === sh ? " checked" : "") + "><span>" + esc(t("sh_" + sh)) + "</span></label>";
+      }).join("") + "</span>" + itPhotoBtn(l) + "</div>";
+      else if (l.k === "eng" || l.k === "long") extra = '<div class="it-row-x"><input type="text" class="it-txt" id="itTxt' + l.id + '" data-it-txt="' + l.id + '" maxlength="' + (l.k === "eng" ? IT_ENG : IT_LONG) + '" value="' + esc(l.txt || "") + '" aria-label="' + esc(t("ip_" + l.k)) + '" placeholder="' + esc(t(l.k === "long" ? "it_long_ph" : "it_eng_ph")) + '"><span class="err" id="itTxt' + l.id + 'E" hidden></span></div>';
+      else if (l.k === "lock") extra = '<p class="hint">' + esc(t("it_lock_photo")) + "</p>";
+      return '<li class="it-row' + (l.id === IT.last ? " it-new" : "") + '"><span class="it-pos tn">' + (i + 1) + "</span>" + itSvg(l) +
+        '<div class="it-row-m"><p class="it-row-t"><b>' + esc(label) + '</b><span class="tn">' + esc(isFree ? t("it_free") : "+" + money(+pr.parts[l.k] || 0)) + "</span></p>" + extra + "</div>" +
+        '<div class="it-row-b"><button type="button" data-it-mv="' + l.id + '" data-d="-1" aria-label="' + esc(t("it_up")) + '"' + (i === 0 ? " disabled" : "") + ">↑</button>" +
+        '<button type="button" data-it-mv="' + l.id + '" data-d="1" aria-label="' + esc(t("it_down")) + '"' + (i === last ? " disabled" : "") + ">↓</button>" +
+        (l.free ? "" : '<button type="button" data-it-rm="' + l.id + '" aria-label="' + esc(t("remove") + ": " + label) + '">✕</button>') + "</div></li>";
+    }).join("");
+  }
+  function itInisHTML() {
+    if (!IT.inis.length) return "";
+    var pr = itPrices();
+    return '<div class="it-inis"><span>' + esc(t("it_inis")) + "</span>" + IT.inis.map(function (L, i) {
+      return '<span class="it-ini"><b>' + L + '</b><small class="tn">+' + esc(money(+pr.parts.ini || 0)) + '</small><button type="button" data-it-rmi="' + i + '" aria-label="' + esc(t("remove") + ": " + L) + '">✕</button></span>';
+    }).join("") + "</div>";
+  }
+  function itSummary() {
+    var pr = itPrices(), N = IT_N[IT.size], used = itUsed(), m = pr.metals[IT.metal] || pr.metals[0], count = {};
+    itParts().forEach(function (k) { count[k] = (count[k] || 0) + 1; });
+    var lines = ["pic", "eng", "long", "lock", "charm", "ini"].filter(function (k) { return count[k]; }).map(function (k) {
+      var n = count[k], freeN = k === "pic" ? Math.min(pr.free, n) : 0, cost = (n - freeN) * (+pr.parts[k] || 0);
+      return "<p><span>" + esc(t(k === "charm" ? "charms" : "ip_" + k)) + " × " + n + (freeN ? " · " + esc(t("it_free_n", { n: freeN })) : "") + "</span><b>" + esc(cost ? money(cost) : t("it_free")) + "</b></p>";
+    }).join("");
+    var btn = pr.live ? '<button class="btn solid wide" type="button" data-it-bag>' + esc(t("add")) + "</button>"
+      : '<a class="btn solid wide" id="itWa" target="_blank" rel="noopener" href="' + esc(itWaLink()) + '">' + esc(t("mk_wa")) + "</a>";
+    return '<h2 class="mk-sum-h">' + esc(t("mk_yours")) + "</h2>" +
+      '<dl class="mk-dl"><div><dt>' + esc(t("it_size")) + "</dt><dd>" + esc(t("isz_" + IT.size)) + (IT.wrist ? ' <small class="tn">' + esc(IT.wrist) + " cm</small>" : "") + "</dd></div>" +
+      "<div><dt>" + esc(t("colour")) + "</dt><dd>" + esc(m[0]) + "</dd></div>" +
+      "<div><dt>" + esc(t("it_links_l")) + '</dt><dd class="tn' + (used > N ? " it-over" : "") + '">' + used + " / " + N + "</dd></div></dl>" +
+      (used > N ? '<p class="it-warn">' + esc(t("it_too_many", { n: N })) + "</p>" : "") +
+      '<div class="mk-money tn"><p><span>' + esc(t("it_bracelet")) + "</span><b>" + esc(money(m[1])) + "</b></p>" + lines +
+      '<p class="grand"><span>' + esc(t("total")) + "</span><b>" + esc(money(itTotal())) + "</b></p></div>" + btn + '<p class="it-care">' + esc(t("it_care")) + "</p>";
+  }
+  // what the shop reads (order details and the WhatsApp message): one line per link, in order
+  function itDetailLines(it, free) {
+    var d = [t("it_size") + ": " + t("isz_" + it.size)];
+    if (it.wrist) d.push(t("it_wrist") + ": " + it.wrist + " cm");
+    (it.links || []).forEach(function (l) {
+      if (l.k === "pic") { var f = free > 0; if (f) free--; d.push(t(f ? "ip_freepic" : "ip_pic") + ": " + t("sh_" + l.sh)); }
+      else if (l.k === "eng" || l.k === "long") d.push(t("ip_" + l.k) + ": “" + (l.txt || "").trim() + "”");
+      else if (l.k === "lock") d.push(t("ip_lock"));
+      else if (l.k === "charm") d.push(t("charm") + " " + l.c + ": " + itCharmName(l.c));
+    });
+    (it.inis || []).forEach(function (L) { d.push(t("ip_ini") + ": " + L); });
+    return d;
+  }
+  function itWaLink() {
+    var pr = itPrices();
+    var d = inLang(shopLang(), function () {
+      var x = [(pr.metals[IT.metal] || pr.metals[0])[0]].concat(itDetailLines(IT, pr.free));
+      if (IT.note.trim()) x.push("“" + IT.note.trim() + "”");
+      return x.concat([t("total") + ": " + money(itTotal())]);
+    });
+    return waLink(tw("it_msg") + "\n" + d.join("\n"));
+  }
+  function itStep(n, title, body) { return '<fieldset class="mk-step"><legend><span class="num">' + n + "</span>" + esc(title) + "</legend>" + body + "</fieldset>"; }
+  function italianPage() {
+    var pr = itPrices();
+    if (IT.metal >= pr.metals.length) IT.metal = 0;
+    var f = itFreeLink();
+    return itDefs() + '<section class="wrap page-head kittied">' + kitty("sparkle", "head-kitty") + '<p class="eyebrow">' + esc(t("it_eyebrow")) + "</p><h1>" + esc(t("it_h")) + '</h1><p class="lead">' + esc(t("it_lead")) + "</p>" +
+      '<p class="mk-price tn">' + esc(t("it_price", { p: money(pr.metals[0][1]) })) + '</p><p class="it-cross"><a class="link" href="#make">' + esc(t("it_cross")) + " →</a></p></section>" +
+      '<section class="section tight mk-sec it-sec"><div class="wrap mk-grid">' +
+      '<div class="mk-side"><div class="mk-card"><div class="it-stage" id="itStage">' + itPreview() + "</div>" +
+      '<div class="mk-peni"><span class="mk-peni-kitty" id="itCat">' + (window.MINISE_CAT ? window.MINISE_CAT(IT.pose) : "") + '</span><p class="mk-say" id="itSay" role="status">' + esc(itSayText()) + "</p></div></div>" +
+      '<div class="mk-sum" id="itSum">' + itSummary() + "</div></div>" +
+      '<form class="mk-steps" id="itForm" novalidate>' +
+      itStep(1, t("it_s_size"), '<div class="it-opts">' + itSizeHTML() + '</div><div class="field it-wrist"><label for="itWrist">' + esc(t("it_wrist_l")) + '</label><input type="text" id="itWrist" inputmode="decimal" maxlength="4" autocomplete="off" placeholder="16" value="' + esc(IT.wrist) + '"><span class="hint">' + esc(t("it_wrist_h")) + "</span></div>") +
+      itStep(2, t("it_s_metal"), '<div class="it-opts" id="itMetals">' + itMetalHTML() + "</div>") +
+      itStep(3, t("it_s_free"), '<p class="hint">' + esc(t("it_free_h")) + '</p><div class="mk-shapes" id="itFree">' + itFreeHTML() + '</div><p class="it-free-ph" id="itFreePh">' + (f ? itPhotoBtn(f, "btn ghost it-ph-btn") : "") + "</p>") +
+      itStep(4, t("it_s_add"), '<div class="mk-tabs">' + itTabsHTML() + '</div><div class="it-panel" id="itPanel">' + itPanel() + "</div>") +
+      itStep(5, t("it_s_arrange"), '<p class="hint">' + esc(t("it_arrange_h")) + '</p><ol class="it-list" id="itList">' + itListHTML() + '</ol><div id="itInis">' + itInisHTML() + '</div><p class="hint">' + esc(t("it_photos_note", { n: IT_PHOTOS })) + "</p>") +
+      itStep(6, t("mk_s4"), '<textarea id="itNote" maxlength="300" placeholder="' + esc(t("it_note_ph")) + '">' + esc(IT.note) + '</textarea><p class="hint">' + esc(t("it_care")) + "</p>") +
+      "</form></div></section>" + '<div class="mk-bar" id="itBar"></div>';
+  }
+  function itBar() {
+    var b = document.getElementById("itBar");
+    if (!b) return;
+    var pr = itPrices();
+    b.innerHTML = "<div><small>" + esc(t("total")) + " · " + esc(t("it_links", { n: itUsed(), max: IT_N[IT.size] })) + '</small><b class="tn">' + esc(money(itTotal())) + "</b></div>" +
+      (pr.live ? '<button class="btn solid" type="button" data-it-bag>' + esc(t("add")) + "</button>" : '<a class="btn solid" target="_blank" rel="noopener" href="' + esc(itWaLink()) + '">WhatsApp</a>');
+  }
+  // Mumi's words are kept as a key, so they follow a change of language
+  function itSayText() {
+    var v = Object.assign({}, IT.say[1]);
+    if (v.c) v.n = itCharmName(v.c);
+    if (v.sz) v.s = t("isz_" + v.sz);
+    if (v.sh) v.s = t("sh_" + v.sh);
+    if (v.mi != null) v.m = (itPrices().metals[v.mi] || [""])[0];
+    return t(IT.say[0], v);
+  }
+  function itSay(key, vars, pose) {
+    IT.say = [key, vars || {}];
+    var el = document.getElementById("itSay");
+    if (!el) return;
+    el.textContent = itSayText();
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+    if (pose && pose !== IT.pose && window.MINISE_CAT) { IT.pose = pose; document.getElementById("itCat").innerHTML = window.MINISE_CAT(pose); }
+  }
+  // redraw after a change; "all" also redraws the parts drawn in the bracelet's metal or with charm counts
+  function itUpdate(all) {
+    itSave();
+    var st = document.getElementById("itStage");
+    if (!st) return;
+    st.innerHTML = itPreview();
+    document.getElementById("itSum").innerHTML = itSummary();
+    document.getElementById("itList").innerHTML = itListHTML();
+    document.getElementById("itInis").innerHTML = itInisHTML();
+    if (all) {
+      document.getElementById("itFree").innerHTML = itFreeHTML();
+      var f = itFreeLink(), fp = document.getElementById("itFreePh");
+      if (fp) fp.innerHTML = f ? itPhotoBtn(f, "btn ghost it-ph-btn") : "";
+      document.getElementById("itMetals").innerHTML = itMetalHTML();
+      // the engraving boxes keep what was typed
+      var typed = ["eng", "long"].map(function (k) { var x = document.getElementById("itIn_" + k); return x ? x.value : ""; });
+      document.getElementById("itPanel").innerHTML = itPanel();
+      ["eng", "long"].forEach(function (k, i) {
+        var x = document.getElementById("itIn_" + k);
+        if (x && typed[i]) { x.value = typed[i]; x.dispatchEvent(new Event("input", { bubbles: true })); }
+      });
+    }
+    IT.last = 0;
+    itBar();
+  }
+  function itRoom(slots, photo) {
+    var N = IT_N[IT.size];
+    if (itUsed() + slots > N) { itSay(IT.size === "w" ? "it_full_w" : "it_full_m", { n: N }, "search"); return false; }
+    if (photo && itPhotoCount() >= IT_PHOTOS) { itSay("it_photo_max", { n: IT_PHOTOS }, "search"); return false; }
+    return true;
+  }
+  function itAddLink(l) { l.id = IT.seq++; IT.links.push(l); IT.last = l.id; }
+  function itAdd() {
+    var bad = IT.links.filter(function (l) { return (l.k === "eng" || l.k === "long") && !(l.txt || "").trim(); })[0];
+    if (bad) {
+      setErr("itTxt" + bad.id, t("it_need_txt"));
+      var inp = document.getElementById("itTxt" + bad.id);
+      if (inp) { inp.scrollIntoView({ block: "center", behavior: calm ? "auto" : "smooth" }); inp.focus({ preventScroll: true }); }
+      itSay("it_need_txt", null, "search");
+      return;
+    }
+    if (itUsed() > IT_N[IT.size]) { itSay("it_too_many", { n: IT_N[IT.size] }, "search"); return; }
+    if (!itPrices().live) return;
+    bag.push({ s: ITB, opt: IT.metal, addN: 0, qty: 1, it: 1, size: IT.size, wrist: IT.wrist, parts: itParts(), inis: IT.inis.slice(), note: IT.note.trim(),
+      links: IT.links.map(function (l) { return { k: l.k, sh: l.sh, txt: (l.txt || "").trim() || undefined, c: l.c }; }) });
+    // photos chosen here are waiting at checkout
+    IT.links.forEach(function (l) {
+      var ph = IT_PH[l.id];
+      if (ph && CO.photos.length < 6 && !CO.photos.some(function (x) { return x.url === ph.url; })) CO.photos.push({ img: ph.img, url: ph.url });
+    });
+    saveBag();
+    toast(t("added"), "gift");
+    itSay("is_added", null, "yay");
+    openBag();
+  }
+  document.addEventListener("change", function (e) {
+    var el = e.target;
+    if (el.name === "itSize") { IT.size = el.value; itSay("is_size", { sz: IT.size, n: IT_N[IT.size] }, "wave"); itUpdate(); }
+    else if (el.name === "itMetal") { IT.metal = +el.value; itSay("is_metal", { mi: IT.metal }, "sparkle"); itUpdate(true); }
+    else if (el.name === "itFree") { var f = itFreeLink(); if (f) { f.sh = el.value; IT.last = f.id; } itSay("is_shape", { sh: el.value }, "heart"); itUpdate(true); }
+    else if (el.hasAttribute("data-it-sh")) { var l = itById(+el.getAttribute("data-it-sh")); if (l) { l.sh = el.value; IT.last = l.id; } itUpdate(true); }
+    else if (el.hasAttribute("data-it-ph")) {
+      var id = +el.getAttribute("data-it-ph"), file = el.files && el.files[0];
+      el.value = "";
+      readImageFile(file).then(function (r) {
+        if (!r || !itById(id)) return;
+        r.thumb = shrink(r.img, 240).toDataURL("image/jpeg", 0.85);
+        IT_PH[id] = r;
+        IT.last = id;
+        itSay("is_photo", null, "heart");
+        itUpdate(true);
+      });
+    }
+  });
+  document.addEventListener("input", function (e) {
+    var el = e.target, id = el.id;
+    if (id === "itWrist") {
+      var v = el.value.replace(/[^\d.]/g, "");
+      IT.wrist = /^\d{2}(\.\d)?$/.test(v) && +v >= 12 && +v <= 25 ? v : "";
+      itSave();
+      document.getElementById("itSum").innerHTML = itSummary();
+    } else if (id === "itIn_eng" || id === "itIn_long") {
+      var k = id.slice(5);
+      document.getElementById("itInH_" + k).textContent = el.value.length + "/" + (k === "eng" ? IT_ENG : IT_LONG);
+      document.getElementById("itPv_" + k).innerHTML = itSvg({ k: k, txt: itClean(el.value, 40) });
+      if (el.value.trim()) document.getElementById("itInE_" + k).hidden = true;
+    } else if (el.hasAttribute("data-it-txt")) {
+      var l = itById(+el.getAttribute("data-it-txt"));
+      if (!l) return;
+      l.txt = itClean(el.value, l.k === "eng" ? IT_ENG : IT_LONG);
+      if (l.txt.trim()) setErr("itTxt" + l.id, "");
+      itSave();
+      document.getElementById("itStage").innerHTML = itPreview();
+      var mini = el.closest(".it-row").querySelector(".it-link");
+      if (mini) mini.outerHTML = itSvg(l);
+      clearTimeout(itUpdate._t);
+      itUpdate._t = setTimeout(function () { document.getElementById("itSum").innerHTML = itSummary(); itBar(); }, 300);
+    } else if (id === "itNote") {
+      IT.note = el.value;
+      itSave();
+      clearTimeout(itUpdate._t);
+      itUpdate._t = setTimeout(function () { var w = document.getElementById("itWa"); if (w) w.href = itWaLink(); itBar(); }, 300);
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    // Enter in an engraving box adds it (instead of sending the form)
+    if (e.key === "Enter" && (e.target.id === "itIn_eng" || e.target.id === "itIn_long")) { e.preventDefault(); var b = document.querySelector('[data-it-add="' + e.target.id.slice(5) + '"]'); if (b) b.click(); }
+  });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-it-tab]");
+    if (b) {
+      IT.tab = b.getAttribute("data-it-tab");
+      itSave();
+      document.querySelectorAll("[data-it-tab]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      document.getElementById("itPanel").innerHTML = itPanel();
+      return;
+    }
+    b = e.target.closest("[data-it-add]");
+    if (b) {
+      var k = b.getAttribute("data-it-add");
+      if (k === "pic") {
+        if (!itRoom(1, true)) return;
+        itAddLink({ k: "pic", sh: b.getAttribute("data-sh") });
+        itSay("is_pic", null, "heart");
+      } else if (k === "eng" || k === "long") {
+        var inp = document.getElementById("itIn_" + k), txt = itClean(inp.value, k === "eng" ? IT_ENG : IT_LONG).trim();
+        if (!txt) { document.getElementById("itInE_" + k).hidden = false; inp.focus(); return; }
+        if (!itRoom(k === "long" ? 2 : 1, false)) return;
+        itAddLink({ k: k, txt: txt });
+        inp.value = "";
+        document.getElementById("itInH_" + k).textContent = "0/" + (k === "eng" ? IT_ENG : IT_LONG);
+        document.getElementById("itPv_" + k).innerHTML = itSvg({ k: k, txt: "" });
+        itSay("is_eng", { t: txt }, "paint");
+      } else if (k === "ini") {
+        if (IT.inis.length >= IT_INI) { itSay("it_ini_max", { n: IT_INI }, "search"); return; }
+        IT.inis.push(b.getAttribute("data-l"));
+        itSay("is_ini", { l: b.getAttribute("data-l") }, "yay");
+      } else if (k === "lock") {
+        if (!itRoom(1, true)) return;
+        itAddLink({ k: "lock" });
+        itSay("is_lock", null, "gift");
+      } else if (k === "charm") {
+        var c = b.getAttribute("data-c");
+        if (!ITC_BY[c] || !itRoom(ITC_BY[c].c[1] ? 2 : 1, false)) return;
+        itAddLink({ k: "charm", c: c });
+        itSay("is_charm", { c: c }, "sparkle");
+      }
+      itUpdate(k === "charm");
+      if (k === "charm") { var again = document.querySelector('[data-it-add="charm"][data-c="' + b.getAttribute("data-c") + '"]'); if (again) again.focus({ preventScroll: true }); }
+      return;
+    }
+    b = e.target.closest("[data-it-mv]");
+    if (b) {
+      var id = +b.getAttribute("data-it-mv"), d = +b.getAttribute("data-d"), i = IT.links.indexOf(itById(id)), j = i + d;
+      if (i < 0 || j < 0 || j >= IT.links.length) return;
+      var x = IT.links[i]; IT.links[i] = IT.links[j]; IT.links[j] = x;
+      itUpdate();
+      var same = document.querySelector('[data-it-mv="' + id + '"][data-d="' + d + '"]');
+      if (same && !same.disabled) same.focus({ preventScroll: true });
+      else { same = document.querySelector('[data-it-mv="' + id + '"]:not([disabled])'); if (same) same.focus({ preventScroll: true }); }
+      return;
+    }
+    b = e.target.closest("[data-it-rm]");
+    if (b) {
+      var rid = +b.getAttribute("data-it-rm"), l = itById(rid);
+      if (!l || l.free) return;
+      IT.links.splice(IT.links.indexOf(l), 1);
+      delete IT_PH[rid];
+      itSay("is_off", null, "wave");
+      itUpdate(true);
+      return;
+    }
+    b = e.target.closest("[data-it-rmi]");
+    if (b) { IT.inis.splice(+b.getAttribute("data-it-rmi"), 1); itSay("is_off", null, "wave"); itUpdate(); return; }
+    if (e.target.closest("[data-it-bag]")) itAdd();
+  });
+
   /* home: a little Mumi & Peni comic, and a charm-matching game (Peni mixed up the tray).
      Winning offers to start a bracelet with the matched charms. The best score stays on this device. */
   var GM_POOL = ["A1", "A7", "A9", "A11", "A15", "A16", "A20", "A24", "B4", "B12", "B20", "B23", "C13", "C16", "C17", "C25", "C33", "C37"];
@@ -1811,7 +2305,7 @@
   }
   function gfPicks(a) {
     var price = function (p) { return p.o[0].price; };
-    var priced = P.filter(function (p) { return p.o.length && !p.so && p.s !== MYO; });
+    var priced = P.filter(function (p) { return p.o.length && !p.so && p.s !== MYO && p.s !== ITB; });
     var fits = a.budget === "low" ? function (p) { return price(p) <= 220000; } : a.budget === "mid" ? function (p) { return price(p) > 200000 && price(p) <= 260000; } : function () { return true; };
     var list = priced.filter(fits);
     if (list.length < 3) list = priced;
@@ -1931,7 +2425,7 @@
   TOP.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   document.body.appendChild(TOP);
   TOP.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" }); });
-  window.addEventListener("scroll", function () { var hide = window.scrollY < 900 || current === "make"; if (TOP.hidden !== hide) TOP.hidden = hide; }, { passive: true });
+  window.addEventListener("scroll", function () { var hide = window.scrollY < 900 || current === "make" || current === "italian"; if (TOP.hidden !== hide) TOP.hidden = hide; }, { passive: true });
 
   /* ---------- Cute note maker (#note): write a note on Mumi & Peni paper, save it as a picture or add it to the order ---------- */
   var NT_PAPERS = { tea: ["drink"], milk: ["peniMilk"], night: ["sleep", "peniSleep"], costume: ["shark", "peniBunny"], clover: ["peniSparkle"] };
@@ -2507,7 +3001,7 @@
   function footer() {
     return '<div class="wrap foot-wrap">' + kitty("shark", "foot-kitty") + kitty("peniBunnySleep", "foot-kitty2") + '<div class="foot-grid"><div class="foot-brand"><span class="foot-logo">Minise Arte</span><p>' + esc(t("footer_tag")) + "</p>" +
       '<p class="tn">' + WA.mainShow + " · " + WA.altShow + "</p></div>" +
-      "<div><h4>" + esc(t("footer_shop")) + '</h4><ul><li><a href="#make">' + esc(t("nav_make")) + "</a></li>" + ["locket", "bracelet", "necklace", "set", "earrings", "accessory"].map(function (ty) {
+      "<div><h4>" + esc(t("footer_shop")) + '</h4><ul><li><a href="#make">' + esc(t("nav_make")) + "</a></li><li><a href=\"#italian\">" + esc(t("nav_italian")) + "</a></li>" + ["locket", "bracelet", "necklace", "set", "earrings", "accessory"].map(function (ty) {
         return '<li><a href="#shop-' + ty + '">' + esc(t("type_" + ty)) + "</a></li>";
       }).join("") + "</ul></div>" +
       "<div><h4>" + esc(t("footer_help")) + '</h4><ul><li><a href="#order">' + esc(t("nav_order")) + '</a></li><li><a href="#visit">' + esc(t("nav_visit")) + '</a></li><li><a href="#story">' + esc(t("nav_story")) + '</a></li><li><a href="#cats">' + esc(t("nav_cats")) + '</a></li><li><a href="#gift">' + esc(t("gf_link")) + '</a></li><li><a href="#note">' + esc(t("nt_link")) + '</a></li><li><a href="#wish">' + esc(t("wish_eyebrow")) + '</a></li><li><a href="#mumi">' + esc(t("mumi_link")) + '</a></li><li><a href="#peni">' + esc(t("peni_link")) + '</a></li><li><a href="#checkout">' + esc(t("checkout")) + '</a></li><li><a href="#privacy">' + esc(t("privacy_link")) + '</a></li><li><a href="#terms">' + esc(t("terms_link")) + "</a></li></ul></div>" +
@@ -2531,6 +3025,7 @@
       }
       html = shop();
     } else if (h === "make" || h === "p-" + MYO) { h = "make"; html = makePage(); }
+    else if (h === "italian" || h === "p-" + ITB) { h = "italian"; html = italianPage(); }
     else if (h.indexOf("p-") === 0) html = product(h.slice(2));
     else if (h === "story") html = story();
     else if (h === "order") html = orderPage();
@@ -2555,6 +3050,7 @@
     if (document.getElementById("results")) renderResults("page");
     if (S) updateAskLink();
     if (h === "make") mkBar();
+    if (h === "italian") itBar();
     refreshCheckout();
     document.querySelectorAll("[data-nav]").forEach(function (a) {
       var n = a.getAttribute("data-nav");
@@ -2569,7 +3065,7 @@
 
   // the browser tab title and the page description follow the page you are on
   function setMeta(h) {
-    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), cats: t("wl_h"), gift: t("gf_h"), note: t("nt_h"), wish: t("wish_h") };
+    var names = { shop: t("nav_shop"), story: t("nav_story"), order: t("nav_order"), visit: t("nav_visit"), checkout: t("co_h"), privacy: t("pv_h"), terms: t("tm_h"), mumi: t("mumi_link"), peni: t("peni_link"), make: t("mk_h"), italian: t("it_h"), cats: t("wl_h"), gift: t("gf_h"), note: t("nt_h"), wish: t("wish_h") };
     var title = "Minise Arte · " + t("footer_tag").replace(/\.$/, ""), desc = t("hero_lead");
     if (S) { title = S.p.n + " · Minise Arte"; desc = (describe(S.p, lang) || describe(S.p, "en") || desc).slice(0, 155); }
     else if (h.indexOf("shop") === 0 || h.indexOf("c-") === 0) title = shopTitle() + " · Minise Arte";
@@ -2580,6 +3076,7 @@
     if (h === "gift") desc = t("gf_lead");
     if (h === "note") desc = t("nt_lead");
     if (h === "make") desc = t("mk_lead");
+    if (h === "italian") desc = t("it_lead");
     document.title = title;
     var m = document.querySelector('meta[name="description"]');
     if (m) m.setAttribute("content", desc);
@@ -2813,7 +3310,7 @@
     var b = peekerEls();
     if (!b) return;
     var drawerOpen = !document.getElementById("drawer").hidden;
-    var want = !PK.off && !drawerOpen && current !== "checkout" && current !== "make" && window.scrollY > 520;
+    var want = !PK.off && !drawerOpen && current !== "checkout" && current !== "make" && current !== "italian" && window.scrollY > 520;
     if (want === PK.shown) return;
     PK.shown = want;
     if (want) {
